@@ -1,0 +1,209 @@
+.aio-login-container {
+    width: 100%;
+    clear: both;
+    display: table;
+}
+
+.aio-login-content-box {
+    width: 80%;
+    float: left;
+    background: #fff;
+}
+
+.aio-login-widget-box {
+    width: 20%;
+    float: left;
+}
+
+.aio-login-mt-3 {
+    margin-top: 30px;
+}
+
+.aio-login-tab-container {
+    width: 100%;
+    background: #efeff0;
+}
+
+.aio-login-tab-container .aio-login-tab {
+    border-radius: 5px 5px 0 0;
+    border-right: 1px solid #d9dce3;
+    display: inline-block;
+    background: #f6f6f6;
+}
+
+.aio-login-tab-container .aio-login-tab a {
+    font-size: 14px;
+    font-weight: 600;
+    color: #707570;
+    text-decoration: none;
+    padding: 8px 14px;
+    display: block;
+    line-height: 32px;
+}
+
+.aio-login-tab-container .aio-login-tab a span {
+    line-height: 32px;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.aio-login-tab-container  .aio-login-tab.active a {
+    color: #9516DF;
+    background: #fff;
+}
+
+.aio-login-content-wrapper {
+    padding: 20px;
+    box-shadow: 0 0 20px #00000012;
+}
+
+.aio-login-sub-tab-container {
+    width: calc( 100% - 15px );
+    height: 45px;
+    background: #fff;
+    border-bottom: 1px solid #f7f8fa;
+}
+
+.aio-login-sub-tab-container .aio-login-tab {
+    height: calc( 45px - 2px );
+    display: inline-block;
+    border-bottom: 3px solid #f7f8fa;
+    position: relative;
+}
+
+.aio-login-sub-tab-container .aio-login-tab a {
+    line-height: 45px;
+    text-decoration: none;
+    font-weight: 600;
+    color: #707578;
+    font-size: 14px;
+    padding: 0 15px;
+    height: calc( 100% );
+    display: inline-block;
+}
+
+.aio-login-sub-tab-container .aio-login-tab a.active {
+    color: #9516DF;
+    border-bottom: 3px solid #9516DF;
+    background: #fff;
+}
+
+.aio-login-tab a:hover, .aio-login-tab-container  .aio-login-tab a:hover {
+    color: #9516DF;
+    background: #fff;
+
+}
+
+@media screen and ( max-width: 961px ) {
+    .aio-login-content-box {
+        width: 100%;
+    }
+
+    .aio-login-widget-box {
+        width: 100%;
+    }
+}
+
+
+.aio-login-content-wrapper:has( input[type="submit"]#submit ) {
+    padding-bottom: 0;
+}
+
+/**
+ * Field styles
+*/
+
+.aio-login-settings-container {
+    width: 100%;
+}
+
+.aio-login-clearfix {
+    clear: both;
+    display: table;
+}
+
+#aio_login_limit_attempts_lockout_message,
+#aio_login_block_ip_address_block_message,
+#aio_login_block_ip_address_blacklist,
+#aio_login_pro__disable_common_usernames_custom_usernames {
+    padding: 5px;
+}
+
+
+.aio-login__preloader {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: #f0f0f1;
+}
+
+@keyframes ldio-yzaezf3dcmj {
+  0% { transform: translate(-50%,-50%) rotate(0deg); }
+  100% { transform: translate(-50%,-50%) rotate(360deg); }
+}
+.ldio-yzaezf3dcmj div {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border: 20px solid #9e00d7;
+  border-top-color: transparent;
+  border-radius: 50%;
+}
+.ldio-yzaezf3dcmj div {
+  animation: ldio-yzaezf3dcmj 0.36101083032490977s linear infinite;
+  top: 100px;
+  left: 100px
+}
+.loadingio-spinner-rolling-2by998twmg8 {
+  width: 200px;
+  height: 200px;
+  display: inline-block;
+  overflow: hidden;
+  background: transparent;
+}
+.ldio-yzaezf3dcmj {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform: translateZ(0) scale(1);
+  backface-visibility: hidden;
+  transform-origin: 0 0; /* see note above */
+}
+.ldio-yzaezf3dcmj div { box-sizing: content-box; }
+
+.aio-login__media-uploader {
+    width: 250px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: rgba(0,0,0,0.5);
+    border-radius:50%;
+}
+
+.aio-login__is-pro {
+    display: inline-flex;
+    width: 40px;
+    justify-content: center;
+    background: linear-gradient(180deg, #6E16DF 0%, #510C79 121.05%);
+    border-radius: 2px;
+    text-align: center;
+    color: #ffce50;
+    font-family: Figtree;
+    font-size: 12.88px;
+    font-weight: 600;
+    text-transform: uppercase;
+    height: 20px;
+    align-items: center;
+    margin-left: 10px !important;
+}

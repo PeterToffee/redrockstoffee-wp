@@ -1,0 +1,3187 @@
+# Copyright (C) 2026 AIO Login
+# This file is distributed under the same license as the All In One Login plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: All In One Login 2.4.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/aio-login\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-07-29T09:37:05+02:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: change-wp-admin-login\n"
+
+#. Plugin Name of the plugin
+#: change-wp-admin-login.php
+msgid "All In One Login"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: change-wp-admin-login.php
+msgid "https://aiologin.com/"
+msgstr ""
+
+#. Description of the plugin
+#: change-wp-admin-login.php
+msgid "AIO Login is a top-notch WordPress admin security plugin that empowers you to secure and customize WordPress login page (wp-admin) at the same time. Which means it offers robust security features and extensive customization options."
+msgstr ""
+
+#. Author of the plugin
+#: change-wp-admin-login.php
+#: includes/admin/class-admin-i18n.php:84
+#: includes/admin/class-admin.php:484
+msgid "AIO Login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:24
+msgid "(optional)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:25
+msgid "+ Add New"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:26
+msgid "0.5 (Default)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:27
+msgid "1. Register your site and get the keys ->"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:28
+msgid "1. Register your site and get the keys →"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:29
+msgid "2. Need help creating keys? ->"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:30
+msgid "2. Need help creating keys? →"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:31
+msgid "2FA Authenticator"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:32
+msgid "3. After getting the Google reCAPTCHA Site Key and Secret Key, click Next to input these credentials."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:33
+msgid "3. Once you have your keys, click Next to enter them."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:34
+msgid "4 digits"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:35
+msgid "6 digits"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:36
+msgid "8 digits"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:37
+msgid "<p>Add custom CSS to fully style your login page according to your site's branding.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:38
+msgid "<p>Allow users to log in using their Discord account for quick authentication.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:39
+msgid "<p>Allow users to log in using their GitHub account for developer-friendly authentication.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:40
+msgid "<p>Allow users to log in using their Google account for faster, secure access.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:41
+msgid "<p>Allow users to log in using their Line account for quick and simple authentication.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:42
+msgid "<p>Allow users to log in with Google, Microsoft, Facebook, Line, GitHub, or Discord. Enable on WooCommerce login, registration, and checkout pages.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:43
+msgid "<p>Allow users to sign in securely without a password using a one-time code sent to their email address</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:44
+msgid "<p>Allow users to sign in with an SMS code via Twilio. Requires AIO Login Pro and Twilio credentials.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:45
+msgid "<p>Block commonly used or custom usernames to prevent brute-force attacks and strengthen login security.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:46
+msgid "<p>Choose from pre-designed login templates to quickly apply a professional look.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:47
+msgid "<p>Configure alerts for security events such as lockouts, failed logins, and other activity so you can respond quickly.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:48
+msgid "<p>Control site access by blocking or allowing specific IP addresses using whitelist or blacklist mode.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:49
+msgid "<p>Customize the login page background with images, colors, or slideshows.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:50
+msgid "<p>Define role-based or user-based destinations after login and logout to guide users to the right pages.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:51
+msgid "<p>Enable Time-based One-Time Password (TOTP) authentication. Users can use apps like Google Authenticator, Authy, or Microsoft Authenticator to generate verification codes.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:52
+msgid "<p>Enable this to send a one-time verification code via email when users log in. This adds an extra layer of security by requiring email verification.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:53
+msgid "<p>Enable to hide usernames to strengthen site security.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:54
+msgid "<p>Enable to monitor username discovery attempts securely.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:55
+msgid "<p>Enable users to log in using their Microsoft account for fast and secure authentication.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:56
+msgid "<p>Enforce custom password rules for registrations and resets to ensure strong credentials.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:57
+msgid "<p>How long (in minutes) the IP address remains blocked after too many failed OTP attempts for this login method. Blocked IPs appear in Activity Log → Lockouts.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:58
+msgid "<p>How long the OTP remains valid before users must request a new code.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:59
+msgid "<p>How long the magic link remains valid before it expires.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:60
+msgid "<p>Integrate AIO Login with WooCommerce to add CAPTCHA and Social Login to login, registration, and checkout pages.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:61
+msgid "<p>Let users log in with their Facebook account for a seamless and trusted login experience.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:62
+msgid "<p>Magic Link Login already acts as a possession-based authentication factor. Enabling this option skips the additional 2FA challenge.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:63
+msgid "<p>Master switch for 2FA on this site. When it is on, both Email OTP and Authenticator App sections appear so you and other users can configure a method. Only one site-wide method can be active at a time (use the toggles below). Each user also uses only one method at a time. When it is off, methods are hidden here and non-administrator users do not see AIO Login in wp-admin.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:64
+msgid "<p>Maximum incorrect OTP attempts before the session is invalidated.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:65
+msgid "<p>Maximum number of login link requests allowed per user within the validity window.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:66
+msgid "<p>Minimum wait time before users can request another OTP.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:67
+msgid "<p>Monitor and log failed login attempts to detect suspicious activity and enhance site security.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:68
+msgid "<p>Number of digits in the verification code shown to users.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:69
+msgid "<p>Prevent exposure of usernames to block brute-force and phishing attacks.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:70
+msgid "<p>Protect your login page from spam and bots using CAPTCHAs.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:71
+msgid "<p>Provide passwordless temporary access link for short-term tasks or guest users without compromising site security.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:72
+msgid "<p>Replace the default WordPress login URL to enhance security and prevent unauthorized access.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:73
+msgid "<p>Require a one-time password (OTP) from an authenticator app to secure admin logins.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:74
+msgid "<p>Restrict login attempts per IP to prevent brute-force attacks and block repeated failed login attempts.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:75
+msgid "<p>Stored encrypted. Leave blank when saving other settings to keep the existing token.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:76
+msgid "<p>To protect forms from bots and spam by adding Captcha.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:77
+msgid "<p>Track attempts to fetch usernames or user IDs to monitor unauthorized enumeration activity.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:78
+msgid "<p>Track users who reached the maximum login attempts and were locked out to monitor security threats.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:79
+msgid "<p>Upload and display a custom logo on your WordPress login page.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:80
+msgid "<p>View lockouts and failed login attempts in one place. Switch between Login Attempt Logs and Failed Login Attempts to monitor security.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:81
+msgid "<p>When enabled, a successful passwordless OTP login counts as completing AIO Login two-factor authentication, so users are not asked for 2FA again in the same session. Requires AIO Login Pro with 2FA enabled.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:82
+msgid "<p>When enabled, registered users can request a secure one-time sign-in link by email from the login page.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:83
+msgid "<p>When enabled, users can mark their device as trusted after a successful OTP verification. They won't be prompted for OTP again on that device for the configured duration. Applies to both Email OTP and TOTP.</p>"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:85
+msgid "AIO Login sections"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:86
+msgid "Account SID"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:87
+msgid "Actions"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:88
+msgid "Add a custom logo to your login page."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:89
+msgid "Afrikaans"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:90
+msgid "All Users"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:91
+msgid "All-In-One Login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:92
+msgid "Allow passwordless sign-in via email link on WooCommerce login, registration, and checkout. New customers can be created automatically when they request a link. Configure expiration in"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:93
+msgid "Allow users to sign in instantly with a secure one-time link sent to their email."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:94
+msgid "Allow users to sign in with a one-time verification code sent to their email address."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:95
+msgid "Allow users to sign in with a one-time verification code sent via SMS (requires Twilio)."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:96
+msgid "Allowed countries"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:97
+msgid "Amharic"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:98
+msgid "Apple"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:99
+msgid "Apply custom CSS to style the login page."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:100
+msgid "Arabic"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:101
+msgid "Are you sure you want to delete this log entry?"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:102
+msgid "Armenian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:103
+msgid "Attackers often try exploits on /wp-login or /wp-admin as a default login URL for WordPress. Change it to avoid these attacks and have an easily memorizable login URL."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:104
+msgid "Auth Token"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:105
+msgid "Auto"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:106
+msgid "Auto (Browser language)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:107
+msgid "Azerbaijani"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:108
+#: includes/passwordless-otp/class-otp-login.php:142
+#: includes/passwordless-otp/views/otp-inline-panel.php:66
+msgid "Back"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:109
+#: includes/login-customization/class-login-customizer.php:534
+msgid "Background"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:110
+msgid "Background Color"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:111
+msgid "Background Image"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:112
+msgid "Basque"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:113
+msgid "Bengali"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:114
+msgid "Block IP Address"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:115
+msgid "Block duration (minutes)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:116
+msgid "Blocks unauthorized access to WordPress REST API user endpoints."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:117
+msgid "Bulgarian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:118
+msgid "By default your WordPress login can be accessed by any IP or user. You can use this feature to allow login only for specific IPs or users in order to prevent brute-force attacks or malicious login attempts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:119
+msgid "Cancel"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:120
+msgid "Captcha"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:121
+msgid "Captcha Settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:122
+msgid "Captcha settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:123
+msgid "Catalan"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:124
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:176
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:186
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:218
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:225
+msgid "Change wp-admin login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:125
+msgid "Checkout"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:126
+msgid "Chinese (Hong Kong)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:127
+msgid "Chinese (Simplified)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:128
+msgid "Chinese (Traditional)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:129
+msgid "Choose a destination..."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:130
+msgid "Choose countries..."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:131
+msgid "Choose reCAPTCHA version:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:132
+msgid "Choose roles..."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:133
+msgid "Choose users..."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:134
+msgid "Choose what determines this redirect."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:135
+msgid "Clear all"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:136
+msgid "Click Here"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:137
+msgid "Cloudflare Turnstile"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:138
+msgid "Cloudflare turnstile"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:139
+msgid "Compact"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:140
+msgid "Condition"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:141
+msgid "Condition Type"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:142
+msgid "Condition Value"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:143
+msgid "Configuration"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:144
+msgid "Configure"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:145
+msgid "Configure how you want to be notified about login activity and security-related events."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:146
+msgid "Configure how you want to receive alerts about security events on your website."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:147
+msgid "Configure the settings for your Google reCAPTCHA integration."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:148
+msgid "Confirm Delete"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:149
+msgid "Connect with Slack"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:150
+msgid "Connection Verified"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:151
+msgid "Connection test failed. Please check your keys and try again."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:152
+msgid "Croatian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:153
+#: includes/login-customization/class-login-customizer.php:1242
+#: includes/login-customization/class-login-customizer.php:1260
+msgid "Custom CSS"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:154
+msgid "Custom Login URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:155
+msgid "Custom URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:156
+msgid "Custom Webhook URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:157
+msgid "Customize your"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:158
+msgid "Czech"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:159
+msgid "Danish"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:160
+msgid "Dark"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:161
+msgid "Date:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:162
+msgid "Days"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:163
+msgid "Default Dashboard"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:164
+msgid "Default country code"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:165
+msgid "Delete"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:166
+msgid "Delete this rule?"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:167
+msgid "Disable"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:168
+msgid "Disable WP Core Author Sitemaps"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:169
+msgid "Dutch"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:170
+msgid "Edit"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:171
+msgid "Email Login Link"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:172
+msgid "Email OTP Login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:173
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:232
+msgid "Enable"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:174
+msgid "Enable CAPTCHAs to block bots and spam."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:175
+msgid "Enable Login Redirection"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:176
+msgid "Enable Protection"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:177
+msgid "Enable WooCommerce integration to secure user interactions with Social Login and CAPTCHA."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:178
+msgid "Enable custom redirection rules for login and logout actions."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:179
+msgid "Enable one-click login via Discord."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:180
+msgid "Enable one-click login via Facebook accounts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:181
+msgid "Enable one-click login via GitHub."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:182
+msgid "Enable one-click login via Google accounts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:183
+msgid "Enable one-click login via Line accounts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:184
+msgid "Enable one-click login via Microsoft accounts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:185
+msgid "Enable secure Captcha in WooCommerce with social login features."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:186
+msgid "Enable to add OTP verification for stronger login security."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:187
+msgid "Enable to allow users temporary admin access securely."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:188
+msgid "Enable to apply login & logout redirect rules."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:189
+msgid "Enable to control access using whitelist or blacklist."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:190
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:399
+msgid "Enable to customize your admin login URL."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:191
+msgid "Enable to hide usernames to strengthen site security."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:192
+msgid "Enable to monitor username discovery attempts securely."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:193
+msgid "Enable to prevent use of common usernames."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:194
+msgid "Enable to restrict repeated login attempts per IP."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:195
+msgid "Enable to set rules to improve user password security."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:196
+msgid "Enable to track failed logins to spot potential threats."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:197
+msgid "Enable to view logs of locked-out users and attempts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:198
+msgid "English"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:199
+msgid "Enter Secret Key"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:200
+msgid "Enter Site Key"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:201
+msgid "Enter custom CSS without using &lt;style&gt;&lt;/style&gt;"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:202
+msgid "Enter the endpoint URL where you want to receive security notifications. We'll send a POST request with event details."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:203
+msgid "Enter your Cloudflare Turnstile details."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:204
+msgid "Enter your credentials for Google reCAPTCHA to authenticate and configure the login process."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:205
+msgid "Enter your hCaptcha details."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:206
+msgid "Entry Details:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:207
+msgid "Enumeration Attempts Logs"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:208
+msgid "Error saving Turnstile settings."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:209
+msgid "Error saving hCaptcha settings."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:210
+msgid "Error saving settings."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:211
+msgid "Estonian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:212
+msgid "Event Settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:213
+msgid "Expiration (minutes)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:214
+msgid "Facebook"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:215
+msgid "Failed Login Attempts"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:216
+#: includes/admin/class-admin.php:144
+msgid "Failed Logins"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:217
+msgid "Fallback Redirection"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:218
+msgid "Features 👑"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:219
+msgid "Filipino"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:220
+msgid "Finished"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:221
+msgid "Finnish"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:222
+msgid "First page"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:223
+msgid "Flexible"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:224
+msgid "Free"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:225
+msgid "French"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:226
+msgid "Galician"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:227
+msgid "Generic Login & Registration Errors"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:228
+msgid "Georgian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:229
+msgid "German"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:230
+#: includes/login-customization/class-login-customizer.php:1391
+msgid "Get AIO Login Pro"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:231
+msgid "Get the Most Powerful WordPress Login Plugin Today"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:232
+msgid "Getting Started"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:233
+msgid "Go Unlimited with AIO Login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:234
+msgid "Google"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:235
+msgid "Google reCAPTCHA"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:236
+msgid "Google reCAPTCHA Configuration"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:237
+msgid "Greek"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:238
+msgid "Guides and Documentation"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:239
+msgid "Gujarati"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:240
+msgid "Hcaptcha"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:241
+msgid "Hebrew"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:242
+msgid "Hindi"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:243
+msgid "Hours"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:244
+msgid "How long the IP stays blocked after too many failed SMS OTP attempts. Shown under Activity Log → Lockouts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:245
+msgid "How long the IP stays blocked after too many failed email OTP attempts. Shown under Activity Log → Lockouts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:246
+msgid "Hungarian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:247
+msgid "ID:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:248
+msgid "IP Address:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:249
+msgid "IP Protection"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:250
+msgid "Icelandic"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:251
+msgid "Indonesian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:252
+msgid "Instruction:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:253
+#: includes/admin/class-admin.php:197
+msgid "Integrations"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:254
+msgid "Italian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:255
+msgid "Japanese"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:256
+msgid "Join over 90K smart website owners who use AIO Login to improve their"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:257
+msgid "Kannada"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:258
+msgid "Korean"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:259
+msgid "Language for Captcha:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:260
+msgid "Lao"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:261
+msgid "Last 14 days"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:262
+msgid "Last 7 days"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:263
+msgid "Last month"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:264
+msgid "Last page"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:265
+msgid "Latvian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:266
+msgid "Leave as &quot;No logout redirect&quot; to only apply this rule on login, or pick a page / custom URL for logout."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:267
+msgid "Lets Go"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:268
+msgid "Light"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:269
+#: includes/admin/class-admin.php:73
+msgid "Limit Login Attempts"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:270
+msgid "Limit the number of times a user IP can attempt to log in to your wp-admin with incorrect credentials. Once the login attempt limit is reached, the IP from which the attempts have originated will be blocked for default period of time."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:271
+msgid "Lithuanian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:272
+msgid "Lockout Attempts"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:273
+msgid "Lockout Message"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:274
+#: includes/admin/class-admin.php:140
+msgid "Lockouts"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:275
+msgid "Log Attempts Duration (Days)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:276
+msgid "Log Enumeration Attempts"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:277
+msgid "Logging Settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:278
+msgid "Login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:279
+#: includes/admin/class-admin.php:127
+msgid "Login Link"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:280
+msgid "Login Link Requests"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:281
+msgid "Login Link Validity"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:282
+msgid "Login Link is not enabled yet. Turn it on in"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:283
+msgid "Login Page Customizer"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:284
+msgid "Login Redirect URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:285
+#: includes/admin/class-admin.php:69
+msgid "Login Redirection"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:286
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:241
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:258
+msgid "Login URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:287
+msgid "Login With Link"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:288
+#: includes/login-customization/class-login-customizer.php:672
+msgid "Logo"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:289
+msgid "Logo Height"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:290
+msgid "Logo Redirect URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:291
+msgid "Logo Width"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:292
+msgid "Logout Redirect URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:293
+msgid "Logout URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:294
+msgid "Malay"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:295
+msgid "Malayalam"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:296
+msgid "Marathi"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:297
+msgid "Margin Bottom"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:298
+msgid "Max retries"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:299
+msgid "Maximum Attempts"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:300
+msgid "Maximum retry attempts"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:301
+msgid "Microsoft"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:302
+msgid "Minutes"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:303
+msgid "Mongolian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:304
+msgid "More →"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:305
+msgid "Myanmar"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:306
+msgid "NEW"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:307
+msgid "Need help setting up?"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:308
+msgid "Nepali"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:309
+msgid "Next"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:310
+msgid "Next page"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:311
+msgid "No Captcha providers are configured. Please configure a Captcha provider first by going to the"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:312
+msgid "No Social Login providers are configured. Please configure a Social Login provider first by going to the"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:313
+msgid "No countries match your search."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:314
+msgid "No failed logins found"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:315
+msgid "No lockouts found"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:316
+msgid "No logout redirect"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:317
+msgid "No matching entries."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:318
+msgid "No roles match your search."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:319
+msgid "No rules found."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:320
+msgid "No users match your search."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:321
+msgid "Normal"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:322
+msgid "Norwegian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:323
+msgid "Note:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:324
+msgid "Note: You can only enable one captcha at a time."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:325
+#: includes/admin/class-admin.php:154
+msgid "Notifications"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:326
+msgid "Number of days to keep enumeration attempt logs."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:327
+msgid "OTP Expiration (minutes)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:328
+msgid "OTP Length"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:329
+msgid "Obfuscates comment author names to prevent username enumeration through comments."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:330
+msgid "Off"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:331
+msgid "On"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:332
+msgid "Only phone numbers from selected countries can request SMS OTP login. At least one country is required."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:333
+msgid "Order"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:334
+msgid "PRO"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:335
+msgid "Passwordless Authentication Settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:336
+msgid "Passwordless Authentication → Login Link"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:337
+msgid "Persian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:338
+msgid "Pick an internal page or choose Custom URL to enter any external link."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:339
+msgid "Please install and activate the WooCommerce plugin to use this feature."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:340
+msgid "Polish"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:341
+msgid "Portuguese"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:342
+msgid "Prevent Username from Comment Authors"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:343
+msgid "Prevents WordPress from exposing login IDs through embedded author links."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:344
+msgid "Previous page"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:345
+msgid "Pro"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:346
+msgid "Protect REST API User Endpoints"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:347
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:429
+msgid "Protect your website by changing the login page URL."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:348
+msgid "Provider"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:349
+msgid "Provides generic error messages to prevent username enumeration through login/registration forms."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:350
+msgid "Recaptcha"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:351
+msgid "Receive real-time security alerts directly in your Slack workspace."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:352
+msgid "Recent Activity"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:353
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:250
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:266
+msgid "Redirect URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:354
+msgid "Registration"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:355
+msgid "Remove"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:356
+msgid "Removes author-based sitemaps to prevent automated exposure of usernames."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:357
+msgid "Resend timer (seconds)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:358
+msgid "Romanian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:359
+msgid "Rule applies when any of the selected users logs in or out."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:360
+msgid "Rule applies when the user has any of the selected roles."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:361
+msgid "Russian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:362
+msgid "SMS OTP"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:363
+msgid "SMS OTP Login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:364
+msgid "Save"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:365
+msgid "Save Changes"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:366
+msgid "Save Rule"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:367
+msgid "Saving…"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:368
+msgid "Scroll sub-tabs left"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:369
+msgid "Scroll sub-tabs right"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:370
+msgid "Scroll tabs left"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:371
+msgid "Scroll tabs right"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:372
+msgid "Search:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:373
+msgid "Secret Key"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:374
+msgid "Security Notification"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:375
+msgid "Select Roles"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:376
+msgid "Select Users"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:377
+msgid "Select a ready-made template for your login page."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:378
+msgid "Select all"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:379
+msgid "Send security events to your custom endpoint for integration with other tools."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:380
+msgid "Sender number"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:381
+msgid "Serbian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:382
+msgid "Set background images, colors, or slideshows."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:383
+msgid "Set up notification channels for important login and security events."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:384
+msgid "Settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:385
+#: includes/login-controller/class-login-redirection.php:1099
+#: includes/passwordless-otp/class-magic-link-admin-rest.php:107
+#: includes/passwordless-otp/class-otp-admin-rest.php:139
+msgid "Settings saved successfully."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:386
+msgid "Showing"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:387
+msgid "Sinhalese"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:388
+msgid "Site Key"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:389
+msgid "Site key or secret key is missing. Go back to Configuration and enter both keys."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:390
+msgid "Size:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:391
+msgid "Skip 2FA for Email login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:392
+msgid "Skip 2FA for Login Link"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:393
+msgid "Skip 2FA for SMS login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:394
+msgid "Slack Notifications"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:395
+msgid "Slack Webhook URL"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:396
+msgid "Slovak"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:397
+msgid "Slovenian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:398
+#: includes/admin/class-admin.php:190
+msgid "Social Login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:399
+msgid "Social Login settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:400
+msgid "Something went wrong."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:401
+msgid "Spanish"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:402
+msgid "Specific user"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:403
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:412
+msgid "Specify URL where attempts to access wp-login or wp-admin should be redirected to. If custom URL is set above, By default, this will redirect to your site's Home page unless you set it to something else."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:404
+msgid "Status:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:405
+msgid "Stop oEmbed Calls Revealing User IDs"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:406
+msgid "Swahili"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:407
+msgid "Swedish"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:408
+msgid "Table pagination"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:409
+msgid "Tamil"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:410
+msgid "Telugu"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:411
+msgid "Test Connection"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:412
+msgid "Thai"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:413
+msgid "Theme:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:414
+msgid "These settings are not compulsory."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:415
+msgid "This action cannot be undone."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:416
+msgid "This field is required"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:417
+msgid "This protection does not apply on admin pages to avoid conflicts. It's recommended to use with a firewall or IP blocking tool (e.g., Fail2Ban) for better security on VPS or dedicated servers."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:418
+msgid "This will permanently remove the redirect rule. This action cannot be undone."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:419
+msgid "Threshold Score:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:420
+msgid "Timeout (min)"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:421
+#: includes/login-customization/class-login-customizer.php:1386
+msgid "To access more features and options"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:422
+msgid "To allow users to log in with their social accounts,"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:423
+msgid "To protect forms from bots and spam by adding Captcha,"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:424
+msgid "To protect your website from spam and bots, start by adding Cloudflare Turnstile to your WordPress login page."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:425
+msgid "To protect your website from spam and bots, start by adding Google reCAPTCHA to your WordPress login page. First, register your site to generate your Site Key and Secret Key. After getting the keys, continue the setup to secure your site."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:426
+msgid "To protect your website from spam and bots, start by adding hCaptcha to your WordPress login page."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:427
+msgid "To use WooCommerce Integration you have to install & activate WooCommerce."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:428
+msgid "Today"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:429
+msgid "Toggle Email OTP Login settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:430
+msgid "Toggle SMS OTP Login settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:431
+msgid "Turkish"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:432
+msgid "Turnstile"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:433
+msgid "Turnstile Configuration"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:434
+msgid "Twilio Configuration"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:435
+msgid "Two Factor Authentication"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:436
+msgid "Two-factor authentication forces admin users to login only after providing a token, generated from the Authenticator applications. When you enable this option, all admin users will be asked to configure their two-factor authentication in the Authenticator app on their next login."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:437
+msgid "Type:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:438
+msgid "Ukrainian"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:439
+msgid "Unlimited Sites + Lifetime Access"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:440
+msgid "Update Rule"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:441
+msgid "Upgrade Now"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:442
+msgid "Urdu"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:443
+msgid "Used when a rule&apos;s login/logout URL is invalid or unreachable. Not used when the rule has &quot;No logout redirect&quot; — WordPress default logout applies then."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:444
+msgid "User Agent:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:445
+msgid "User Enumeration Attempts"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:446
+#: includes/admin/class-admin.php:177
+msgid "User Enumeration Protection"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:447
+msgid "User Role"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:448
+msgid "Username:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:449
+msgid "V2"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:450
+msgid "V3"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:451
+msgid "Verify Again"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:452
+msgid "Vietnamese"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:453
+msgid "View All"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:454
+msgid "View All Activity"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:455
+msgid "View configuration guide"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:456
+msgid "WP Login"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:457
+msgid "Webhook Notifications"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:458
+msgid "When enabled, users who sign in with SMS OTP are not prompted for AIO Login two-factor authentication."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:459
+msgid "When enabled, users who sign in with email OTP are not prompted for AIO Login two-factor authentication."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:460
+msgid "WooCommerce Integration"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:461
+msgid "WooCommerce Integration Settings"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:462
+msgid "WooCommerce Integration:"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:463
+msgid "WooCommerce is required for this integration."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:464
+msgid "WordPress admin login security and customization"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:465
+msgid "You have been locked out due to too many login attempts."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:466
+msgid "Your credentials are valid. You can finish setup now."
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:467
+msgid "Zulu"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:468
+msgid "click here"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:469
+msgid "entries"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:470
+msgid "entries per page"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:471
+msgid "hCaptcha"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:472
+msgid "hCaptcha Configuration"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:473
+msgid "of"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:474
+msgid "reCAPTCHA"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:475
+msgid "selected"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:476
+msgid "to"
+msgstr ""
+
+#: includes/admin/class-admin-i18n.php:477
+msgid "← Back"
+msgstr ""
+
+#: includes/admin/class-admin.php:55
+#: includes/admin/class-admin.php:507
+#: includes/admin/class-admin.php:508
+msgid "Dashboard"
+msgstr ""
+
+#: includes/admin/class-admin.php:60
+msgid "Login Protection"
+msgstr ""
+
+#: includes/admin/class-admin.php:65
+msgid "Change Login URL"
+msgstr ""
+
+#: includes/admin/class-admin.php:79
+msgid "Disable Common Usernames"
+msgstr ""
+
+#: includes/admin/class-admin.php:85
+msgid "Password Strength Checker"
+msgstr ""
+
+#: includes/admin/class-admin.php:93
+#: includes/admin/class-admin.php:297
+#: includes/admin/class-admin.php:496
+#: includes/admin/class-admin.php:497
+#: includes/admin/class-admin.php:746
+msgid "2FA"
+msgstr ""
+
+#: includes/admin/class-admin.php:100
+#: includes/admin/class-admin.php:302
+#: includes/admin/class-admin.php:751
+msgid "Authentication Methods"
+msgstr ""
+
+#: includes/admin/class-admin.php:104
+msgid "2FA Policies"
+msgstr ""
+
+#: includes/admin/class-admin.php:110
+msgid "Advanced Settings"
+msgstr ""
+
+#: includes/admin/class-admin.php:118
+msgid "Passwordless Authentication"
+msgstr ""
+
+#: includes/admin/class-admin.php:123
+msgid "OTP Login"
+msgstr ""
+
+#: includes/admin/class-admin.php:135
+msgid "Activity Log"
+msgstr ""
+
+#: includes/admin/class-admin.php:148
+msgid "Enumeration Protection Logs"
+msgstr ""
+
+#: includes/admin/class-admin.php:162
+msgid "Security"
+msgstr ""
+
+#: includes/admin/class-admin.php:167
+msgid "CAPTCHA"
+msgstr ""
+
+#: includes/admin/class-admin.php:171
+msgid "Ban / Whitelist IP Addresses"
+msgstr ""
+
+#: includes/admin/class-admin.php:183
+msgid "Temporary Access"
+msgstr ""
+
+#: includes/admin/class-admin.php:209
+msgid "Get Pro"
+msgstr ""
+
+#: includes/admin/class-admin.php:284
+msgid "Good News!"
+msgstr ""
+
+#: includes/admin/class-admin.php:285
+msgid "All In One Login is live on "
+msgstr ""
+
+#: includes/admin/class-admin.php:286
+msgid "AppSumo"
+msgstr ""
+
+#: includes/admin/class-admin.php:287
+msgid "Get Lifetime Deal Now"
+msgstr ""
+
+#: includes/admin/class-admin.php:288
+msgid "AppSumo promotion"
+msgstr ""
+
+#: includes/admin/class-admin.php:289
+msgid "Dismiss promotion"
+msgstr ""
+
+#: includes/admin/class-admin.php:483
+msgid "All in One Login"
+msgstr ""
+
+#: includes/admin/class-admin.php:549
+#: includes/admin/class-admin.php:550
+msgid "Customize"
+msgstr ""
+
+#: includes/admin/class-admin.php:632
+msgid "You do not have permission to access this page."
+msgstr ""
+
+#: includes/admin/class-admin.php:988
+#: includes/login-controller/class-login-controller.php:325
+msgid "Your plan does not include Limit Login Attempts."
+msgstr ""
+
+#: includes/admin/class-admin.php:1002
+msgid "Limit login attempts updated successfully"
+msgstr ""
+
+#: includes/admin/class-admin.php:1009
+#: includes/admin/class-admin.php:1038
+#: includes/admin/class-admin.php:1084
+msgid "Invalid value"
+msgstr ""
+
+#: includes/admin/class-admin.php:1031
+msgid "Two factor authentication updated successfully"
+msgstr ""
+
+#: includes/admin/class-admin.php:1063
+msgid "Your plan does not include Ban / Whitelist IP Addresses."
+msgstr ""
+
+#: includes/admin/class-admin.php:1077
+msgid "Block IP address updated successfully"
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:123
+msgid "Site key and secret key are required."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:138
+msgid "Unknown captcha provider."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:226
+msgid "Complete the hCaptcha challenge to test the connection."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:256
+msgid "Complete the Turnstile challenge to test the connection."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:279
+msgid "Site key is required."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:295
+msgid "Unable to connect to the captcha provider. Please try again."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:303
+msgid "Unexpected response from the captcha provider."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:319
+msgid "Secret key is invalid. Please check your credentials."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:331
+msgid "Captcha credentials are invalid. Please verify your site key and secret key."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:338
+msgid "Complete the captcha challenge to test the connection."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:345
+msgid "Captcha token expired. Please test the connection again."
+msgstr ""
+
+#: includes/captcha/class-captcha-validation.php:351
+msgid "Could not verify captcha credentials. Please check your keys and try again."
+msgstr ""
+
+#. translators: %1$s: plugin name.
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:175
+#, php-format
+msgid "Please upgrade to the latest version of WordPress to activate %1$s."
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:187
+msgid "This option allows you to set a networkwide default, which can be overridden by individual sites. Simply go to to the siteâ€™s permalink settings to change the url."
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:190
+msgid "Networkwide default"
+msgstr ""
+
+#. translators: %1$s: network settings url.
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:375
+#, php-format
+msgid "To set a networkwide default, go to %1$s."
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:376
+msgid "Network Settings"
+msgstr ""
+
+#. translators: %1$s: new login url, %2$s: new login url.
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:444
+#, php-format
+msgid "Your login page is now here: %1$s. Bookmark this page!"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:463
+msgid "This feature is not enabled."
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:740
+#: includes/google-recaptcha/class-google-recaptcha.php:361
+#: includes/login-controller/class-login-controller.php:357
+#: includes/login-customization/class-login-customization.php:150
+#: includes/login-customization/class-login-customization.php:227
+msgid "Settings saved successfully"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:747
+#: includes/google-recaptcha/class-google-recaptcha.php:366
+#: includes/google-recaptcha/class-google-recaptcha.php:380
+#: includes/login-controller/class-login-controller.php:364
+#: includes/login-customization/class-login-customization.php:116
+#: includes/login-customization/class-login-customization.php:158
+#: includes/login-customization/class-login-customization.php:234
+msgid "Nonce verification failed"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:114
+#: includes/google-recaptcha/class-google-recaptcha.php:145
+#: includes/passwordless-otp/class-otp-captcha.php:101
+#: includes/passwordless-otp/class-otp-captcha.php:127
+#: includes/passwordless-otp/class-otp-captcha.php:134
+msgid "Please verify that you are not a robot."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:128
+msgid "Unable to connect to Google reCAPTCHA. Please try again later."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:151
+msgid "Google reCAPTCHA secret key is missing. Please check plugin settings."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:154
+#: includes/google-recaptcha/class-google-recaptcha.php:158
+#: includes/google-recaptcha/class-google-recaptcha.php:168
+msgid "Google reCAPTCHA secret key is invalid. Please update it in plugin settings."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:163
+msgid "The response parameter is missing."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:171
+msgid "The request is invalid or malformed."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:174
+msgid "The response is no longer valid: either is too old or has been used previously."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:408
+msgid "Connection successful. Your reCAPTCHA keys are valid."
+msgstr ""
+
+#: includes/login-controller/class-failed-logins.php:196
+msgid "Blocked"
+msgstr ""
+
+#. translators: %d: Remaining minutes.
+#: includes/login-controller/class-login-controller.php:85
+#: includes/login-controller/class-login-controller.php:346
+#, php-format
+msgid "You have been blocked due to too many unsuccessful login attempts. Please try again in %d minutes."
+msgstr ""
+
+#. translators: %d: Remaining attempts.
+#: includes/login-controller/class-login-controller.php:228
+#, php-format
+msgid "You have %d attempts remaining."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1082
+#: includes/login-controller/class-login-redirection.php:1109
+#: includes/login-controller/class-login-redirection.php:1250
+msgid "Invalid nonce"
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1114
+msgid "Invalid condition type."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1120
+msgid "User and role-based redirect rules require an eligible Pro plan."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1138
+msgid "Please select at least one role."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1148
+msgid "Please select at least one user."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1183
+msgid "Please enter a login redirect URL when Custom URL is selected."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1190
+msgid "Please choose a login redirect destination."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1215
+msgid "This rule already exists. Please update the existing rule or remove it before creating a new one."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1237
+msgid "Rule updated successfully."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1237
+msgid "Rule saved successfully."
+msgstr ""
+
+#: includes/login-controller/class-login-redirection.php:1266
+msgid "Rule deleted successfully."
+msgstr ""
+
+#: includes/login-customization/class-customize-control-google-fonts-grid.php:86
+msgid "Search fonts"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-google-fonts-grid.php:91
+msgid "Search fonts…"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-google-fonts-grid.php:94
+msgid "Selected font"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-google-fonts-grid.php:103
+msgid "Google Fonts catalog"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-google-fonts-grid.php:147
+msgid "Aa Bb"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-reset.php:37
+msgid "Reset all to defaults"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-template-grid.php:85
+msgid "Selected template"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-template-grid.php:95
+msgid "Login design templates"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-template-grid.php:106
+msgid "Free login design templates"
+msgstr ""
+
+#: includes/login-customization/class-customize-control-template-grid.php:117
+msgid "Pro login design templates"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:108
+msgid "Custom CSS saved successfully"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:195
+msgid "AIO Login Customize"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:197
+msgid "Customize your login screen with live preview (same sections as LoginPress: themes, logo, form, footer links, fonts, and CSS)."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:237
+msgid "Reset customization"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:249
+msgid "Master reset"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:250
+msgid "Restore every AIO Login Customize option to its default. Click Publish to save. Other Customizer sections (theme, widgets, etc.) are not changed."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:420
+#: includes/login-customization/class-login-customizer.php:448
+msgid "Templates"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:427
+msgid "Modern Center"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:428
+msgid "Future Tech Split"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:429
+msgid "Classic Bold"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:430
+msgid "Midnight Dark"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:431
+msgid "Dynamic Split"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:432
+msgid "Deep Glass"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:433
+msgid "Corporate Pro"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:434
+msgid "Vibrant Duo"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:435
+msgid "Elegant Frost"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:439
+msgid "Click a thumbnail to apply that login design. The preview refreshes after you pick a template."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:440
+msgid "Modern Center and Future Tech are included on all plans. Additional themes require Professional or Business (tier 3+)."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:469
+msgid "Inherit (Theme/WP Default)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:496
+msgid "Google Fonts"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:500
+msgid "Pick any font from the Google Fonts catalog (~1,900 families). Applies across the login form text."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:501
+msgid "The full Google Fonts catalog unlocks on Professional or Business (tier 3+). Inherit stays available on all plans."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:520
+msgid "Font family"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:554
+msgid "Background color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:573
+msgid "Background image"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:593
+msgid "Mobile background image"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:611
+msgid "Background repeat"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:614
+msgid "No repeat"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:615
+msgid "Tile"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:616
+msgid "Repeat X"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:617
+msgid "Repeat Y"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:634
+msgid "Background position"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:637
+msgid "Left"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:638
+msgid "Center"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:639
+msgid "Right"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:656
+msgid "Background size"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:659
+msgid "Cover"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:660
+msgid "Contain"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:661
+msgid "Initial"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:682
+msgid "Disable logo"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:695
+msgid "Upload logo image"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:705
+msgid "Logo width (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:715
+msgid "Logo height (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:725
+msgid "Spacing below logo (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:735
+msgid "Logo URL"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:744
+msgid "Logo title"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:755
+msgid "Customize Login Form"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:758
+msgid "Form box, fields, and labels."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:774
+msgid "Enable form transparency"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:791
+msgid "Form width (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:809
+msgid "Minimum height (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:827
+#: includes/login-customization/class-login-customizer.php:995
+msgid "Border radius (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:845
+msgid "Shadow (e.g. 0 10px 30px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:862
+#: includes/login-customization/class-login-customizer.php:1015
+msgid "Shadow opacity (0-1)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:880
+msgid "Padding (top right bottom left) with units"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:882
+msgid "Example: 20px 24px 20px 24px"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:898
+msgid "Border (CSS shorthand)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:900
+msgid "Example: 2px dotted black"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:905
+msgid "Label color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:906
+msgid "\"Remember Me\" label color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:913
+msgid "Label font size (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:923
+msgid "\"Remember Me\" font size (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:933
+msgid "Input margin (top right bottom left) with units"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:935
+msgid "Example: 0 0 14px 0"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:939
+msgid "Input background color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:940
+msgid "Input text color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:947
+msgid "Field width (CSS)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:949
+msgid "Example: 100% or 320px"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:959
+msgid "Button Customization"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:965
+msgid "Button color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:966
+msgid "Hover color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:967
+msgid "Text color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:968
+msgid "Border color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:975
+msgid "Button size (height px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:984
+msgid "Button padding"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:986
+msgid "CSS padding shorthand, e.g. 16px (all sides), 12px 24px (top/bottom left/right), or four values for top, right, bottom, left."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1005
+msgid "Shadow (e.g. 0 8px 20px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1026
+msgid "Text size (px)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1093
+msgid "Form Footer"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1096
+msgid "Footer links (Lost password, Back to site) and browser tab title."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1106
+msgid "Footer link color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1123
+msgid "Login page title"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1142
+msgid "Custom favicon"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1154
+msgid "Customize Forgot Password"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1174
+msgid "Forgot form background color"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1193
+msgid "Forgot form background image"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1205
+msgid "Add your own CSS code here to customize the appearance and layout of your login screen. JavaScript is not injected from here."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1209
+msgid "Learn more about CSS"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1212
+#: includes/login-customization/class-login-customizer.php:1230
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1217
+msgid "When using a keyboard to navigate:"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1219
+msgid "In the editing area, the Tab key enters a tab character."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1220
+msgid "To move away from this area, press the Esc key followed by the Tab key."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1221
+msgid "Screen reader users: when in forms mode, you may need to press the Esc key twice."
+msgstr ""
+
+#. translators: 1: Opening profile link tag, 2: Closing link tag + screen reader text.
+#: includes/login-customization/class-login-customizer.php:1228
+#, php-format
+msgid "The edit field automatically highlights code syntax. You can disable this in your %1$suser profile%2$s to work in plain text mode."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1236
+msgid "Close"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1251
+msgid "Add custom CSS to further customize your login page."
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1252
+msgid "Example:"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1385
+msgid "Unlock premium features with the AppSumo deal"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1388
+msgid "View AppSumo Plans"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1390
+msgid "Get Business Plan Now"
+msgstr ""
+
+#: includes/login-customization/class-login-customizer.php:1399
+msgid "Reset all AIO Login Customize options to their default values? Click Publish to save."
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:153
+msgid "Lockout"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:162
+#: includes/notifications/class-notification-sender.php:297
+msgid "Failed login"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:171
+#: includes/notifications/class-notification-sender.php:354
+msgid "User enumeration"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:253
+msgid "IP lockout"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:260
+#: includes/notifications/class-notification-sender.php:304
+#: includes/notifications/class-notification-sender.php:361
+msgid "Site"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:261
+#: includes/notifications/class-notification-sender.php:305
+#: includes/notifications/class-notification-sender.php:362
+msgid "Time"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:262
+#: includes/notifications/class-notification-sender.php:307
+#: includes/notifications/class-notification-sender.php:364
+msgid "IP address"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:263
+#: includes/notifications/class-notification-sender.php:308
+msgid "Location"
+msgstr ""
+
+#. translators: %s: site URL
+#: includes/notifications/class-notification-sender.php:273
+#: includes/notifications/class-notification-sender.php:330
+#: includes/notifications/class-notification-sender.php:375
+#, php-format
+msgid "AIO Login • <%s|Open site>"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:306
+#: includes/notifications/class-notification-sender.php:365
+msgid "Username"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:318
+msgid "User agent"
+msgstr ""
+
+#: includes/notifications/class-notification-sender.php:363
+msgid "Event type"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-admin-rest.php:75
+#: includes/passwordless-otp/class-otp-admin-rest.php:75
+msgid "Invalid security token."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-admin-rest.php:79
+msgid "Login Link requires AIO Login Pro."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-email-sender.php:26
+msgid "Unable to send login link email."
+msgstr ""
+
+#. translators: 1: display name, 2: site name, 3: validity duration, 4: login URL
+#: includes/passwordless-otp/class-magic-link-email-sender.php:35
+#, php-format
+msgid ""
+"Hi %1$s,\n"
+"\n"
+"Use the link below to sign in to %2$s. This link is valid for %3$s and can only be used once.\n"
+"\n"
+"%4$s\n"
+"\n"
+"If you did not request this email, you can safely ignore it.\n"
+""
+msgstr ""
+
+#. translators: %s: site name
+#: includes/passwordless-otp/class-magic-link-email-sender.php:47
+#, php-format
+msgid "[%s] Your login link"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-email-sender.php:57
+msgid "Unable to send login link email. Please try again later or contact the administrator."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:144
+msgid "Or login with"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:288
+#: includes/passwordless-otp/class-magic-link-login.php:395
+msgid "Login link"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:289
+#: includes/passwordless-otp/class-magic-link-login.php:380
+#: includes/passwordless-otp/class-magic-link-login.php:381
+#: includes/passwordless-otp/class-magic-link-login.php:398
+#: includes/passwordless-otp/views/magic-link-inline-panel.php:19
+msgid "Email Me a Login Link"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:382
+#: includes/passwordless-otp/views/magic-link-inline-panel.php:30
+msgid "Send Link"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:383
+#: includes/passwordless-otp/class-otp-login.php:143
+#: includes/passwordless-otp/views/magic-link-inline-panel.php:14
+#: includes/passwordless-otp/views/otp-inline-panel.php:14
+msgid "Back to login"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:384
+#: includes/passwordless-otp/views/magic-link-inline-panel.php:36
+msgid "Check your email"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:385
+#: includes/passwordless-otp/views/magic-link-inline-panel.php:37
+msgid "We sent a secure login link to your email. Open the link to sign in."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:386
+#: includes/passwordless-otp/class-otp-login.php:152
+#: includes/passwordless-otp/views/magic-link-inline-panel.php:23
+#: includes/passwordless-otp/views/otp-inline-panel.php:23
+msgid "Email address"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:387
+#: includes/passwordless-otp/class-otp-login.php:157
+msgid "Register"
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:412
+msgid "Login link sign-in is not available."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:469
+msgid "Login link sent to your email."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:727
+msgid "You do not have an account yet. Please register first, then request a login link."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:729
+#: includes/passwordless-otp/class-magic-link-service.php:39
+#: includes/passwordless-otp/class-otp-login.php:660
+msgid "You do not have an account yet. Please register first or contact the site administrator."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-login.php:750
+#: includes/passwordless-otp/class-otp-login.php:676
+msgid "Security check failed."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-service.php:34
+msgid "Login link sign-in is currently disabled."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-service.php:277
+msgid "This login link has already been used. Please request a new login link."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-service.php:279
+msgid "This login link has expired. Please request a new login link."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-service.php:281
+msgid "Too many login requests. Please wait before trying again."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-service.php:285
+msgid "This login link is no longer valid. Please request a new login link."
+msgstr ""
+
+#: includes/passwordless-otp/class-magic-link-service.php:287
+msgid "Invalid login link detected. Please request a new magic link."
+msgstr ""
+
+#. translators: %d: number of hours
+#: includes/passwordless-otp/class-magic-link-service.php:351
+#, php-format
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of days
+#: includes/passwordless-otp/class-magic-link-service.php:354
+#, php-format
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of minutes
+#: includes/passwordless-otp/class-magic-link-service.php:357
+#, php-format
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/passwordless-otp/class-otp-admin-rest.php:129
+msgid "Select at least one allowed country for SMS login."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-admin-rest.php:175
+msgid "Account SID is required."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-admin-rest.php:183
+msgid "Auth Token is required."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-admin-rest.php:191
+msgid "Sender number is required."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-captcha.php:107
+#: includes/passwordless-otp/class-otp-captcha.php:152
+#: includes/passwordless-otp/class-otp-captcha.php:189
+msgid "Captcha is not configured correctly."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-captcha.php:122
+#: includes/passwordless-otp/class-otp-captcha.php:167
+#: includes/passwordless-otp/class-otp-captcha.php:205
+msgid "Unable to verify captcha. Please try again."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-captcha.php:147
+#: includes/passwordless-otp/class-otp-captcha.php:172
+#: includes/passwordless-otp/class-otp-captcha.php:184
+#: includes/passwordless-otp/class-otp-captcha.php:210
+msgid "Please complete the captcha challenge."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-email-sender.php:31
+#: includes/passwordless-otp/class-otp-email-sender.php:38
+msgid "Unable to send verification email."
+msgstr ""
+
+#. translators: %s: site name
+#: includes/passwordless-otp/class-otp-email-sender.php:58
+#, php-format
+msgid "[%s] Your login verification code"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-email-sender.php:68
+msgid "Unable to send verification email. Please try again later or contact the administrator."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-lockout.php:137
+#: includes/passwordless-otp/class-otp-lockout.php:263
+msgid "Too many incorrect attempts. Please try again after some time."
+msgstr ""
+
+#. translators: %d: minutes until unblock
+#: includes/passwordless-otp/class-otp-lockout.php:142
+#: includes/passwordless-otp/class-otp-lockout.php:276
+#, php-format
+msgid "Too many incorrect attempts. Please try again after %d minutes."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-lockout.php:261
+msgid "Too many verification code requests. Please try again after some time."
+msgstr ""
+
+#. translators: %d: minutes until unblock
+#: includes/passwordless-otp/class-otp-lockout.php:269
+#, php-format
+msgid "Too many verification code requests. Please try again after %d minutes."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:139
+#: includes/passwordless-otp/class-otp-login.php:177
+msgid "Continue with Email"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:140
+#: includes/passwordless-otp/class-otp-login.php:185
+msgid "Continue with SMS"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:141
+#: includes/passwordless-otp/views/otp-inline-panel.php:41
+msgid "Send Code"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:144
+#: includes/passwordless-otp/views/otp-inline-panel.php:67
+msgid "Verify"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:145
+#: includes/passwordless-otp/views/otp-inline-panel.php:62
+msgid "Resend code"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:146
+#, php-format
+msgid "Resend code in %ds"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:147
+#: includes/passwordless-otp/views/otp-inline-panel.php:73
+msgid "You're signed in"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:148
+#: includes/passwordless-otp/class-otp-login.php:326
+#: includes/passwordless-otp/views/otp-inline-panel.php:74
+msgid "You're signed in. Redirecting you to your dashboard…"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:149
+msgid "Verification successful"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:150
+#: includes/passwordless-otp/class-otp-login.php:314
+msgid "Complete two-factor authentication to finish signing in…"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:151
+#: includes/passwordless-otp/views/otp-inline-panel.php:75
+msgid "Continue to Dashboard"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:153
+#: includes/passwordless-otp/class-otp-user-phone.php:180
+#: includes/passwordless-otp/views/otp-inline-panel.php:30
+msgid "Phone number"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:154
+#: includes/passwordless-otp/views/otp-inline-panel.php:49
+msgid "Verification code"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:155
+msgid "SMS login is not available for your region. Please contact the site administrator."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:156
+#: includes/passwordless-otp/class-otp-service.php:508
+#: includes/passwordless-otp/class-otp-service.php:669
+#: includes/passwordless-otp/class-otp-service.php:674
+msgid "Please enter a valid phone number."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:172
+msgid "Passwordless login"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:212
+msgid "Invalid request."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:260
+msgid "A new verification code has been sent."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:286
+msgid "Unable to sign you in."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:358
+msgid "Verification code sent to your email."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:365
+msgid "SMS login requires AIO Login Pro."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:400
+msgid "Verification code sent to your phone."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:419
+msgid "Unable to send verification code."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:653
+msgid "No account is linked to this phone number. If you already have an account, add your mobile number in your profile. Otherwise, please register first."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-login.php:657
+msgid "You do not have an account yet. Please register first, then use Continue with Email."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:56
+msgid "Invalid authentication channel."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:60
+msgid "This login method is currently disabled."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:66
+msgid "Account not found. Please register first."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:171
+msgid "Please wait before requesting a new code."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:226
+msgid "Your OTP has expired. Please request a new verification code."
+msgstr ""
+
+#. translators: %s: remaining attempts phrase
+#: includes/passwordless-otp/class-otp-service.php:255
+#, php-format
+msgid "Invalid OTP. Please enter the correct verification code. %s"
+msgstr ""
+
+#. translators: %d: remaining verification attempts
+#: includes/passwordless-otp/class-otp-service.php:258
+#, php-format
+msgid "You have %d attempt remaining."
+msgid_plural "You have %d attempts remaining."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/passwordless-otp/class-otp-service.php:308
+msgid "Account not found. Please register first, then sign in with OTP."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:334
+#: includes/passwordless-otp/class-otp-service.php:339
+msgid "Your session has expired. Please start again."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:409
+#: includes/passwordless-otp/class-otp-service.php:429
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:447
+#: includes/passwordless-otp/class-otp-service.php:520
+msgid "Unable to create account. Please contact the administrator."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-service.php:678
+msgid "SMS login is not available for this country."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:158
+msgid "SMS login phone"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:160
+msgid "Add your mobile number to sign in with Continue with SMS on the login page."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:164
+#: includes/passwordless-otp/views/otp-inline-panel.php:28
+#: includes/passwordless-otp/views/otp-inline-panel.php:29
+msgid "Country code"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:194
+#: includes/passwordless-otp/views/otp-inline-panel.php:35
+msgid "The country code is shown automatically and cannot be edited here. Enter the rest of your mobile number."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:346
+msgid "This phone number is already linked to another account."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:409
+msgid "SMS login phone number saved."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:461
+msgid "To use Continue with SMS on the login page, add your mobile number to your account profile."
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:463
+msgid "Add phone number"
+msgstr ""
+
+#: includes/passwordless-otp/class-otp-user-phone.php:465
+msgid "Dismiss"
+msgstr ""
+
+#: includes/passwordless-otp/views/otp-inline-panel.php:46
+msgid "Enter verification code"
+msgstr ""

@@ -1,0 +1,505 @@
+<?php
+/**
+ * Class ShippingMethodSimple
+ *
+ * @package WPDesk\FS\TableRate\
+ */
+
+namespace WPDesk\FS\TableRate;
+
+use FSVendor\Psr\Log\LoggerInterface;
+use FSVendor\WPDesk\FS\TableRate\Logger\NoticeLogger;
+use FSVendor\WPDesk\FS\TableRate\Logger\ShippingMethodLogger;
+use FSVendor\WPDesk\FS\TableRate\Settings\MethodSettingsFactory;
+use WC_Shipping_Method;
+use WPDesk\FS\TableRate\FreeShipping\LffsNoticeTextFormatValidator;
+use WPDesk\FS\TableRate\FreeShipping\NoticeTextSettings;
+use WPDesk\FS\TableRate\FreeShipping\Tracker\ThresholdAlertTracker;
+use WPDesk\FS\TableRate\Rule\Condition\ConditionsFactory;
+use WPDesk\FS\TableRate\Rule\Cost\RuleAdditionalCostFactory;
+use WPDesk\FS\TableRate\Rule\Cost\RuleCostFieldsFactory;
+use WPDesk\FS\TableRate\ShippingMethod\CommonMethodSettings;
+use WPDesk\FS\TableRate\ShippingMethod\FreeShippingThresholdRuleValidator;
+use WPDesk\FS\TableRate\ShippingMethod\RateCalculatorFactory;
+use WPDesk\FS\TableRate\ShippingMethod\SingleMethodSettings;
+use WPDesk\FS\TableRate\Tax\TaxCalculator;
+use WPDesk_Flexible_Shipping;
+
+/**
+ * Shipping method flexible_shipping_single
+ */
+class ShippingMethodSingle extends WC_Shipping_Method {
+
+	const SHIPPING_METHOD_ID = 'flexible_shipping_single';
+
+	/**
+	 * Logger provided by Flexible Shipping plugin.
+	 *
+	 * @var LoggerInterface
+	 */
+	protected static $fs_logger;
+
+	/**
+	 * @var bool
+	 */
+	private $is_html_ads_loaded = false;
+
+	/**
+	 * @var string[]
+	 */
+	private $field_validation_errors = [];
+
+	/**
+	 * ShippingMethodSingle constructor.
+	 *
+	 * @param int $instance_id .
+	 */
+	public function __construct( $instance_id = 0 ) {
+		$this->instance_id = absint( $instance_id );
+
+		$this->id = self::SHIPPING_METHOD_ID;
+		$this->init();
+	}
+
+	/**
+	 * Init.
+	 */
+	protected function init() {
+		$this->supports = [
+			'shipping-zones',
+			'instance-settings',
+		];
+		$this->init_instance_form_fields( false );
+		$this->method_title       = __( 'Flexible Shipping', 'flexible-shipping' );
+		$this->method_description = __( 'A single Flexible Shipping method.', 'flexible-shipping' );
+		if ( $this->instance_id ) {
+			$docs_link = get_locale() === 'pl_PL' ? 'https://octol.io/fs-docs-pl' : 'https://octol.io/fs-docs';
+			// Translators: docs link.
+			$this->method_description = sprintf( __( 'A single Flexible Shipping method. Learn %1$show to configure FS shipping method &rarr;%2$s', 'flexible-shipping' ), '<a href="' . $docs_link . '" target="_blank">', '</a>' );
+		}
+		$this->title                      = $this->get_instance_option( 'method_title', $this->method_title );
+		$this->instance_settings['title'] = $this->title;
+		$this->tax_status                 = $this->get_instance_option( 'tax_status' );
+	}
+
+	/**
+	 * @param bool $with_integration_settings .
+	 */
+	public function init_instance_form_fields( $with_integration_settings = false ) {
+		$this->instance_form_fields = ( new SingleMethodSettings() )->get_settings_fields( $this->instance_settings, $with_integration_settings );
+	}
+
+	/**
+	 * @param array $form_fields .
+	 * @param bool  $echo        .
+	 *
+	 * @return string
+	 */
+	public function generate_settings_html( $form_fields = [], $echo = true ) {
+		$this->init_instance_form_fields( true );
+		$form_fields = $this->get_instance_form_fields();
+		if ( $echo ) {
+			parent::generate_settings_html( $form_fields, $echo );
+		} else {
+			return parent::generate_settings_html( $form_fields, $echo );
+		}
+	}
+
+
+	/**
+	 * Generate Title HTML.
+	 *
+	 * @param string $key  Field key.
+	 * @param array  $data Field data.
+	 *
+	 * @return string
+	 * @since  1.0.0
+	 */
+	public function generate_title_html( $key, $data ) {
+		$field_key = $this->get_field_key( $key );
+		$defaults  = [
+			'title' => '',
+			'class' => '',
+		];
+
+		$data = wp_parse_args( $data, $defaults );
+
+		ob_start();
+		?>
+		</table>
+		<h3 class="wc-settings-sub-title <?php echo esc_attr( $data['class'] ); ?>"
+			id="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></h3>
+		<?php if ( ! empty( $data['description'] ) ) : ?>
+			<p><?php echo wp_kses_post( $data['description'] ); ?></p>
+		<?php endif; ?>
+
+		<table class="form-table">
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Generate Price Input HTML.
+	 *
+	 * @param string $key  Field key.
+	 * @param array  $data Field data.
+	 *
+	 * @return string
+	 */
+	public function generate_price_html( $key, $data ) {
+		if ( CommonMethodSettings::METHOD_FREE_SHIPPING === $key ) {
+			$data = $this->append_free_shipping_threshold_validation_error( $data );
+		}
+
+		if ( CommonMethodSettings::METHOD_FREE_SHIPPING !== $key || empty( $data['error_message'] ) ) {
+			return parent::generate_price_html( $key, $data );
+		}
+
+		$field_key = $this->get_field_key( $key );
+		$defaults  = [
+			'title'             => '',
+			'disabled'          => false,
+			'class'             => '',
+			'css'               => '',
+			'placeholder'       => '',
+			'type'              => 'text',
+			'desc_tip'          => false,
+			'description'       => '',
+			'custom_attributes' => [],
+			'error_message'     => '',
+		];
+
+		$data = wp_parse_args( $data, $defaults );
+
+		do_action( ThresholdAlertTracker::DISPLAYED_ACTION );
+
+		ob_start();
+		include __DIR__ . '/views/html-price-with-validation-error.php';
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * @param array $field_settings Free shipping threshold field settings.
+	 *
+	 * @return array
+	 */
+	private function append_free_shipping_threshold_validation_error( array $field_settings ) {
+		$method_rules = $this->get_method_rules_for_threshold_validation();
+		$threshold    = $this->get_option( CommonMethodSettings::METHOD_FREE_SHIPPING );
+
+		if ( ( new FreeShippingThresholdRuleValidator() )->is_valid( $threshold, $method_rules ) ) {
+			return $field_settings;
+		}
+
+		$field_settings['class']                             = trim( ( $field_settings['class'] ?? '' ) . ' fs-free-shipping-threshold-error' );
+		$field_settings['css']                               = trim( ( $field_settings['css'] ?? '' ) . ' border-color: #d63638; box-shadow: 0 0 0 1px #d63638;' );
+		$field_settings['custom_attributes']['aria-invalid'] = 'true';
+		$field_settings['error_message']                     = $this->get_free_shipping_threshold_validation_message( $threshold );
+
+		return $field_settings;
+	}
+
+	/**
+	 * @return array
+	 */
+	private function get_method_rules_for_threshold_validation() {
+		$method_rules = $this->get_option( CommonMethodSettings::METHOD_RULES, [] );
+
+		if ( is_string( $method_rules ) ) {
+			$decoded_method_rules = json_decode( $method_rules, true );
+
+			return is_array( $decoded_method_rules ) ? $decoded_method_rules : [];
+		}
+
+		return is_array( $method_rules ) ? $method_rules : [];
+	}
+
+	/**
+	 * @return string
+	 */
+	private function get_free_shipping_threshold_validation_message( $threshold ) {
+		$docs_url         = 'pl_PL' === get_user_locale() ? 'https://octol.io/fs-shipping-threshold-pl' : 'https://octol.io/fs-shipping-threshold';
+		$threshold_amount = $this->format_price_for_threshold_validation_message( $threshold );
+		$zero_amount      = $this->format_price_for_threshold_validation_message( 0 );
+
+		if ( 'pl_PL' === get_user_locale() ) {
+			return sprintf(
+				// Translators: documentation link opening tag, closing tag, free shipping threshold amount, zero cost amount.
+				__( 'Upewnij się, że zakres od progu darmowej wysyłki wzwyż jest również pokryty odpowiednią regułą w tabeli poniżej, np. KIEDY: Cena jest od %3$s do [puste], koszt wynosi %4$s.<br />%1$sDowiedz się, jak skonfigurować próg darmowej wysyłki w regułach obliczania kosztów →%2$s', 'flexible-shipping' ),
+				'<a href="' . esc_url( $docs_url ) . '" target="_blank">',
+				'</a>',
+				esc_html( $threshold_amount ),
+				esc_html( $zero_amount )
+			);
+		}
+
+		return sprintf(
+			// Translators: documentation link opening tag, closing tag, free shipping threshold amount, zero cost amount.
+			__( 'Make sure the range from the free shipping threshold upwards is also covered by the corresponding rule in the table below, e.g. WHEN: Price is from %3$s to [empty], rule cost is %4$s.<br />%1$sLearn how to configure the free shipping threshold in the cost calculation rules →%2$s', 'flexible-shipping' ),
+			'<a href="' . esc_url( $docs_url ) . '" target="_blank">',
+			'</a>',
+			esc_html( $threshold_amount ),
+			esc_html( $zero_amount )
+		);
+	}
+
+	/**
+	 * @param mixed $price Price amount.
+	 *
+	 * @return string
+	 */
+	private function format_price_for_threshold_validation_message( $price ) {
+		$formatted_price = wp_strip_all_tags( wc_price( (float) $price ) );
+		$formatted_price = html_entity_decode( $formatted_price, ENT_QUOTES, get_bloginfo( 'charset' ) );
+
+		return trim( str_replace( html_entity_decode( '&nbsp;', ENT_QUOTES, get_bloginfo( 'charset' ) ), ' ', $formatted_price ) );
+	}
+
+	/**
+	 * .
+	 */
+	public function init_instance_settings() {
+		parent::init_instance_settings();
+		if ( isset( $this->instance_settings['method_rules'] ) && ! is_array( $this->instance_settings['method_rules'] ) && is_string( $this->instance_settings['method_rules'] ) ) {
+			$this->instance_settings['method_rules'] = json_decode( $this->instance_settings['method_rules'], true );
+		}
+		$this->instance_settings['id_for_shipping'] = $this->get_rate_id();
+		$this->instance_settings['title']           = $this->title;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function process_admin_options() {
+		$this->init_instance_form_fields( true );
+		$filter_name     = 'woocommerce_shipping_' . $this->id . '_instance_settings_values';
+		$filter_callback = [ $this, 'process_integrations_settings' ];
+		add_filter( $filter_name, $filter_callback );
+		$processed = parent::process_admin_options();
+		remove_filter( $filter_name, $filter_callback );
+		if ( $this->instance_id ) {
+			do_action( 'flexible_shipping_method_updated', $this->instance_id, $processed );
+		}
+
+		return $processed;
+	}
+
+	/**
+	 * @param array $settings .
+	 *
+	 * @return array
+	 */
+	public function process_integrations_settings( $settings ) {
+		$settings                   = apply_filters( 'flexible_shipping_process_admin_options', $settings );
+		$settings['method_logo_id'] = absint( $settings['method_logo_id'] ?? 0 );
+
+		return $settings;
+	}
+
+	/**
+	 * Admin options.
+	 */
+	public function admin_options() {
+		parent::admin_options();
+		do_action( 'flexible_shipping_method_script', self::SHIPPING_METHOD_ID, $this->instance_id );
+	}
+
+	/**
+	 * Renders shipping rules settings.
+	 *
+	 * @param string $key  .
+	 * @param array  $data .
+	 *
+	 * @return string
+	 */
+	public function generate_shipping_rules_html( $key, $data ) {
+		$field_key             = $this->get_field_key( $key );
+		$method_rules_settings = $this->get_option( $key, '[]' );
+		$rules_settings        = new RulesSettingsField(
+			$field_key,
+			$field_key,
+			$data['title'],
+			$data,
+			! is_array( $method_rules_settings ) ? json_decode( $method_rules_settings, true ) : $method_rules_settings,
+			$this->instance_settings
+		);
+
+		return $rules_settings->render();
+	}
+
+	/**
+	 * @param string $key   .
+	 * @param array  $value .
+	 *
+	 * @return string
+	 */
+	public function validate_shipping_rules_field( $key, $value ) {
+		$rules_settings_processor = new Rule\Settings\SettingsProcessor(
+			( null === $value || ! is_array( $value ) ) ? [] : $value,
+			( new ConditionsFactory() )->get_conditions(),
+			( new RuleCostFieldsFactory() )->get_fields(),
+			( new Rule\Cost\RuleAdditionalCostFieldsFactory( ( new RuleAdditionalCostFactory() )->get_additional_costs() ) )->get_fields(),
+			( new Rule\SpecialAction\SpecialActionFieldsFactory( ( new Rule\SpecialAction\SpecialActionFactory() )->get_special_actions() ) )->get_fields()
+		);
+
+		return json_encode( $rules_settings_processor->prepare_settings(), JSON_PRETTY_PRINT );
+	}
+
+	/**
+	 * @param string $key   Field key.
+	 * @param string $value Posted value.
+	 *
+	 * @return string
+	 */
+	public function validate_method_free_shipping_notice_text_field( $key, $value ) {
+		$value = parent::validate_textarea_field( $key, $value );
+
+		if ( ( new LffsNoticeTextFormatValidator() )->is_valid( $value ) ) {
+			return $value;
+		}
+
+		$error_message                         = $this->get_lffs_notice_text_validation_error_message();
+		$this->field_validation_errors[ $key ] = $error_message;
+		$this->add_error( $error_message );
+
+		return $this->get_option( $key, '' );
+	}
+
+	/**
+	 * @param string $key  Field key.
+	 * @param array  $data Field data.
+	 *
+	 * @return string
+	 */
+	public function generate_textarea_html( $key, $data ) {
+		$html = parent::generate_textarea_html( $key, $data );
+
+		if ( NoticeTextSettings::FIELD_NAME !== $key || empty( $this->field_validation_errors[ $key ] ) ) {
+			return $html;
+		}
+
+		return str_replace(
+			'</fieldset>',
+			'<p class="description fs-lffs-notice-text-error-message" style="color:#b32d2e;margin-top:4px;">' . wp_kses_post( $this->field_validation_errors[ $key ] ) . '</p></fieldset>',
+			$html
+		);
+	}
+
+	/**
+	 * @return string
+	 */
+	private function get_lffs_notice_text_validation_error_message(): string {
+		return sprintf(
+			// Translators: code tag opening, code tag closing.
+			__( 'The LFFS notice text contains an invalid placeholder format. Use %1$s%%1$s%2$s to display the amount left for free shipping.', 'flexible-shipping' ),
+			'<code>',
+			'</code>'
+		);
+	}
+
+	/**
+	 * Field key.
+	 * For compatibility with integrations scripts.
+	 *
+	 * @param string $key .
+	 *
+	 * @return string
+	 */
+	public function get_field_key( $key ) {
+		return $this->plugin_id . WPDesk_Flexible_Shipping::METHOD_ID . '_' . $key;
+	}
+
+	/**
+	 * Get method rules.
+	 *
+	 * @return array
+	 */
+	public function get_method_rules() {
+		return $this->get_instance_option( 'method_rules', [] );
+	}
+
+	/**
+	 * @param string $key   .
+	 * @param string $value .
+	 *
+	 * @return bool
+	 */
+	public function update_instance_option( $key, $value = '' ) {
+		if ( empty( $this->instance_settings ) ) {
+			$this->init_instance_settings();
+		}
+
+		$this->instance_settings[ $key ] = $value;
+
+		return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ), 'yes' );
+	}
+
+	/**
+	 * @param array $package .
+	 */
+	public function calculate_shipping( $package = [] ) {
+		$rate_calculator = RateCalculatorFactory::create_for_shipping_method( $this, $package );
+
+		$method_settings = MethodSettingsFactory::create_from_array( $this->instance_settings );
+
+		$logger = $this->prepare_shipping_method_calculation_logger( $method_settings );
+
+		$rate_calculator->set_logger( $logger );
+		$calculated_rate = $rate_calculator->calculate_rate( $method_settings, $this->get_rate_id(), is_user_logged_in() );
+
+		if ( ! empty( $calculated_rate ) && $this->should_add_rate( $calculated_rate ) ) {
+			$calculated_rate = ( new TaxCalculator( $method_settings, \WC_Tax::get_shipping_tax_rates() ) )->append_taxes_to_rate_if_enabled( $calculated_rate, WC()->cart->get_customer()->get_is_vat_exempt() );
+			$this->add_rate( $calculated_rate );
+			$logger->debug( __( 'Shipping cost added.', 'flexible-shipping' ), $logger->get_results_context() );
+		}
+
+		$logger->show_notice_if_enabled();
+	}
+
+	/**
+	 * @param array $calculated_rate .
+	 *
+	 * @return bool
+	 */
+	private function should_add_rate( array $calculated_rate ) {
+		return ! ( 'yes' === $this->get_instance_option( 'method_visibility', 'no' ) && ! is_user_logged_in() );
+	}
+
+	/**
+	 * Set logger. This logger is set by Flexible Shipping plugin.
+	 *
+	 * @param LoggerInterface $fs_logger .
+	 */
+	public static function set_fs_logger( LoggerInterface $fs_logger ) {
+		static::$fs_logger = $fs_logger;
+	}
+
+	/**
+	 * @param \FSVendor\WPDesk\FS\TableRate\Settings\MethodSettings $shipping_method_settings .
+	 *
+	 * @return Logger\ShippingMethodLogger
+	 */
+	private function prepare_shipping_method_calculation_logger( $shipping_method_settings ) {
+		$method_debug_mode     = $shipping_method_settings->get_debug_mode();
+		$shipping_method_title = $shipping_method_settings->get_title();
+		$shipping_method_url   = admin_url(
+			'admin.php?page=wc-settings&tab=shipping&instance_id=' . sanitize_key( $this->instance_id ) . '&action=edit&method_id=' . sanitize_key( $shipping_method_settings->get_id() )
+		);
+		if ( null !== static::$fs_logger ) {
+			$fs_logger = static::$fs_logger;
+		} else {
+			$fs_logger = NullLogger();
+		}
+
+		return new ShippingMethodLogger(
+			$fs_logger,
+			new NoticeLogger(
+				$shipping_method_title,
+				$shipping_method_url,
+				'yes' === $method_debug_mode && current_user_can( 'manage_woocommerce' )
+			)
+		);
+	}
+}

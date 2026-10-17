@@ -1,0 +1,312 @@
+*** Mailonix - Email Template Customizer for WooCommerce Changelog ***
+
+2026.10.08 - version 1.3.5
+- Added: Sample template and {verify_url} shortcode for the WooCommerce Confirm email address email (customer_verify_email)
+- Added: System Status admin page with support report email to support@villatheme.com
+
+2026.08.20 - version 1.3.4
+- Updated: Compatible with WP 7.1
+- Updated: Compatibility check with WC 11.0
+
+2026.08.17 - version 1.3.3
+- Updated: Change premium version url
+
+2026.06.19 - version 1.3.2
+- Updated: VillaTheme support
+
+2026.06.04 - version 1.3.1
+- Fixed: Errors from customers' feedback
+- Updated: Compatible with WC 10.8
+
+2026.05.22 - version 1.3.0
+- Updated: Compatible with WP 7.0 and WC 10.7
+- Updated: Compatible with PixelYourSite
+
+2026.01.23 - version 1.2.21
+- Updated: VillaTheme support
+
+2025.11.28 - version 1.2.20
+- Updated: VillaTheme support
+
+2025.10.06 - version 1.2.19
+- Updated:  Edit the "Cancelled Order" email for customers
+
+2025.09.12 - version 1.2.18
+- Fixed: Error vulnerable to Cross Site Scripting (XSS)
+
+2025.07.24 - version 1.2.17
+- Updated: VillaTheme support
+
+2025.06.27 - version 1.2.16
+- Added: Title in the Shipping Address component
+
+2025.06.20 - version 1.2.15
+- Fixed: Errors from customers' feedback
+
+2025.04.18 - version 1.2.14
+- Updated: Added ALT text to product images and social media images
+- Updated: Only show the shipping address information when it's needed for the order
+- Updated: New social icon of X
+- Added: Social icon of Pinterest, Discord
+- Added: Shortcode {order_date_time} to display both the date and time created of the order
+
+2025.02.21 - version 1.2.13
+- Fixed: Display correctly the expiration date of the download order item
+- Updated: Responsive mobile
+- Updated: Use the default template for the changed password email and the email of the changed email if the 9MAIL is not activated
+
+2025.01.10 - version 1.2.12
+- Updated: VillaTheme support
+
+2024.12.20 - version 1.2.11
+- Updated: Compatible with WC 9.5
+
+2024.11.22 - version 1.2.10
+– Updated: Compatible with WC 9.4 and WP 6.7
+
+2024.11.15 - version 1.2.9.2
+- Fixed: Errors from customers' feedback
+
+2024.11.12 - version 1.2.9.1
+– Fixed: Compatible with PHP 8.3
+
+2024.11.12 - version 1.2.9
+– Updated: Compatible with PHP 8.3
+
+2024.11.09 - version 1.2.8
+- Fixed: Errors from customers' feedback
+
+2024.11.01 - version 1.2.7
+- Fixed: Errors from customers' feedback
+
+2024.10.18 - version 1.2.6
+– Updated: Compatible with WC 9.3 and WP 6.6
+– Updated: Update support class
+- Fixed: Display WC's special currency symbols in the subject.
+
+2024.05.22 - version 1.2.5
+- Fixed: Free version is excluded when installing Premium version.
+
+2024.05.22 - version 1.2.4
+– Updated: Compatible with WC 8.9
+- Fixed: Fixed security
+– Updated: Support file
+
+2024.04.13 - version 1.2.3
+– Updated: Compatible with WC 8.7 and WP 6.5
+– Updated: Support file
+
+2024.02.22 - version 1.2.2
+– Updated: Compatible with WC 8.6
+– Updated: Support file
+- Fixed: Fixed email type invoice unpaid
+
+2023.27.11 - version 1.2.1
+- Fixed: Fixed verification link Dokan
+– Updated: Compatible with WC 8.3 and WP 6.4
+
+2023.07.15 - version 1.2.0
+– Updated: Compatible with HPOS - WC 7.8
+- Fixed: Fixed enable/disable loading bug in WooCommerce email settings.
+
+2023.06.02 - version 1.1.22
+- Updated: Compatible with 'Onea' theme by Elated Themes
+- Updated: Compatible with 'Adorn' theme By Edge-Theme
+– Updated: Compatible with WC 7.7.1
+– Updated: Compatible with php 8.2
+
+2023.03.23 - version 1.1.21
+- Updated: Compatible with 'TrackShip for WooCommerce' plugin by TrackShip
+– Updated: Compatible with WC 7.5 and WP 6.2
+
+2023.02.23 - version 1.1.20
+– Updated: Compatible with WC 7.4
+- Fixed: Exclude link in image when url empty
+
+2023.01.06 - version 1.1.19
+- Fixed: Fixed 'ID' of non-object
+– Updated: Compatible with WC 7.2
+
+2022.11.14 - version 1.1.18
+- Fixed: Fixed social icon of Tiktok and Telegram not working
+
+2022.11.14 - version 1.1.17
+– Updated: Compatible with WC 7.0 and WP 6.1
+– Updated: Language file
+
+2022.09.27 - version 1.1.16
+- Fixed: Transaction emails displayed in default template of 9MAIL plugin by Villatheme
+
+2022.09.17 - version 1.1.15
+- Fixed: Fixed custom css component not working with photo review
+- Fixed: Fixed default template applied to all 3rd plugin emails
+- Updated: Email subject can run shortcode
+– Updated: Compatible with WC 6.9.2
+
+2022.08.25 - version 1.1.14
+- Update: Compatible with Dokan pro verification email
+- Fixed: Fixed email template disable setting working not correct
+– Updated: Compatible with WC 6.8.0
+
+2022.07.25 - version 1.1.13
+– Fix: Fatal Errors notifications
+– Fix: Exclude email template from front end search results.
+– Updated: Compatible with WC 6.7.0
+– Updated: Support file
+
+2022.07.12 - version 1.1.12
+– Updated: Add class name for each element
+
+2022.07.06 - version 1.1.10
+– Updated: Deactive survey
+– Updated: Override custom css for row
+
+2022.06.06 - version 1.1.9
+– Updated: Check with WordPress 6.0
+– Fix: Email invoice subject
+
+2022.04.06 - version 1.1.8
+- Fix: Fix minify content on Outlook
+
+2022.03.29 - version 1.1.7
+– Updated: VillaTheme_Support
+
+2022.03.28 - version 1.1.6
+- Fix: Select type control
+- Updated: Minify email content
+
+2022.03.21 - version 1.1.5
+– Updated: VillaTheme_Support
+
+2022.02.16 - version 1.1.4
+- Fix: Image width on Outlook
+
+2022.02.07 - version 1.1.3
+- Fix: Change capability_type
+- Updated: Add shortcode {set_password_url} to new account email
+
+2022.01.12 - version 1.1.2
+- Fix: Show product thumbnail at version 1.1.1
+
+2022.01.11 - version 1.1.1
+- Updated: Add filter to show image for order item detail with style 2, 3
+
+2021.11.08 - version 1.1.0
+- Updated: Add filter to show image for order item detail
+
+2021.10.26 - version 1.0.12
+- Updated: Add shortcode {current_year}
+
+2021.10.04 - version 1.0.11
+- Fixed: RTL for template default of order detail
+
+2021.09.23 - version 1.0.10
+- Updated: Note to customer on single line
+
+2021.09.20 - version 1.0.9
+- Fixed: Link color in hook
+
+2021.09.16 - version 1.0.8
+- Updated: Image size for order items detail
+- Fixed: Style of default template for outlook
+- Updated: Get email send test error result
+
+2021.09.13 - version 1.0.5
+- Fixed: Send email with wc_mailer
+
+2021.09.10 - version 1.0.4.6
+- Updated: Add shortcode {from_email}
+- Fixed: Fix css with WooCommerce Photo Reviews plugin
+
+2021.08.20 - version 1.0.4.5
+- Updated: Font-family for text element
+
+2021.08.03 - version 1.0.4.4
+- Fixed: Translate 'Refunded'
+
+2021.07.22 - version 1.0.4.3
+- Updated: Order detail template overridable
+
+2021.07.13 - version 1.0.4.2
+- Fixed: Line break in customer note
+
+2021.06.18 - version 1.0.4.1
+- Updated: Update support file
+
+2021.06.14 - version 1.0.4
+- Updated: Remove product link from order detail item option
+
+2021.06.01 - version 1.0.3.9
+- Updated: Enable display product SKU
+- Updated: Image src & alt
+- Updated: Dashboard notices
+
+2021.04.27 - version 1.0.3.8
+- Updated: RTL support
+- Updated: Disable from WC email list
+
+2021.04.15 - version 1.0.3.7
+- Fixed: Shortcode {user_email}
+- Fixed: Localize must be an array - WP 5.7
+
+2021.03.08 - version 1.0.3.6
+- Fixed: Custom CSS
+
+2021.02.01 - version 1.0.3.4
+- Fixed: Clear html tag in subject
+
+2021.01.01 - version 1.0.3.2
+- Fixed: Add empty file
+
+2021.01.01 - version 1.0.3.2
+- Fixed: Default template image style
+
+2020.12.26 - version 1.0.3.1
+- Fixed: Clear Woo Style
+
+2020.12.25 - version 1.0.3
+- Updated: Design for default template
+- Updated: Copy, paste element, row feature
+
+2020.11.27 - version 1.0.2.4
+- Fixed: Get style attribute on FireFox
+- Updated: Add more social icons & social icon width
+
+2020.11.18 - version 1.0.2.3
+- Updated: survey link
+
+2020.11.17 - version 1.0.2.1
+- Updated: Add hook, class for 3rd plugin compatible
+- Updated: Deactivate survey
+
+2020.10.26 - version 1.0.2
+- Updated: Add woocommerce_email_order_meta hook
+
+2020.10.24 - version 1.0.1.9
+- Updated: Add file compatible.php
+
+2020.10.23 - version 1.0.1.8
+- Updated: Compatible with Claudio Sanches - Correios for WooCommerce
+
+2020.10.23 - version 1.0.1.7
+- Updated: Default template
+- Updated: Admin note
+- Fixed: replace some shortcodes
+
+2020.10.19 - version 1.0.1.6
+- Fixed: Add sample via URL params
+
+2020.10.18 - version 1.0.1.5
+- Fixed: Activate samples
+
+2020.10.17 - version 1.0.1.4
+- Updated: Hooks for 3rd party plugin make compatible
+
+2020.10.12 - version 1.0.1.3
+- Fixed: customer note
+- Updated: WooCommerce hooks
+
+2020.10.05 - version 1.0.1.2
+- Fixed: shortcode {user_login}
+
+~ The first released.

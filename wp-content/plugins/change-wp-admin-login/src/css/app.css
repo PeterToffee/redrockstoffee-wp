@@ -1,0 +1,2134 @@
+@import "figtree.css";
+
+@import "protest-riot.css";
+
+@import "datatables.css";
+
+#aio-login__app *:not(.dashicons) {
+  font-family: Figtree;
+}
+
+#aio-login__app {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#aio-login__app .dashicons {
+  font-family: dashicons !important;
+}
+
+#aio-login__app .float-left {
+  float: left;
+}
+
+#aio-login__app .float-right {
+  float: right;
+}
+
+#aio-login__app .text-center {
+  text-align: center;
+}
+
+#aio-login__app .text-left {
+  text-align: left;
+}
+
+#aio-login__app .text-right {
+  text-align: right;
+}
+
+#aio-login__app .clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+#aio-login__app .container {
+	padding: 0 25px;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+@media screen and (max-width: 782px) {
+	#aio-login__app .container {
+		padding: 0 12px;
+	}
+}
+
+#aio-login__app .mb-25 {
+  margin-bottom: 25px;
+}
+
+#aio-login__app .mt-25 {
+  margin-top: 25px;
+}
+
+#aio-login__app .m-5 {
+  margin: 5px;
+}
+
+#wpcontent {
+  padding-left: 0 !important;
+}
+
+
+/* DataTables 2 uses flex layout — floats stretch/misalign length + search. */
+.dt-layout-cell.dt-layout-start,
+.dt-layout-cell.dt-layout-end {
+  float: none;
+}
+
+.dt-layout-row::after {
+  clear: both;
+  content: '';
+  display: table;
+}
+
+.dt-layout-row {
+  background: #FBF5FF;
+  padding: 15px;
+}
+
+.dt-layout-row.dt-layout-table {
+  background: #fff;
+  padding: 0;
+}
+
+#DataTables_Table_0 thead th,
+#DataTables_Table_0 tfoot th {
+  background: #e8e5e8;
+}
+
+.dt-paging-button {
+  background: #e8e5e8;
+  border: 1px solid #e8e5e8;
+  color: #000;
+  padding: 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dt-paging-button.disabled {
+  background: #f5f5f5;
+  border: 1px solid #f5f5f5;
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Keep "entries per page" select compact and aligned with the table toolbar. */
+#aio-login__app div.dt-container .dt-length {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+#aio-login__app div.dt-container .dt-length select.dt-input,
+#aio-login__app select.dt-input {
+  width: auto !important;
+  min-width: 3.25em;
+  max-width: 4.75em;
+  box-sizing: border-box;
+  padding: 2px 28px 2px 8px;
+  vertical-align: middle;
+}
+
+
+div.dt-container div.dt-layout-row {
+  margin: 0 !important;
+}
+
+.mt-40 {
+  margin-top: 40px;
+}
+
+#aio-login__app a:focus,
+#aio-login__app a:active {
+  box-shadow: none;
+}
+
+/* Ensure disabled inputs are properly styled */
+.aio-login-pro-overlay input:disabled,
+.aio-login-pro-overlay select:disabled,
+.aio-login-pro-overlay textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Pro Feature Overlay */
+.aio-login-pro-feature {
+  position: relative;
+}
+
+.aio-login-pro-overlay {
+  position: relative;
+  cursor: pointer;
+  filter: blur(1px);
+  transition: all 0.3s ease;
+}
+
+.aio-login-pro-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.aio-login-pro-label {
+  color: #667eea !important;
+  font-weight: 600;
+}
+
+.aio-login-pro-desc {
+  color: #667eea !important;
+  opacity: 0.8;
+}
+
+.aio-login-pro-overlay input:disabled,
+.aio-login-pro-overlay select:disabled,
+.aio-login-pro-overlay button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Prevent table interactions */
+.aio-login-pro-overlay table,
+.aio-login-pro-overlay .dataTables_wrapper,
+.aio-login-pro-overlay .dataTables_filter,
+.aio-login-pro-overlay .dataTables_length,
+.aio-login-pro-overlay .dataTables_paginate {
+  pointer-events: none;
+}
+
+/* Prevent form interactions in pro overlay */
+.aio-login-pro-overlay .aio-login-toggle,
+.aio-login-pro-overlay .aio-login-text,
+.aio-login-pro-overlay input,
+.aio-login-pro-overlay select,
+.aio-login-pro-overlay button {
+  pointer-events: none;
+}
+
+/* Action Buttons with Theme Colors */
+.action-btn {
+  display: inline-block;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 8px;
+  text-decoration: none;
+  color: white;
+  transition: all 0.2s ease;
+  background: #9416de;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.action-btn.unblock {
+  background: #9416de;
+}
+
+.action-btn.unblock:hover {
+  background: #9516df;
+}
+
+.action-btn.block {
+  background: #9416de;
+}
+
+.action-btn.block:hover {
+  background: #9516df;
+}
+
+.action-btn.delete {
+  background: #dc3545;
+}
+
+.action-btn.delete:hover {
+  background: #c82333;
+}
+
+.action-btn:last-child {
+  margin-right: 0;
+}
+
+/* Ensure buttons stay inline */
+.action-btn:not(:last-child)::after {
+  content: '';
+  margin: 0;
+}
+
+/* Keep action buttons inline only in datatables */
+table.dataTable td:last-child {
+  white-space: nowrap;
+}
+
+/* Note Section Styling */
+.aio-login__note-section {
+  margin-top: 30px;
+}
+
+.aio-login__note {
+  background: #fff;
+  border-left: 4px solid #9416de;
+  padding: 15px 20px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.aio-login__note p {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.aio-login__note strong {
+  color: #9416de;
+  font-weight: 600;
+}
+
+/* Global styles for AIO Login Pro components */
+.aio-login-pro__inline-form {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.aio-login-pro__form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.aio-login-pro__form-label {
+  font-size: 14px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.aio-login-pro__form-input {
+  padding: 10px 35px 10px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: border-color 0.2s ease-in-out;
+  border: 1px solid #EBE8EB !important;
+  background: #FFF;
+  height: 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.aio-login-pro__form-input[type='text'],
+.aio-login-pro__form-input[type='password'] {
+  padding: 10px 35px 10px 10px;
+}
+
+.aio-login-pro__form-input:focus {
+  outline: none;
+  border-color: #9516df;
+}
+
+.aio-login-pro__required {
+  color: #ff0000;
+}
+
+.aio-login-pro__error {
+  border-color: #ff0000 !important;
+}
+
+.aio-login-pro__error-message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.input-with-delete {
+  position: relative;
+  width: 100%;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  color: #999;
+  border: none;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.clear-btn:hover {
+  color: #666;
+}
+
+/* Spacing for WooCommerce Social Login vs Captcha */
+.aio-login-social-login-buttons-wrapper.woocommerce-social-login {
+  margin-bottom: 20px !important;
+}
+
+/* 2FA Authentication Methods — structure aligned with aio-login-pro (free preview when Pro JS/CSS not loaded) */
+.aio-login-2fa-methods {
+  position: relative;
+}
+
+.aio-login-2fa-methods__list {
+  padding: 8px 0;
+}
+
+.aio-login-2fa-methods__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid #eceff3;
+  border-radius: 8px;
+  background: #fff;
+  margin-top: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.aio-login-2fa-methods__item:first-child {
+  margin-top: 0;
+}
+
+.aio-login-2fa-methods__method-note {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.aio-login-2fa-methods__content {
+  padding-right: 14px;
+}
+
+.aio-login-2fa-methods__controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aio-login-2fa-methods__expand-btn {
+  border: 1px solid #dbe2ea;
+  background: #fff;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.aio-login-2fa-methods__expand-btn:hover {
+  border-color: #9516df;
+}
+
+.aio-login-2fa-methods__expand-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(149, 22, 223, 0.24);
+  border-color: #9516df;
+}
+
+.aio-login-2fa-methods__chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #6b7280;
+  border-bottom: 2px solid #6b7280;
+  transform: rotate(45deg);
+  margin-top: -2px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.aio-login-2fa-methods__title {
+  margin: 0;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 17px;
+  line-height: 1.3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aio-login-2fa-methods__desc {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+.aio-login-2fa-policies__list {
+  padding: 8px 0;
+}
+
+.aio-login-2fa-policies__card {
+  flex-direction: column;
+  align-items: stretch !important;
+}
+
+.aio-login-2fa-policies__card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.aio-login-2fa-policies__card-header .aio-login-2fa-methods__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.aio-login-2fa-policies__icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #f5f0ff;
+  color: #9416de;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aio-login-2fa-methods__actions {
+  margin-top: 16px;
+}
+
+.aio-login-2fa-methods__chevron.is-expanded {
+	transform: rotate(225deg);
+	margin-top: 2px;
+	border-color: #9516df;
+}
+
+.aio-login-2fa-policies__card-body {
+	width: 100%;
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 1px solid #eceff3;
+}
+
+.aio-login-2fa-methods__grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px;
+	margin-bottom: 14px;
+}
+
+.aio-login-2fa-methods__grid--four {
+	grid-template-columns: repeat(4, 1fr);
+}
+
+.aio-login-2fa-methods__field {
+	margin-bottom: 12px;
+}
+
+.aio-login-2fa-methods__help {
+	margin: 6px 0 0;
+	color: #6b7280;
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+.aio-login-2fa-methods__label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	color: #374151;
+	margin-bottom: 6px;
+}
+
+.aio-login-2fa-methods__input,
+.aio-login-2fa-methods__textarea {
+	width: 100%;
+	border: 1px solid #dbe2ea;
+	border-radius: 6px;
+	padding: 9px 11px;
+	font-size: 13px;
+	color: #1f2937;
+	background: #fff;
+	box-sizing: border-box;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.aio-login-2fa-methods__input:focus,
+.aio-login-2fa-methods__textarea:focus {
+	outline: none;
+	border-color: #9516df;
+	box-shadow: 0 0 0 1px rgba(149, 22, 223, 0.22);
+}
+
+.aio-login-2fa-methods__input:disabled {
+	background: #f9fafb;
+	color: #9ca3af;
+}
+
+/* Passwordless OTP Login — admin cards (matches 2FA Policies) */
+.aio-login-otp-login .aio-login-2fa-methods__title .aio-login-tooltip-wrap {
+	vertical-align: middle;
+}
+
+.aio-login-otp-login__section-title {
+	margin: 4px 0 12px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #111827;
+}
+
+.aio-login-otp-login__section-title--sms {
+	margin-top: 4px;
+}
+
+.aio-login-otp-login__twilio-box {
+	margin-bottom: 20px;
+	padding: 16px 18px;
+	background: linear-gradient(180deg, #faf8ff 0%, #f6f8fb 100%);
+	border: 1px solid #e6e9f0;
+	border-radius: 10px;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.aio-login-otp-login__twilio-box-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 14px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid #ebe6f5;
+}
+
+.aio-login-otp-login__twilio-box-icon {
+	flex-shrink: 0;
+	width: 36px;
+	height: 36px;
+	border-radius: 8px;
+	background: #f5f0ff;
+	color: #9416de;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.aio-login-otp-login__twilio-box-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 700;
+	color: #111827;
+}
+
+.aio-login-otp-login__twilio-box-field {
+	margin-bottom: 0;
+}
+
+.aio-login-otp-login__country-ms .aio-login-2fa-methods__help {
+	margin-top: 8px;
+}
+
+#aio-login__app .aio-login-otp-login__country-ms.is-disabled button.aio-login-lr-ms-trigger {
+	cursor: not-allowed;
+	opacity: 0.65;
+}
+
+#aio-login__app .aio-login-lr-ms-select-all {
+	flex-shrink: 0;
+	border-bottom: 1px solid #eef0f4;
+	background: #fcfcfd;
+}
+
+#aio-login__app .aio-login-lr-ms-select-all-label {
+	font-weight: 600;
+}
+
+#aio-login__app .aio-login-lr-ms-footer--actions .aio-login-lr-ms-footer-buttons {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.aio-login-otp-login__field--half {
+	max-width: 50%;
+}
+
+.aio-login-otp-login__toggle-field {
+	margin-top: 4px;
+	margin-bottom: 14px;
+	padding-top: 14px;
+	border-top: 1px solid #f3f4f6;
+}
+
+.aio-login-otp-login__toggle-field .aio-login__toggle-switch-wrapper {
+	margin-top: 8px;
+}
+
+.aio-login-otp-login__pro-badge {
+	margin-left: 6px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	background: #9416de;
+	color: #fff;
+	padding: 2px 7px;
+	border-radius: 4px;
+	vertical-align: middle;
+}
+
+.aio-login-otp-login__sms-card--locked {
+	position: relative;
+	cursor: pointer;
+}
+
+.aio-login-otp-login__sms-card--locked::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 20;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.28);
+	backdrop-filter: blur(1px);
+	-webkit-backdrop-filter: blur(1px);
+	cursor: pointer;
+}
+
+.aio-login-otp-login__sms-card--locked .aio-login-2fa-policies__card-header,
+.aio-login-otp-login__sms-card--locked .aio-login-2fa-policies__card-body {
+	pointer-events: none;
+}
+
+/* Login Link (passwordless sub-tab) */
+.aio-login-magic-link__panel {
+	max-width: 720px;
+}
+
+.aio-login-magic-link__row {
+	display: grid;
+	grid-template-columns: minmax(200px, 280px) 1fr;
+	gap: 16px 24px;
+	align-items: center;
+	margin-bottom: 22px;
+}
+
+.aio-login-magic-link__row--stacked {
+	align-items: start;
+}
+
+.aio-login-magic-link__label {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin: 0;
+}
+
+.aio-login-magic-link__help {
+	margin: 10px 0 0;
+	max-width: 420px;
+}
+
+.aio-login-magic-link__validity {
+	display: flex;
+	align-items: stretch;
+	gap: 10px;
+	max-width: 320px;
+}
+
+.aio-login-magic-link__validity .aio-login-2fa-methods__input {
+	width: auto;
+	min-height: 40px;
+	height: 40px;
+	line-height: 1.2;
+}
+
+.aio-login-magic-link__validity-input {
+	width: 88px !important;
+	flex: 0 0 88px;
+	max-width: 88px;
+}
+
+.aio-login-magic-link__validity-unit {
+	flex: 1 1 auto;
+	min-width: 132px;
+	max-width: 180px;
+	padding-right: 28px;
+}
+
+.aio-login-magic-link__requests-input {
+	max-width: 120px;
+}
+
+.aio-login-magic-link__actions {
+	margin-top: 8px;
+}
+
+.aio-login-magic-link__panel--locked {
+	position: relative;
+	pointer-events: none;
+	opacity: 0.55;
+}
+
+.aio-login-magic-link.aio-login-pro-feature {
+	position: relative;
+	cursor: default;
+}
+
+@media (max-width: 782px) {
+	.aio-login-magic-link__row {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+}
+
+.aio-login-otp-login__country-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.aio-login-otp-login__country-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	padding: 8px 12px;
+	font-size: 13px;
+	font-weight: 500;
+	color: #374151;
+	background: #fff;
+	border: 1px solid #d1d5db;
+	border-radius: 999px;
+	cursor: pointer;
+	transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.aio-login-otp-login__country-tag:has(input:checked) {
+	border-color: #9516df;
+	background: #f5f0ff;
+	color: #6b21a8;
+}
+
+.aio-login-otp-login__country-tag input {
+	margin: 0;
+}
+
+.aio-login-otp-login__save-btn,
+.aio-login-otp-login__save-btn.button-primary {
+	background: #9416de !important;
+	border-color: #9416de !important;
+	color: #fff !important;
+	box-shadow: none !important;
+	padding: 8px 20px !important;
+	height: auto !important;
+	line-height: 1.4 !important;
+	font-weight: 600 !important;
+}
+
+.aio-login-otp-login__save-btn:hover:not(:disabled),
+.aio-login-otp-login__save-btn.button-primary:hover:not(:disabled) {
+	background: #7c12ba !important;
+	border-color: #7c12ba !important;
+	color: #fff !important;
+}
+
+.aio-login-otp-login__save-btn:disabled,
+.aio-login-otp-login__save-btn.button-primary:disabled {
+	background: #9416de !important;
+	border-color: #9416de !important;
+	color: #fff !important;
+	opacity: 0.65;
+	cursor: not-allowed;
+}
+
+@media (max-width: 1200px) {
+	.aio-login-2fa-methods__grid--four {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+@media (max-width: 782px) {
+	.aio-login-2fa-methods__grid,
+	.aio-login-2fa-methods__grid--four {
+		grid-template-columns: 1fr;
+	}
+
+	.aio-login-otp-login__field--half {
+		max-width: 100%;
+	}
+}
+
+
+.aio-login-lr-load-error {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid #f5c2c7;
+  border-radius: 8px;
+  background: #f8d7da;
+  color: #842029;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.aio-login-lr-rules-head {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+#aio-login__app .aio-login-lr-fallback {
+  margin-top: 24px;
+  padding: 20px 20px 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+#aio-login__app .aio-login-lr-fallback-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+#aio-login__app .aio-login-lr-fallback-titles {
+  min-width: 0;
+}
+
+#aio-login__app .aio-login-lr-fallback-title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #111827;
+}
+
+#aio-login__app .aio-login-lr-fallback-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+#aio-login__app .aio-login-lr-fallback-body {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #eef0f4;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#aio-login__app .aio-login-lr-fallback-choice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  cursor: pointer;
+}
+
+#aio-login__app .aio-login-lr-fallback-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  margin: 3px 0 0;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  box-sizing: border-box;
+  padding: 0;
+  box-shadow: none !important;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+#aio-login__app .aio-login-lr-fallback-radio::before {
+  content: none !important;
+  display: none !important;
+}
+
+#aio-login__app .aio-login-lr-fallback-radio:hover {
+  border-color: #b8a0e8;
+}
+
+#aio-login__app .aio-login-lr-fallback-radio:focus {
+  outline: none;
+}
+
+#aio-login__app .aio-login-lr-fallback-radio:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(148, 22, 222, 0.28);
+}
+
+#aio-login__app .aio-login-lr-fallback-radio:checked {
+  border-color: #9416de;
+  background: #fff;
+}
+
+#aio-login__app .aio-login-lr-fallback-radio:checked::after {
+  content: '';
+  display: block;
+  position: absolute;
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9416de !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#aio-login__app .aio-login-lr-fallback-radio:not(:checked)::after {
+  display: none;
+  content: none;
+}
+
+#aio-login__app .aio-login-lr-fallback-choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+#aio-login__app .aio-login-lr-fallback-choice-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+#aio-login__app .aio-login-lr-fallback-choice-hint {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+#aio-login__app .aio-login-lr-fallback-custom .regular-text {
+  width: 100%;
+  max-width: 520px;
+}
+
+#aio-login__app .aio-login-lr-fallback-saving {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #9416de;
+}
+
+#aio-login__app .aio-login-lr-fallback-placeholders {
+  margin-top: 2px;
+  max-width: 520px;
+}
+
+#aio-login__app .aio-login-lr-add-btn.button.button-primary {
+  border-radius: 8px !important;
+  padding: 0 16px !important;
+  height: 36px !important;
+  line-height: 34px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  background: #fff !important;
+  border: 2px solid #9416de !important;
+  color: #9416de !important;
+  box-shadow: none !important;
+}
+
+#aio-login__app .aio-login-lr-add-btn.button.button-primary:hover,
+#aio-login__app .aio-login-lr-add-btn.button.button-primary:focus {
+  background: #7f11c5 !important;
+  border-color: #7f11c5 !important;
+  color: #fff !important;
+}
+
+#aio-login__app .aio-login-lr-add-btn.button.button-primary:focus {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(148, 22, 222, 0.35) !important;
+}
+
+#aio-login__app .aio-login-lr-dt {
+  margin-top: 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+#aio-login__app .aio-login-lr-dt-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef0f4;
+}
+
+#aio-login__app .aio-login-lr-dt-length {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#aio-login__app .aio-login-lr-dt-length-label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+#aio-login__app .aio-login-lr-dt-select {
+  min-height: 32px;
+  padding: 4px 30px 4px 10px;
+  font-size: 13px;
+  border: 1px solid #d1d5dc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #1f2937;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px 12px;
+}
+
+#aio-login__app .aio-login-lr-dt-select:focus {
+  border-color: #9416de;
+  box-shadow: 0 0 0 2px rgba(148, 22, 222, 0.15);
+  outline: none;
+}
+
+#aio-login__app .aio-login-lr-dt-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#aio-login__app .aio-login-lr-dt-search-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+#aio-login__app .aio-login-lr-dt-search-input {
+  min-width: 200px;
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 1px solid #d1d5dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+}
+
+#aio-login__app .aio-login-lr-dt-search-input:focus {
+  border-color: #9416de;
+  box-shadow: 0 0 0 2px rgba(148, 22, 222, 0.15);
+  outline: none;
+}
+
+.aio-login-lr-table-scroll {
+  overflow-x: auto;
+  background: #fff;
+}
+
+#aio-login__app .aio-login-lr-datatable-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+#aio-login__app .aio-login-lr-datatable-table col.aio-login-lr-col--url {
+  width: 23%;
+}
+
+#aio-login__app .aio-login-lr-datatable-table col.aio-login-lr-col--narrow {
+  width: 12%;
+}
+
+#aio-login__app .aio-login-lr-datatable-table col.aio-login-lr-col--value {
+  width: 17%;
+}
+
+#aio-login__app .aio-login-lr-datatable-table col.aio-login-lr-col--order {
+  width: 10%;
+}
+
+#aio-login__app .aio-login-lr-datatable-table col.aio-login-lr-col--actions {
+  width: 16%;
+}
+
+/* Five columns when Order column is hidden (free / no Pro). */
+#aio-login__app .aio-login-lr-datatable-table colgroup:not(:has(.aio-login-lr-col--order)) col.aio-login-lr-col--url {
+  width: 26%;
+}
+
+#aio-login__app .aio-login-lr-datatable-table colgroup:not(:has(.aio-login-lr-col--order)) col.aio-login-lr-col--narrow {
+  width: 12%;
+}
+
+#aio-login__app .aio-login-lr-datatable-table colgroup:not(:has(.aio-login-lr-col--order)) col.aio-login-lr-col--value {
+  width: 20%;
+}
+
+#aio-login__app .aio-login-lr-datatable-table colgroup:not(:has(.aio-login-lr-col--order)) col.aio-login-lr-col--actions {
+  width: 16%;
+}
+
+#aio-login__app .aio-login-lr-datatable-table thead th {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+  color: #1f2937;
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+#aio-login__app .aio-login-lr-datatable-table .col-order {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#aio-login__app .aio-login-lr-datatable-table .cell-order.is-locked {
+  cursor: pointer;
+}
+
+#aio-login__app .aio-login-lr-order-th {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Keep PRO badge optically level with "Order" header text (AIOL-662). */
+#aio-login__app .aio-login-lr-order-th .aio-login-lr-condtype-pro {
+  padding: 2px 5px;
+  min-width: 0;
+  min-height: 16px;
+  font-size: 10px;
+  line-height: 1.2;
+  align-self: center;
+  position: static;
+  transform: none;
+  margin: 0;
+}
+
+#aio-login__app .aio-login-lr-grid>label.aio-login-lr-order-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#aio-login__app .aio-login-lr-order-control.is-locked {
+  cursor: pointer;
+}
+
+#aio-login__app .aio-login-lr-order-control.is-locked .aio-login-lr-order-input {
+  opacity: 0.5;
+  cursor: pointer;
+  pointer-events: none;
+  background-color: #f9fafb;
+  color: #6b7280;
+}
+
+#aio-login__app .aio-login-lr-order-control.is-locked .aio-login-lr-help {
+  opacity: 1;
+  color: #6b7280;
+}
+
+#aio-login__app .aio-login-lr-order-locked-cell {
+  opacity: 0.5;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+#aio-login__app .aio-login-lr-datatable-table .col-actions {
+  white-space: nowrap;
+  text-align: left;
+}
+
+#aio-login__app .aio-login-lr-datatable-table td {
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 12px 14px;
+  color: #1f2937;
+  vertical-align: middle;
+  border-bottom: 1px solid #eef0f4;
+}
+
+#aio-login__app .aio-login-lr-datatable-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+#aio-login__app .aio-login-lr-datatable-table .cell-url .aio-login-lr-url-text {
+  color: #9416de;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+#aio-login__app .aio-login-lr-datatable-table .cell-url {
+  max-width: 240px;
+}
+
+#aio-login__app .aio-login-lr-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+#aio-login__app .aio-login-lr-pill--condition {
+  background: #f5edff;
+  color: #7f11c5;
+}
+
+#aio-login__app .aio-login-lr-pill--value {
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 500;
+}
+
+#aio-login__app .aio-login-lr-cond-plain {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+#aio-login__app .aio-login-lr-datatable-table .cell-order {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #111827;
+}
+
+#aio-login__app .aio-login-lr-datatable-table .cell-actions {
+  white-space: nowrap;
+}
+
+#aio-login__app .aio-login-lr-datatable-table .aio-login-lr-table-empty td {
+  text-align: center;
+  padding: 28px 16px;
+  color: #6b7280;
+  font-size: 13px;
+  background: #fafafa;
+}
+
+#aio-login__app .aio-login-lr-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: none;
+  vertical-align: middle;
+}
+
+#aio-login__app .aio-login-lr-action-link .dashicons {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  line-height: 1;
+}
+
+#aio-login__app .aio-login-lr-action-edit {
+  color: #9416de !important;
+}
+
+#aio-login__app .aio-login-lr-action-edit:hover {
+  color: #7f11c5 !important;
+}
+
+#aio-login__app .aio-login-lr-action-sep {
+  display: inline-block;
+  margin: 0 8px;
+  color: #d1d5db;
+  font-weight: 400;
+  font-size: 13px;
+  user-select: none;
+}
+
+#aio-login__app .aio-login-lr-action-delete {
+  color: #dc2626 !important;
+}
+
+#aio-login__app .aio-login-lr-action-delete:hover {
+  color: #b91c1c !important;
+}
+
+#aio-login__app .aio-login-lr-dt-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid #eef0f4;
+  background: #fafafa;
+}
+
+#aio-login__app .aio-login-lr-dt-info {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+#aio-login__app .aio-login-lr-dt-pager {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+#aio-login__app .aio-login-lr-dt-pager-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+#aio-login__app .aio-login-lr-dt-pager-btn:hover:not(:disabled) {
+  border-color: #d1d5dc;
+  background: #f9fafb;
+}
+
+#aio-login__app .aio-login-lr-dt-pager-btn.is-active {
+  border-color: #c4b5fd;
+  background: #faf5ff;
+  color: #6d28d9;
+}
+
+#aio-login__app .aio-login-lr-dt-pager-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.aio-login-lr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.56);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.aio-login-lr-modal {
+  width: min(580px, 92vw);
+  max-height: min(88vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.28);
+}
+
+.aio-login-lr-modal-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.aio-login-lr-modal-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.aio-login-lr-close {
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin: -4px -8px -4px 0;
+  border-radius: 6px;
+}
+
+.aio-login-lr-close:hover {
+  color: #111827;
+  background: #f3f4f6;
+}
+
+.aio-login-lr-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 22px 22px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.aio-login-lr-grid {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  gap: 18px 20px;
+  align-items: start;
+}
+
+.aio-login-lr-grid>label {
+  font-weight: 500;
+  margin-top: 10px;
+  color: #111827;
+  font-size: 13px;
+}
+
+.aio-login-lr-grid .regular-text {
+  width: 100%;
+  min-height: 40px;
+  border-color: #e5e7eb;
+  border-radius: 8px;
+}
+
+.aio-login-lr-grid>div>input.regular-text {
+  margin-top: 10px;
+}
+
+.aio-login-lr-grid .small-text {
+  width: 84px;
+  min-height: 38px;
+  border-color: #e5e7eb;
+  border-radius: 8px;
+}
+
+.aio-login-lr-help {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+#aio-login__app .aio-login-lr-field-error {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #b91c1c;
+  line-height: 1.35;
+}
+
+#aio-login__app .aio-login-lr-grid .regular-text.aio-login-lr-input-error,
+#aio-login__app .aio-login-2fa-methods__input.aio-login-lr-input-error {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.35);
+}
+
+#aio-login__app button.aio-login-lr-ms-trigger.aio-login-lr-input-error {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.35);
+}
+
+#aio-login__app .aio-login-lr-ms {
+  position: relative;
+  width: 100%;
+}
+
+#aio-login__app button.aio-login-lr-ms-trigger {
+  width: 100%;
+  min-height: 40px;
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 8px 10px 8px 12px !important;
+  background: #fff !important;
+  background-image: none !important;
+  font-family: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+  line-height: 1.35;
+  box-shadow: none !important;
+}
+
+#aio-login__app .aio-login-lr-ms-pills {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+#aio-login__app .aio-login-lr-ms-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 3px 4px 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7f11c5;
+  background: #f5edff;
+  border-radius: 999px;
+  border: 1px solid #e9d5ff;
+  line-height: 1.3;
+}
+
+#aio-login__app .aio-login-lr-ms-pill-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #7f11c5;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#aio-login__app .aio-login-lr-ms-pill-remove:hover {
+  background: rgba(127, 17, 197, 0.12);
+  color: #5b1896;
+}
+
+#aio-login__app .aio-login-lr-ms-trigger .aio-login-lr-ms-chevron.dashicons {
+  font-size: 18px;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  margin-top: 1px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+#aio-login__app .aio-login-lr-ms.is-open .aio-login-lr-ms-trigger .aio-login-lr-ms-chevron.dashicons {
+  color: #9416de;
+}
+
+#aio-login__app .aio-login-lr-ms-trigger-placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+#aio-login__app .aio-login-lr-ms.is-open .aio-login-lr-ms-trigger {
+  border-color: #9416de !important;
+  box-shadow: 0 0 0 2px rgba(148, 22, 222, 0.12);
+}
+
+#aio-login__app .aio-login-lr-ms-panel {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.12),
+    0 2px 6px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+#aio-login__app .aio-login-lr-ms-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 10px;
+  border-bottom: 1px solid #eef0f4;
+  background: #fafafa;
+}
+
+#aio-login__app .aio-login-lr-ms-search .dashicons-search {
+  font-size: 16px;
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+#aio-login__app .aio-login-lr-ms-search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+}
+
+#aio-login__app .aio-login-lr-ms-search-input:focus {
+  border-color: #9416de;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(148, 22, 222, 0.12);
+}
+
+#aio-login__app .aio-login-lr-ms-list {
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 188px;
+  -webkit-overflow-scrolling: touch;
+}
+
+#aio-login__app .aio-login-lr-ms-item {
+  margin: 0;
+}
+
+#aio-login__app .aio-login-lr-ms-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+#aio-login__app .aio-login-lr-ms-option:hover {
+  background: #faf5ff;
+}
+
+#aio-login__app .aio-login-lr-ms-check {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #9416de;
+}
+
+#aio-login__app .aio-login-lr-ms-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: 1px solid #eef0f4;
+  background: #fafafa;
+  font-size: 12px;
+}
+
+#aio-login__app .aio-login-lr-ms-footer-count {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+#aio-login__app .aio-login-lr-ms-clear-all {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #9416de !important;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: none;
+}
+
+#aio-login__app .aio-login-lr-ms-clear-all:hover {
+  color: #7f11c5 !important;
+  text-decoration: underline;
+}
+
+#aio-login__app .aio-login-lr-ms-option-label {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+#aio-login__app .aio-login-lr-ms-empty {
+  padding: 12px 14px;
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.aio-login-lr-placeholders {
+  margin-top: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.aio-login-lr-placeholders-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: #f9fafb;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.aio-login-lr-placeholders-body {
+  padding: 12px 14px;
+  background: #fcfcfd;
+  font-size: 12px;
+}
+
+.aio-login-lr-placeholders-body p {
+  margin: 0 0 8px;
+  color: #4b5563;
+}
+
+.aio-login-lr-token-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.aio-login-lr-token-list li {
+  margin: 0 0 5px;
+}
+
+.aio-login-lr-token-list code {
+  background: #f3f4f6;
+  color: #9416de;
+  border-radius: 4px;
+  padding: 2px 10px;
+}
+
+.aio-login-lr-modal-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.aio-login-lr-modal-footer .button {
+  min-width: 100px;
+  height: 38px;
+  line-height: 1;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.aio-login-lr-btn-cancel {
+  background: #fff !important;
+  color: #9416de !important;
+  border: 1px solid #9416de !important;
+  box-shadow: none !important;
+}
+
+.aio-login-lr-btn-cancel:hover {
+  background: #faf5ff !important;
+  border-color: #7f11c5 !important;
+  color: #7f11c5 !important;
+}
+
+.aio-login-lr-btn-save.button-primary,
+.aio-login-lr-modal-footer .button.button-primary.aio-login-lr-btn-save {
+  background: #9416de !important;
+  border-color: #9416de !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.aio-login-lr-btn-save.button-primary:hover,
+.aio-login-lr-modal-footer .button.button-primary.aio-login-lr-btn-save:hover {
+  background: #7f11c5 !important;
+  border-color: #7f11c5 !important;
+  color: #fff !important;
+}
+
+.aio-login-lr-btn-save.button-primary:focus,
+.aio-login-lr-modal-footer .button.button-primary.aio-login-lr-btn-save:focus {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 3px rgba(148, 22, 222, 0.35) !important;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-modal {
+  width: min(440px, 92vw);
+  max-height: none;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-body {
+  padding: 24px 24px 10px;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.3;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px 22px;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-footer .button {
+  min-width: 96px;
+  height: 38px;
+  line-height: 1;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  box-sizing: border-box;
+  box-shadow: none !important;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-cancel {
+  background: #fff !important;
+  color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-cancel:hover {
+  background: #f9fafb !important;
+  border-color: #b8c0cc !important;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-cancel:focus {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 3px rgba(148, 148, 148, 0.25) !important;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-submit.button {
+  background: #ef4444 !important;
+  border: 1px solid #ef4444 !important;
+  color: #fff !important;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-submit.button:hover {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+#aio-login__app .aio-login-lr-delete-confirm-submit.button:focus {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 3px rgba(239, 68, 68, 0.35) !important;
+}
+
+#aio-login__app .aio-login-lr-action-edit--locked {
+  opacity: 0.65;
+  cursor: pointer !important;
+}
+
+#aio-login__app .aio-login-lr-condtype {
+  position: relative;
+  width: 100%;
+}
+
+#aio-login__app .aio-login-lr-condtype-trigger {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 8px 10px 8px 12px !important;
+  background: #fff !important;
+  background-image: none !important;
+  font-family: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+  line-height: 1.35;
+  box-shadow: none !important;
+}
+
+#aio-login__app .aio-login-lr-condtype-trigger-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 500;
+  color: #111827;
+}
+
+#aio-login__app .aio-login-lr-condtype-chevron.dashicons {
+  font-size: 18px;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+#aio-login__app .aio-login-lr-condtype.is-open .aio-login-lr-condtype-trigger {
+  border-color: #9416de !important;
+  box-shadow: 0 0 0 2px rgba(148, 22, 222, 0.12);
+}
+
+#aio-login__app .aio-login-lr-condtype.is-open .aio-login-lr-condtype-chevron.dashicons {
+  color: #9416de;
+}
+
+#aio-login__app .aio-login-lr-condtype-panel {
+  position: absolute;
+  z-index: 25;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.12),
+    0 2px 6px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+#aio-login__app .aio-login-lr-condtype-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 1px solid #eef0f4;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+#aio-login__app .aio-login-lr-condtype-item:last-child {
+  border-bottom: 0;
+}
+
+#aio-login__app .aio-login-lr-condtype-item:hover {
+  background: #faf5ff;
+}
+
+#aio-login__app .aio-login-lr-condtype-item.is-locked {
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+#aio-login__app .aio-login-lr-condtype-item.is-locked:hover {
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+#aio-login__app .aio-login-lr-condtype-pro {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 34px;
+  padding: 5px 6px;
+  margin: 0;
+  background: #9516DF;
+  border-radius: 3px;
+  color: #FFFFFF;
+  font-family: Figtree, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  /* height: 18px; */
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .aio-login-lr-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .aio-login-lr-grid>label {
+    margin-top: 0;
+  }
+}

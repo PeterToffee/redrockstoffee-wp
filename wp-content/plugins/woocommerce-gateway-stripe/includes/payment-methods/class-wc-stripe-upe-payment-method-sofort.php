@@ -1,0 +1,63 @@
+<?php
+
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Sofort Payment Method class extending UPE base class
+ *
+ * @deprecated 11.1.0 Discontinued by Stripe on 2025-03-31; kept only for refunds and
+ * SEPA-mandate subscription renewals on existing orders.
+ */
+class WC_Stripe_UPE_Payment_Method_Sofort extends WC_Stripe_UPE_Payment_Method {
+	use WC_Stripe_Subscriptions_Trait;
+
+	public const STRIPE_ID = WC_Stripe_Payment_Methods::SOFORT;
+
+	/**
+	 * Constructor for Sofort payment method
+	 */
+	public function __construct() {
+		parent::__construct();
+		$this->stripe_id            = self::STRIPE_ID;
+		$this->title                = __( 'Sofort', 'woocommerce-gateway-stripe' );
+		$this->is_reusable          = true;
+		$this->supported_currencies = [ WC_Stripe_Currency_Code::EURO ];
+		$this->label                = __( 'Sofort', 'woocommerce-gateway-stripe' );
+		$this->supports[]           = PaymentGatewayFeature::TOKENIZATION;
+		$this->description          = __(
+			'Accept secure bank transfers from Austria, Belgium, Germany, Italy, Netherlands, and Spain.',
+			'woocommerce-gateway-stripe'
+		);
+
+		// Add support for pre-orders.
+		$this->maybe_init_pre_orders();
+
+		// Init subscription so it can process subscription payments.
+		$this->maybe_init_subscriptions();
+	}
+
+	/**
+	 * Sofort saves tokens as SEPA Direct Debit on the Stripe side, so saved
+	 * payment methods must be retrieved using the SEPA type rather than `sofort`.
+	 *
+	 * @return string
+	 */
+	public function get_retrievable_type() {
+		return WC_Stripe_UPE_Payment_Method_Sepa::STRIPE_ID;
+	}
+
+	/**
+	 * Sofort is discontinued, so it can never be offered at checkout.
+	 *
+	 * @param int|null    $order_id
+	 * @param string|null $account_domestic_currency The account's default currency.
+	 * @return bool Always return false, as Sofort is no longer available for new purchases.
+	 */
+	public function is_enabled_at_checkout( $order_id = null, $account_domestic_currency = null ) {
+		return false;
+	}
+}

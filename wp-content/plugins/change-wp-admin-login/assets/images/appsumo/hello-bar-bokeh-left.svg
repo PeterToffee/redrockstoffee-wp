@@ -1,0 +1,14 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 333 205" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_f_hello_bar_left)">
+<circle cx="268" cy="140" r="51" fill="#68F375"/>
+<circle cx="149.5" cy="60.5" r="46.5" fill="#9FF5A7"/>
+<circle cx="41.5" cy="139.5" r="27.5" fill="#4AF059"/>
+</g>
+<defs>
+<filter id="filter0_f_hello_bar_left" x="0" y="0" width="333" height="205" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="7" result="effect1_foregroundBlur"/>
+</filter>
+</defs>
+</svg>

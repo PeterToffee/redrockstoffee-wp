@@ -1,0 +1,649 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: All In One Login\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-02-15 14:34+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.6.6; wp-6.4.3\n"
+"X-Domain: aio-login"
+
+#: includes/google-recaptcha/class-google-recaptcha.php:321
+msgid "0.1"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:322
+msgid "0.2"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:323
+msgid "0.3"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:324
+msgid "0.4"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:325
+msgid "0.5"
+msgstr ""
+
+#: includes/admin/class-admin.php:63
+msgid "Activity Log"
+msgstr ""
+
+#: includes/admin/class-admin.php:168
+msgid "AIO Login"
+msgstr ""
+
+#. Name of the plugin
+msgid "All In One Login"
+msgstr ""
+
+#: includes/admin/class-admin.php:167
+msgid "All in One Login"
+msgstr ""
+
+#: includes/admin/settings/pro-features.php:14
+#: includes/admin/settings/pro-features.php:19
+#: includes/admin/settings/pro-features.php:24
+#: includes/admin/settings/pro-features.php:29
+#: includes/admin/settings/pro-features.php:34
+#: includes/admin/settings/pro-features.php:39
+msgid ""
+"All-In-One Login includes a video sitemap generator, so you can rank in "
+"Google’s video carousel widget and grow your traffic."
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:220
+msgid ""
+"Amount of time a particular IP will be locked out once a lockout has been "
+"triggered. By default, this is set to 5 mins if left blank."
+msgstr ""
+
+#: includes/admin/settings/pro-features.php:17
+msgid "App Based 2FA"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:105
+msgid "Apply"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:155
+msgid "Are you sure you want to delete this item?"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:269
+msgid "Available placeholders"
+msgstr ""
+
+#: includes/admin/class-admin.php:98
+msgid "Background"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:101
+msgid "Background Color"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:95
+msgid "Background Customization"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:109
+msgid "Background Image"
+msgstr ""
+
+#: includes/admin/settings/pro-features.php:12
+msgid "Ban User / IP"
+msgstr ""
+
+#: includes/admin/settings/pro-features.php:37
+msgid "Block Login Attempts"
+msgstr ""
+
+#: includes/login-controller/class-failed-login.php:164
+msgid "Blocked"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:338
+msgid "Bottom Left"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:339
+msgid "Bottom Right"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:99
+msgid "Bulk actions"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:164
+#: includes/admin/settings/dashboard.php:187
+#: includes/admin/settings/dashboard.php:202
+#: includes/admin/settings/dashboard.php:216
+msgid ""
+"By default your WordPress login can be accessed via any IP. You can use this "
+"feature to allow login only for specific IPs or range of IPs in order to "
+"prevent brute-force attacks or malicious login attempts."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:235
+msgid ""
+"Captcha or \"are you human\" verification ensures bots can't attack your "
+"login page and provides additional protection with minimal impact to users."
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:175
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:218
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:250
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:257
+msgid "Change wp-admin login"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:28
+#: includes/login-controller/class-lockouts-activity-logs.php:25
+#: includes/admin/settings/dashboard.php:273
+#: includes/admin/settings/dashboard.php:305
+msgid "City"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:250
+msgid ""
+"Completely lock out website access for blocked IPs, or just locking out "
+"access to the login page."
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:180
+msgid "Configure"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:27
+#: includes/login-controller/class-lockouts-activity-logs.php:24
+#: includes/admin/settings/dashboard.php:272
+#: includes/admin/settings/dashboard.php:304
+msgid "Country"
+msgstr ""
+
+#: includes/admin/class-admin.php:102
+#: includes/login-customization/class-login-customization.php:123
+#: includes/login-customization/class-login-customization.php:129
+msgid "Custom CSS"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:215
+msgid "Custom CSS for login page."
+msgstr ""
+
+#: includes/admin/class-admin.php:89
+msgid "Customize"
+msgstr ""
+
+#: includes/admin/settings/pro-features.php:27
+msgid "Customize Design Pro"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:139
+msgid "Customize your"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:285
+msgid "Dark"
+msgstr ""
+
+#: includes/admin/class-admin.php:43 includes/admin/class-admin.php:176
+#: includes/admin/class-admin.php:177
+msgid "Dashboard"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:26
+#: includes/login-controller/class-lockouts-activity-logs.php:23
+#: includes/admin/settings/dashboard.php:271
+#: includes/admin/settings/dashboard.php:303
+msgid "Date & Time"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:100
+#: includes/login-controller/class-failed-login-activity-logs.php:156
+msgid "Delete"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:201
+msgid "Disable Common Usernames"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:118
+#: includes/login-controller/class-login-controller.php:128
+msgid "Enable"
+msgstr ""
+
+#. %1$s is <style></style> tag.
+#: includes/login-customization/class-login-customization.php:219
+#, php-format
+msgid "Enter your custom CSS without adding %1$s tag"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:272
+#: includes/google-recaptcha/class-google-recaptcha.php:309
+msgid "Enter your site's secret reCAPTCHA key here."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:260
+#: includes/google-recaptcha/class-google-recaptcha.php:297
+msgid "Enter your site's unique reCAPTCHA site key here."
+msgstr ""
+
+#: includes/admin/class-admin.php:72 includes/admin/settings/dashboard.php:55
+#: includes/admin/settings/dashboard.php:263
+msgid "Failed Logins"
+msgstr ""
+
+#: includes/admin/class-admin.php:53
+msgid "General"
+msgstr ""
+
+#: includes/admin/settings/admin.php:66
+#: includes/admin/settings/dashboard.php:239
+#: includes/admin/settings/pro-features.php:69
+msgid "Get AIO Login Pro"
+msgstr ""
+
+#: includes/admin/class-admin.php:113
+msgid "Get Pro"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:231
+msgid "Get the #1 Most Powerful WordPress Login Plugin Today"
+msgstr ""
+
+#: includes/admin/class-admin.php:83
+#: includes/google-recaptcha/class-google-recaptcha.php:108
+msgid "Google reCAPTCHA"
+msgstr ""
+
+#. URI of the plugin
+#. Author URI of the plugin
+msgid "https://wpexperts.io"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:24
+#: includes/admin/settings/dashboard.php:301
+msgid "ID"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:337
+msgid "Inline"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:30
+#: includes/login-controller/class-lockouts-activity-logs.php:27
+#: includes/admin/settings/dashboard.php:275
+#: includes/admin/settings/dashboard.php:307
+msgid "IP Address"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:233
+msgid ""
+"Join over 3 million smart website owners who use AIOSEO to improve their "
+"website search rankings."
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:41
+#: includes/admin/settings/dashboard.php:42
+#: includes/admin/settings/dashboard.php:82
+#: includes/admin/settings/dashboard.php:83
+#: includes/admin/settings/dashboard.php:123
+#: includes/admin/settings/dashboard.php:124
+msgid "Last 14 days"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:35
+#: includes/admin/settings/dashboard.php:36
+#: includes/admin/settings/dashboard.php:76
+#: includes/admin/settings/dashboard.php:77
+#: includes/admin/settings/dashboard.php:117
+#: includes/admin/settings/dashboard.php:118
+msgid "Last 7 days"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:47
+#: includes/admin/settings/dashboard.php:48
+#: includes/admin/settings/dashboard.php:88
+#: includes/admin/settings/dashboard.php:89
+#: includes/admin/settings/dashboard.php:129
+#: includes/admin/settings/dashboard.php:130
+msgid "Last month"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:155
+msgid "Let's Go"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:284
+msgid "Light"
+msgstr ""
+
+#: includes/admin/class-admin.php:57
+#: includes/login-controller/class-login-controller.php:121
+#: includes/admin/settings/dashboard.php:214
+msgid "Limit Login Attempts"
+msgstr ""
+
+#: includes/class-aio-login.php:225
+msgid "Limit login attempts has been updated"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:210
+msgid "Location"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:236
+msgid "Lock access to the entire website"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:172
+msgid "Lockout Message"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:161
+msgid "lockout Type"
+msgstr ""
+
+#: includes/admin/class-admin.php:68 includes/admin/settings/dashboard.php:96
+#: includes/admin/settings/dashboard.php:260
+msgid "Lockouts"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:162
+msgid "Login Access"
+msgstr ""
+
+#: includes/admin/class-admin.php:48
+msgid "Login Protection"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:264
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:281
+msgid "Login URL"
+msgstr ""
+
+#: includes/admin/class-admin.php:94
+#: includes/login-customization/class-login-customization.php:48
+msgid "Logo"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:42
+msgid "Logo Customization"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:72
+msgid "Logo Height"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:56
+msgid "Logo URL"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:64
+msgid "Logo Width"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:80
+msgid "Margin Bottom"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:139
+msgid "Maximum Attempts"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:207
+msgid ""
+"Maximum number of login attempts allowed before users are locked out. By "
+"default, this is set to 5 failed attempts if left blank."
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:267
+msgid ""
+"Message displayed to locked out visitors due to too many failed login "
+"attempts."
+msgstr ""
+
+#: includes/class-aio-login.php:169
+msgid "Method not found"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:406
+msgid "Network Settings"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:222
+msgid "Networkwide default"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:326
+msgid "No failed logins found."
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:128
+msgid "No failed logs found."
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:292
+msgid "No locked users found."
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:222
+msgid "Off"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:221
+msgid "On"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:233
+msgid "Only lock access to the login page"
+msgstr ""
+
+#. %1$s: plugin name.
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:174
+#, php-format
+msgid "Please upgrade to the latest version of WordPress to activate %1$s."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:370
+#: includes/google-recaptcha/class-google-recaptcha.php:396
+msgid "Please verify that you are not a robot."
+msgstr ""
+
+#: includes/admin/settings/pro-features.php:46
+msgid "Pro Features"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:439
+msgid "Protect your website by changing the login page URL."
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:242
+msgid "Read Pro Details"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:255
+msgid "Recent Activity"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:273
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:289
+msgid "Redirect URL"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:271
+msgid "Remaining minutes"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:75
+msgid "Search"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:156
+#: includes/google-recaptcha/class-google-recaptcha.php:190
+msgid "Secret Key"
+msgstr ""
+
+#: includes/admin/class-admin.php:78
+msgid "Security"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:471
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:473
+msgid "Settings"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:146
+#: includes/google-recaptcha/class-google-recaptcha.php:180
+msgid "Site Key"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:422
+msgid ""
+"Specify URL where attempts to access wp-login or wp-admin should be "
+"redirected to. If custom URL is set above, By default, this will redirect to "
+"your site's Home page unless you set it to something else."
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:14
+msgid "Successful Logins"
+msgstr ""
+
+#: includes/admin/settings/pro-features.php:22
+msgid "Temp Access URL"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:166
+msgid "Theme"
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:490
+msgid "This feature is not enabled."
+msgstr ""
+
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:219
+msgid ""
+"This option allows you to set a networkwide default, which can be overridden "
+"by individual sites. Simply go to to the siteâ€™s permalink settings to "
+"change the url."
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:200
+msgid "Threshold"
+msgstr ""
+
+#: includes/login-controller/class-login-controller.php:150
+msgid "Timeout"
+msgstr ""
+
+#: includes/admin/settings/admin.php:62
+msgid "To access more features and options"
+msgstr ""
+
+#. %1$s: network settings url.
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:405
+#, php-format
+msgid "To set a networkwide default, go to %1$s."
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:17
+#: includes/admin/settings/dashboard.php:29
+#: includes/admin/settings/dashboard.php:30
+#: includes/admin/settings/dashboard.php:58
+#: includes/admin/settings/dashboard.php:70
+#: includes/admin/settings/dashboard.php:71
+#: includes/admin/settings/dashboard.php:99
+#: includes/admin/settings/dashboard.php:111
+#: includes/admin/settings/dashboard.php:112
+msgid "Today"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:185
+msgid "Two-factor Authentication for Admin & Editors Users"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:206
+msgid "Upload Image"
+msgstr ""
+
+#: includes/login-customization/class-login-customization.php:144
+msgid "Upload Logo"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:29
+#: includes/login-controller/class-lockouts-activity-logs.php:26
+#: includes/admin/settings/dashboard.php:274
+#: includes/admin/settings/dashboard.php:306
+msgid "User Agent"
+msgstr ""
+
+#: includes/login-controller/class-failed-login-activity-logs.php:25
+msgid "User Login"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:302
+msgid "user Login"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:247
+msgid "v2"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:248
+msgid "v3"
+msgstr ""
+
+#: includes/google-recaptcha/class-google-recaptcha.php:132
+msgid "Version"
+msgstr ""
+
+#: includes/admin/settings/admin.php:19
+msgid "Version:"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:348
+msgid "View All Activity"
+msgstr ""
+
+#: includes/admin/settings/pro-features.php:32
+msgid "Whitelist IP Addresses"
+msgstr ""
+
+#: includes/admin/settings/dashboard.php:141
+msgid "WP Login"
+msgstr ""
+
+#. Author of the plugin
+msgid "WPExperts"
+msgstr ""
+
+#. %d: Remaining attempts.
+#: includes/login-controller/class-login-controller.php:409
+msgid "You have %d attempts remaining."
+msgstr ""
+
+#. %d: Remaining minutes.
+#: includes/login-controller/class-login-controller.php:66
+#: includes/login-controller/class-login-controller.php:263
+msgid ""
+"You have been blocked due to too many unsuccessful login attempts. Please "
+"try again in %d minutes."
+msgstr ""
+
+#. %1$s: new login url, %2$s: new login url.
+#: includes/change-wp-admin-login/class-change-wp-admin-login.php:454
+#, php-format
+msgid "Your login page is now here: %1$s. Bookmark this page!"
+msgstr ""
