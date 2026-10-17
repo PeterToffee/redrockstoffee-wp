@@ -1,0 +1,109 @@
+/* RRT Label Configurator — plain CSS, no build step. */
+
+.rrt-label-configurator {
+	max-width: 900px;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	font-family: inherit;
+}
+
+.rrt-lc-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-bottom: 12px;
+}
+
+.rrt-lc-field label {
+	font-weight: 600;
+	font-size: 0.95rem;
+}
+
+.rrt-lc-field input[type="text"],
+.rrt-lc-field input[type="email"],
+.rrt-lc-field input[type="tel"],
+.rrt-lc-field select,
+.rrt-lc-field textarea {
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	font-size: 1rem;
+}
+
+.rrt-lc-stage {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	background: #f4f4f4;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 12px;
+}
+
+#rrt-lc-canvas {
+	max-width: 100%;
+	height: auto;
+	touch-action: none;
+	cursor: grab;
+	border: 1px solid #ccc;
+	background: #fff;
+}
+
+#rrt-lc-canvas.rrt-dragging {
+	cursor: grabbing;
+}
+
+.rrt-lc-hint {
+	font-size: 0.85rem;
+	color: #666;
+	margin: 0 0 12px;
+}
+
+.rrt-lc-btn-primary,
+.rrt-lc-btn-secondary {
+	border: none;
+	border-radius: 999px;
+	padding: 12px 24px;
+	font-weight: 700;
+	font-size: 1rem;
+	cursor: pointer;
+}
+
+.rrt-lc-btn-primary {
+	background: #8e2434;
+	color: #fff;
+}
+
+.rrt-lc-btn-primary:hover {
+	background: #6f1c28;
+}
+
+.rrt-lc-btn-secondary {
+	background: #eee;
+	color: #333;
+	padding: 6px 14px;
+	font-size: 0.85rem;
+	margin-top: 6px;
+	align-self: flex-start;
+}
+
+.rrt-lc-status {
+	font-size: 0.9rem;
+	min-height: 1.2em;
+}
+
+.rrt-lc-status.is-error {
+	color: #a1222f;
+}
+
+.rrt-lc-status.is-success {
+	color: #1a7a3c;
+}
+
+@media (max-width: 480px) {
+	.rrt-lc-btn-primary {
+		width: 100%;
+	}
+}
