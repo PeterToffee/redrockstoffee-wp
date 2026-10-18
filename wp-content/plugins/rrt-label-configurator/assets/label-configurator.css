@@ -455,6 +455,7 @@
 	font-size: 0.9rem;
 	min-height: 1.2em;
 	margin-top: 10px;
+	white-space: pre-line;
 }
 
 .rrt-lc-status.is-error {

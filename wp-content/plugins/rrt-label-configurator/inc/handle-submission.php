@@ -170,6 +170,14 @@ function rrt_label_handle_submit() {
 		$layer_paths = array(); // not fatal — the flat composite alone still gets emailed.
 	}
 
+	// Email is attempted (useful once this is live on GoDaddy, where real
+	// mail delivery works), but Pete, 2026-10-18: "don't need mail, it can
+	// go to a file, just give me the folder/filename" — on local XAMPP
+	// there's no mail server behind `wp_mail()`, so it either silently
+	// fails or just never gets tested at all. Either way, the files on
+	// disk are the real, always-true answer, so the success message below
+	// reports the exact folder + filenames directly instead of relying on
+	// an email arriving.
 	rrt_label_email_submission(
 		array(
 			'size'    => $sizes[ $size_key ]['label'],
@@ -183,7 +191,17 @@ function rrt_label_handle_submit() {
 		$layer_paths
 	);
 
-	wp_send_json_success( array( 'message' => "Thanks! We've got your design and will follow up by email." ) );
+	$all_paths = array_merge( array( $composite_path ), $layer_paths );
+	$folder    = wp_normalize_path( dirname( $composite_path ) );
+	$filenames = array_map( 'basename', $all_paths );
+
+	wp_send_json_success(
+		array(
+			'message'   => "Saved! Folder: {$folder}\nFiles: " . implode( ', ', $filenames ),
+			'folder'    => $folder,
+			'filenames' => $filenames,
+		)
+	);
 }
 
 /**
