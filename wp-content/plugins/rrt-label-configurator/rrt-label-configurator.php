@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.16.0' );
+define( 'RRT_LABEL_VERSION', '3.16.1' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -586,6 +586,7 @@ function rrt_label_configurator_shortcode( $atts ) {
 	return ob_get_clean();
 }
 add_shortcode( 'rrt_label_configurator', 'rrt_label_configurator_shortcode' );
+
 
 
 
