@@ -1,27 +1,107 @@
 /**
  * RRT Label Configurator — plain vanilla JS, no build step, no framework.
  *
- * Draws the chosen size's real label template on a <canvas>, lets the
- * customer drag/resize an uploaded logo and/or typed text inside the
- * label's blank zone, and submits the raw inputs (not a screenshot) to
- * the server, which composites the authoritative final image with GD.
+ * Wires up the REAL copied TheUnframer quote-module-card markup
+ * (inc/quote-module-card.part.php) to this plugin's own fixed-zone
+ * preview (assets/label-configurator.css's .rrt-lc-stage/.rrt-lc-zone).
+ * Cartoon Balloon is left visible (copy means copy) but NOT wired —
+ * Pete: "we won't need the cartoon balloons."
+ *
+ * Text groups and the logo are each positioned as absolutely-positioned
+ * elements inside .rrt-lc-zone, left/top % + `transform:
+ * translate(-50%,-50%)`, same technique TheUnframer's own quote-module.js
+ * uses. Font-size/logo-scale are stored as "percent of the zone's own
+ * width" (matches quote-module.js's `fsPx = fw * fontSize / 100`), so
+ * they scale correctly if the zone's rendered size ever changes.
+ *
+ * The server never trusts this preview directly — on submit, every text
+ * group + the logo are sent as a `layers` JSON array (same contract
+ * inc/handle-submission.php already expects) and GD re-composites the
+ * authoritative final image from those numbers.
  */
 ( function () {
 	'use strict';
 
-	var config = window.rrtLabelConfigurator || { sizes: {}, ajaxUrl: '' };
+	var config = window.rrtLabelConfigurator || { sizes: {}, fonts: {}, art: {}, ajaxUrl: '' };
 
 	var root = document.getElementById( 'rrt-label-configurator' );
 	if ( ! root ) {
 		return;
 	}
 
+	// Font key -> CSS family, matching the radio-card `value`s in the
+	// copied font-drum exactly (also matches the Google Fonts families
+	// this plugin already enqueues).
+	var TEXT_FONTS = {
+		oswald: "'Oswald', sans-serif",
+		luckiest: "'Luckiest Guy', cursive",
+		comic: "'Boogaloo', cursive",
+		satisfy: "'Satisfy', cursive",
+		lobster: "'Lobster', cursive",
+		bangers: "'Bangers', cursive",
+		fredoka: "'Fredoka One', cursive",
+		montserrat: "'Montserrat', sans-serif",
+		abril: "'Abril Fatface', cursive",
+		greatvibes: "'Great Vibes', cursive",
+		sniglet: "'Sniglet', cursive",
+		arial: "Arial, Helvetica, sans-serif",
+		playfair: "'Playfair Display', serif",
+		scripty: "'Dancing Script', cursive",
+		pacifico: "'Pacifico', cursive",
+	};
+
+	// The 5 fixed text-color swatches (toffee-appropriate: brand red, gold,
+	// brown, cream, slate) — see inc/quote-module-card.part.php for why
+	// .color-row/.color-swatch themselves are the real site's own
+	// component, just a new palette.
+	var TEXT_COLOR_SWATCHES = {
+		red: '#991e21',
+		gold: '#c89b3c',
+		brown: '#5c3a21',
+		cream: '#fdf6e3',
+		slate: '#708090',
+	};
+
 	var els = {
 		size: document.getElementById( 'rrt-lc-size' ),
-		canvas: document.getElementById( 'rrt-lc-canvas' ),
-		logoInput: document.getElementById( 'rrt-lc-logo' ),
-		logoRemove: document.getElementById( 'rrt-lc-logo-remove' ),
-		textInput: document.getElementById( 'rrt-lc-text' ),
+		stage: document.getElementById( 'rrt-lc-stage' ),
+		bg: document.getElementById( 'rrt-lc-bg' ),
+		zone: document.getElementById( 'rrt-lc-zone' ),
+
+		tabBtnQuote: document.getElementById( 'tab-btn-quote' ),
+		tabBtnLogo: document.getElementById( 'tab-btn-logo' ),
+		tabBtnBalloon: document.getElementById( 'tab-btn-balloon' ),
+		panelQuote: document.getElementById( 'tab-panel-quote' ),
+		panelLogo: document.getElementById( 'tab-panel-logo' ),
+		panelBalloon: document.getElementById( 'tab-panel-balloon' ),
+
+		quoteSelectorBtns: document.getElementById( 'quote-selector-btns' ),
+		quoteAddBtn: document.getElementById( 'quote-add-btn' ),
+		quoteRemoveBtn: document.getElementById( 'quote-remove-btn' ),
+		quoteText: document.getElementById( 'quote-text' ),
+		btnBold: document.getElementById( 'btn-bold' ),
+		btnItalic: document.getElementById( 'btn-italic' ),
+		fsSlider: document.getElementById( 'fs-slider' ),
+		boxSideMargin: document.getElementById( 'box-side-margin' ),
+		shadowColorRow: document.getElementById( 'shadow-color-row' ),
+		textColorSwatches: document.getElementById( 'text-color-swatches' ),
+		textColorCustom: document.getElementById( 'text-color-custom' ),
+		textShadowToggle: document.getElementById( 'text-shadow-toggle' ),
+		shadowIntensitySlider: document.getElementById( 'shadow-intensity-slider' ),
+		centerTextBtn: document.getElementById( 'center-text-btn' ),
+		fontRadios: document.querySelectorAll( 'input[name="quote-font"]' ),
+
+		logoFileInput: document.getElementById( 'logo-file-input' ),
+		artPicker: document.getElementById( 'art-picker' ),
+		artPickerBtn: document.getElementById( 'art-picker-btn' ),
+		artPickerPanel: document.getElementById( 'art-picker-panel' ),
+		logoUploadBtn: document.getElementById( 'logo-upload-btn' ),
+		logoAddBtn: document.getElementById( 'logo-add-btn' ),
+		logoRemoveBtn: document.getElementById( 'logo-remove-btn' ),
+		logoSizeSlider: document.getElementById( 'logo-size-slider' ),
+		logoSelectorBtns: document.getElementById( 'logo-selector-btns' ),
+		logoFilename: document.getElementById( 'logo-filename' ),
+
 		name: document.getElementById( 'rrt-lc-name' ),
 		email: document.getElementById( 'rrt-lc-email' ),
 		phone: document.getElementById( 'rrt-lc-phone' ),
@@ -30,270 +110,908 @@
 		status: document.getElementById( 'rrt-lc-status' ),
 	};
 
-	var ctx = els.canvas.getContext( '2d' );
-
-	// Current state, always in the TEMPLATE IMAGE'S OWN pixel space
-	// (not the on-screen display size, which only scales for viewing).
 	var state = {
 		sizeKey: null,
-		templateImg: null,
-		logoImg: null,
-		logoFile: null,
-		// box = fraction (0-1) of the zone's own width/height
-		logoBox: null,
-		textBox: { x: 0.05, y: 0.1, w: 0.9, h: 0.8 },
-		dragging: null, // { what: 'logo'|'text', mode: 'move'|'resize', startX, startY, startBox }
+		textGroups: [], // { id, text, font, fontSize, bold, italic, shadowColor, pos, el }
+		activeGroupId: null,
+		nextGroupId: 1,
+		logos: [], // { id, file, scale, pos, el }
+		activeLogoId: null,
+		nextLogoId: 1,
+		addingNewLogo: false, // true while waiting on the file picker for a brand-new logo (vs. replacing the active one)
+		dragging: null,
 	};
 
 	function activeSize() {
 		return config.sizes[ state.sizeKey ];
 	}
 
-	function loadTemplate( sizeKey ) {
+	// --- size switching (unchanged from before, still the "right" part) ---
+
+	els.size.addEventListener( 'change', function () {
+		loadSize( els.size.value );
+	} );
+
+	function loadSize( sizeKey ) {
 		var size = config.sizes[ sizeKey ];
 		if ( ! size ) {
 			return;
 		}
 		state.sizeKey = sizeKey;
-		state.logoImg = null;
-		state.logoFile = null;
-		state.logoBox = null;
-		els.logoInput.value = '';
-		els.logoRemove.hidden = true;
 
-		var img = new Image();
-		img.onload = function () {
-			state.templateImg = img;
-			els.canvas.width = size.image_width;
-			els.canvas.height = size.image_height;
-			draw();
+		els.stage.style.aspectRatio = size.crop_width + ' / ' + size.crop_height;
+		els.bg.src = size.template_url;
+		els.bg.style.width = size.bg_width_pct + '%';
+		els.bg.style.transform = 'translate(-' + size.bg_translate_x + '%, -' + size.bg_translate_y + '%)';
+
+		els.zone.style.left = size.zone_left_pct + '%';
+		els.zone.style.top = size.zone_top_pct + '%';
+		els.zone.style.width = size.zone_width_pct + '%';
+		els.zone.style.height = size.zone_height_pct + '%';
+
+		state.textGroups.forEach( renderTextGroup );
+		state.logos.forEach( renderLogo );
+	}
+
+	function positionEl( el, pos ) {
+		el.style.left = pos.x + '%';
+		el.style.top = pos.y + '%';
+	}
+
+	// --- tabs ---
+
+	function selectTab( tab ) {
+		var map = {
+			quote: { btn: els.tabBtnQuote, panel: els.panelQuote },
+			logo: { btn: els.tabBtnLogo, panel: els.panelLogo },
+			balloon: { btn: els.tabBtnBalloon, panel: els.panelBalloon },
 		};
-		img.src = size.template_url;
-	}
-
-	function draw() {
-		if ( ! state.templateImg ) {
-			return;
-		}
-		var size = activeSize();
-		ctx.clearRect( 0, 0, els.canvas.width, els.canvas.height );
-		ctx.drawImage( state.templateImg, 0, 0 );
-
-		// Dashed outline showing the customer where the drop zone is.
-		ctx.save();
-		ctx.strokeStyle = 'rgba(142,36,52,0.6)';
-		ctx.lineWidth = Math.max( 2, size.image_width * 0.003 );
-		ctx.setLineDash( [ 14, 10 ] );
-		ctx.strokeRect( size.zone_x, size.zone_y, size.zone_width, size.zone_height );
-		ctx.restore();
-
-		if ( state.logoImg && state.logoBox ) {
-			drawBox( state.logoBox, function ( px ) {
-				ctx.drawImage( state.logoImg, px.x, px.y, px.w, px.h );
-			} );
-		}
-
-		if ( els.textInput.value.trim() ) {
-			drawBox( state.textBox, function ( px ) {
-				drawWrappedText( els.textInput.value.trim(), px );
-			} );
-		}
-	}
-
-	// Converts a fractional box (relative to the zone) into absolute
-	// template-image pixels, draws the content via the callback, then
-	// draws a light selection outline + resize handle on top.
-	function drawBox( box, drawContent ) {
-		var size = activeSize();
-		var px = {
-			x: size.zone_x + box.x * size.zone_width,
-			y: size.zone_y + box.y * size.zone_height,
-			w: box.w * size.zone_width,
-			h: box.h * size.zone_height,
-		};
-		drawContent( px );
-
-		ctx.save();
-		ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-		ctx.lineWidth = 2;
-		ctx.setLineDash( [] );
-		ctx.strokeRect( px.x, px.y, px.w, px.h );
-		var handleSize = Math.max( 16, size.image_width * 0.02 );
-		ctx.fillStyle = 'rgba(142,36,52,0.85)';
-		ctx.fillRect( px.x + px.w - handleSize / 2, px.y + px.h - handleSize / 2, handleSize, handleSize );
-		ctx.restore();
-	}
-
-	function drawWrappedText( text, px ) {
-		var size = activeSize();
-		var fontSize = Math.max( 14, px.h * 0.18 );
-		ctx.save();
-		ctx.fillStyle = '#141414';
-		ctx.font = fontSize + 'px sans-serif';
-		ctx.textBaseline = 'top';
-
-		var words = text.split( ' ' );
-		var lines = [];
-		var line = '';
-		words.forEach( function ( word ) {
-			var test = line ? line + ' ' + word : word;
-			if ( ctx.measureText( test ).width > px.w && line ) {
-				lines.push( line );
-				line = word;
-			} else {
-				line = test;
-			}
+		Object.keys( map ).forEach( function ( key ) {
+			var active = key === tab;
+			map[ key ].btn.classList.toggle( 'active', active );
+			map[ key ].panel.classList.toggle( 'active', active );
 		} );
-		if ( line ) {
-			lines.push( line );
-		}
-
-		lines.forEach( function ( l, i ) {
-			ctx.fillText( l, px.x, px.y + i * fontSize * 1.25 );
-		} );
-		ctx.restore();
 	}
 
-	// --- pointer interaction: drag to move, drag the bottom-right handle to resize ---
-
-	function canvasToImagePoint( evt ) {
-		var rect = els.canvas.getBoundingClientRect();
-		var scaleX = els.canvas.width / rect.width;
-		var scaleY = els.canvas.height / rect.height;
-		return {
-			x: ( evt.clientX - rect.left ) * scaleX,
-			y: ( evt.clientY - rect.top ) * scaleY,
-		};
-	}
-
-	function boxPixels( box ) {
-		var size = activeSize();
-		return {
-			x: size.zone_x + box.x * size.zone_width,
-			y: size.zone_y + box.y * size.zone_height,
-			w: box.w * size.zone_width,
-			h: box.h * size.zone_height,
-		};
-	}
-
-	function hitTest( point ) {
-		var size = activeSize();
-		var handleSize = Math.max( 16, size.image_width * 0.02 );
-		var candidates = [];
-		if ( state.logoImg && state.logoBox ) {
-			candidates.push( { what: 'logo', box: state.logoBox } );
-		}
-		if ( els.textInput.value.trim() ) {
-			candidates.push( { what: 'text', box: state.textBox } );
-		}
-		// Check topmost (last drawn) first.
-		for ( var i = candidates.length - 1; i >= 0; i-- ) {
-			var px = boxPixels( candidates[ i ].box );
-			var onHandle =
-				point.x >= px.x + px.w - handleSize &&
-				point.x <= px.x + px.w + handleSize / 2 &&
-				point.y >= px.y + px.h - handleSize &&
-				point.y <= px.y + px.h + handleSize / 2;
-			if ( onHandle ) {
-				return { what: candidates[ i ].what, mode: 'resize' };
-			}
-			if ( point.x >= px.x && point.x <= px.x + px.w && point.y >= px.y && point.y <= px.y + px.h ) {
-				return { what: candidates[ i ].what, mode: 'move' };
-			}
-		}
-		return null;
-	}
-
-	els.canvas.addEventListener( 'pointerdown', function ( evt ) {
-		var point = canvasToImagePoint( evt );
-		var hit = hitTest( point );
-		if ( ! hit ) {
-			return;
-		}
-		els.canvas.setPointerCapture( evt.pointerId );
-		els.canvas.classList.add( 'rrt-dragging' );
-		var box = hit.what === 'logo' ? state.logoBox : state.textBox;
-		state.dragging = {
-			what: hit.what,
-			mode: hit.mode,
-			startPoint: point,
-			startBox: { x: box.x, y: box.y, w: box.w, h: box.h },
-		};
+	els.tabBtnQuote.addEventListener( 'click', function () {
+		selectTab( 'quote' );
+	} );
+	els.tabBtnLogo.addEventListener( 'click', function () {
+		selectTab( 'logo' );
+	} );
+	els.tabBtnBalloon.addEventListener( 'click', function () {
+		selectTab( 'balloon' );
 	} );
 
-	els.canvas.addEventListener( 'pointermove', function ( evt ) {
+	// --- text groups ---
+
+	function activeGroup() {
+		return state.textGroups.filter( function ( g ) {
+			return g.id === state.activeGroupId;
+		} )[ 0 ] || null;
+	}
+
+	function addTextGroup() {
+		var group = {
+			id: state.nextGroupId++,
+			text: '',
+			font: 'oswald',
+			fontSize: 5,
+			bold: false,
+			italic: false,
+			shadowColor: 'white', // WHITE TYPE (default): white text, black outline. BLACK TYPE: inverted — see renderTextGroup().
+			textColor: null, // null = use shadowColor's white/black preset. A hex string (palette swatch or custom picker) overrides it — see renderTextGroup().
+			shadowEnabled: true, // Pete, 2026-10-17: "checkbox to add shadow" then "the default shadow on white type has been lost" — on by default (matches the original always-on look), checkbox is an opt-OUT, not opt-in.
+			shadowIntensity: 60, // Pete, 2026-10-17: "shadow intensity adjustment slider" — 0-100, replaces the old fixed full/subtle auto-switch with a continuous dial the customer controls directly — see outlineShadow().
+			sideMargin: 2, // matches the real site's defaultQuote() — maxWidth = 100-2*this
+			pos: defaultPos( state.textGroups.length ),
+		};
+
+		var div = document.createElement( 'div' );
+		div.className = 'preview-text-layer style-dropshadow';
+		els.zone.appendChild( div );
+		group.el = div;
+
+		state.textGroups.push( group );
+		state.activeGroupId = group.id;
+		attachDrag( div, group, 'text' );
+		renderTextGroup( group );
+		renderSelectorPills();
+		loadGroupIntoControls( group );
+	}
+
+	function removeActiveGroup() {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.el.remove();
+		state.textGroups = state.textGroups.filter( function ( g ) {
+			return g.id !== group.id;
+		} );
+		state.activeGroupId = state.textGroups.length ? state.textGroups[ state.textGroups.length - 1 ].id : null;
+		renderSelectorPills();
+		var next = activeGroup();
+		if ( next ) {
+			loadGroupIntoControls( next );
+		} else {
+			els.quoteText.value = '';
+			updateCenterBtn();
+		}
+	}
+
+	// The very first logo/text added starts dead center — only the 2nd,
+	// 3rd, etc. get nudged apart so they don't land exactly on top of
+	// each other (and, for text, so it doesn't land pre-flagged as
+	// "off center" by updateCenterBtn() the moment it's created).
+	function defaultPos( existingCount ) {
+		if ( 0 === existingCount ) {
+			return { x: 50, y: 50 };
+		}
+		var nudge = ( existingCount % 4 ) * 6 - 9;
+		return { x: 50 + nudge, y: 50 + nudge };
+	}
+
+	function renderSelectorPills() {
+		els.quoteSelectorBtns.innerHTML = '';
+		state.textGroups.forEach( function ( group, i ) {
+			var pill = document.createElement( 'button' );
+			pill.type = 'button';
+			pill.className = 'toggle-btn' + ( group.id === state.activeGroupId ? ' selected' : '' );
+			pill.style.width = '1.6rem';
+			pill.style.fontSize = '0.65rem';
+			pill.textContent = String( i + 1 );
+			pill.addEventListener( 'click', function () {
+				state.activeGroupId = group.id;
+				renderSelectorPills();
+				loadGroupIntoControls( group );
+			} );
+			els.quoteSelectorBtns.appendChild( pill );
+		} );
+	}
+
+	function loadGroupIntoControls( group ) {
+		els.quoteText.value = group.text;
+		els.btnBold.classList.toggle( 'selected', group.bold );
+		els.btnItalic.classList.toggle( 'selected', group.italic );
+		els.fsSlider.value = group.fontSize;
+		els.boxSideMargin.value = group.sideMargin;
+		els.fontRadios.forEach( function ( r ) {
+			r.checked = r.value === group.font;
+		} );
+		// WHITE TYPE/BLACK TYPE and the palette/custom picker are mutually
+		// exclusive — only one highlighted "selected" state at a time,
+		// matching whichever one actually controls group.el's color
+		// right now (see the textColor branch in renderTextGroup()).
+		els.shadowColorRow.querySelectorAll( '.toggle-btn' ).forEach( function ( btn ) {
+			btn.classList.toggle( 'selected', ! group.textColor && btn.dataset.shadowColor === group.shadowColor );
+		} );
+		els.textColorSwatches.querySelectorAll( '.color-swatch' ).forEach( function ( swatch ) {
+			swatch.classList.toggle( 'selected', TEXT_COLOR_SWATCHES[ swatch.dataset.color ] === group.textColor );
+		} );
+		els.textColorCustom.classList.toggle( 'selected', !! group.textColor && ! isPaletteColor( group.textColor ) );
+		if ( group.textColor ) {
+			els.textColorCustom.value = group.textColor;
+		}
+		els.textShadowToggle.checked = group.shadowEnabled;
+		els.shadowIntensitySlider.value = group.shadowIntensity;
+		updateCenterBtn();
+	}
+
+	function isPaletteColor( hex ) {
+		return Object.keys( TEXT_COLOR_SWATCHES ).some( function ( key ) {
+			return TEXT_COLOR_SWATCHES[ key ] === hex;
+		} );
+	}
+
+	// Ported from the real site's updateCenterBtn()/"Center text button"
+	// handler — shows a "TEXT OFF CENTER — TAP TO RECENTER" alarm button
+	// whenever the active text group has drifted off horizontal center,
+	// clicking it snaps x back to 50%. Hidden whenever nothing is
+	// off-center (or there's no active group at all).
+	function updateCenterBtn() {
+		var group = activeGroup();
+		if ( ! group || Math.abs( group.pos.x - 50 ) <= 0.1 ) {
+			els.centerTextBtn.style.display = 'none';
+			return;
+		}
+		els.centerTextBtn.style.display = '';
+	}
+
+	els.centerTextBtn.addEventListener( 'click', function () {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.pos.x = 50;
+		renderTextGroup( group );
+		updateCenterBtn();
+	} );
+
+	// Ported from TheUnframer's own renderLayerOnEl() (quote-module.js) —
+	// text layers are positioned/sized differently from the logo:
+	// `width: max-content` (deterministic shrink-to-fit, which is also
+	// what fixed the box seeming to "change shape" — it had no explicit
+	// width before) and `left` + `bottom` + `transform: translateX(-50%)`
+	// only (no translateY — Y is anchored by the box's BOTTOM edge, not
+	// centered), so the box grows upward from a fixed point as text wraps
+	// instead of growing from a shifting center. max-width is driven by
+	// the TEXT WIDTH slider (sideMargin), not a fixed CSS percentage —
+	// `100 - 2*sideMargin`, clamped to a 20% floor, same formula as the
+	// real site.
+	function renderTextGroup( group ) {
+		group.el.textContent = group.text;
+		// Always the plain "dropshadow" style (text + outline, no
+		// background box) — WHITE TYPE/BLACK TYPE is NOT a different
+		// placement style, it's the real site's shadowColor toggle WITHIN
+		// dropshadow: white (default CSS) = white text/black outline,
+		// black = inline-overridden to near-black text/white outline. The
+		// 'blackbox' class is a literal solid-black background rectangle,
+		// a completely different thing — wiring BLACK TYPE to it was the
+		// bug ("white letters in a black box" instead of black lettering).
+		group.el.className = 'preview-text-layer style-dropshadow';
+		// resolveTextColor() picks whichever is in control — the custom
+		// palette/picker (group.textColor) if set, else the WHITE
+		// TYPE/BLACK TYPE preset — and the matching outline for contrast.
+		var resolvedColor = resolveTextColor( group );
+		group.el.style.color = resolvedColor.color;
+		// "Shadow" checkbox + intensity slider — on by default at a
+		// middle intensity, unchecks to turn it off entirely.
+		group.el.style.textShadow = group.shadowEnabled ? outlineShadow( group.shadowIntensity ) : 'none';
+		group.el.style.display = group.text ? 'block' : 'none';
+		group.el.style.fontFamily = TEXT_FONTS[ group.font ] || 'sans-serif';
+		group.el.style.fontWeight = group.bold ? '700' : '400';
+		group.el.style.fontStyle = group.italic ? 'italic' : 'normal';
+		group.el.style.whiteSpace = group.text.indexOf( '\n' ) !== -1 ? 'pre-wrap' : 'normal';
+		group.el.style.width = 'max-content';
+		group.el.style.maxWidth = Math.max( 20, 100 - 2 * group.sideMargin ) + '%';
+		updateTextGroupFontSize( group ); // sets font-size — affects the box's rendered width/height, measured below
+		clampGroupToZone( group );
+
+		group.el.style.left = group.pos.x + '%';
+		group.el.style.bottom = ( 100 - group.pos.y ) + '%';
+		group.el.style.top = 'auto';
+		group.el.style.transform = 'translateX(-50%)';
+	}
+
+	// Hard wall, same as the drag clamp, but triggered by size changes
+	// that aren't a drag at all — typing more text, a bigger font, or a
+	// wider TEXT WIDTH setting all grow the box, and since it's
+	// bottom-anchored (see renderTextGroup()'s comment), a taller box
+	// pushes its TOP edge upward. Without this, going from one line to
+	// two could push the box above the zone entirely while its pos.y
+	// never changed. MUST be called after ANY style change that could
+	// resize the box (content, font, width) — not just from
+	// renderTextGroup() itself, since the font-size slider used to call
+	// updateTextGroupFontSize() directly and skip this entirely.
+	function clampGroupToZone( group ) {
+		if ( group.text ) {
+			var zoneRect = els.zone.getBoundingClientRect();
+			// Width is correct already (max-content respects maxWidth), but
+			// height only reflects the real wrapped line count once the
+			// element is actually in final layout — safe to measure now
+			// since font/width/content are already applied above.
+			var elRect = group.el.getBoundingClientRect();
+			var halfWPct = ( elRect.width / zoneRect.width ) * 50;
+			var heightPct = ( elRect.height / zoneRect.height ) * 100;
+			// When the box itself is wider/taller than the zone (e.g. a
+			// big font wrapped to 2 lines), halfWPct can exceed 50 and
+			// heightPct can exceed 100 — there's no position left that
+			// fully contains the box. clamp(value, min, max) with
+			// min > max returns min unconditionally (Math.max(min, ...)
+			// always wins), which previously sent pos.y to a wild
+			// out-of-range value like 202%. Capping the bounds themselves
+			// to a sane [0,100] window first pins the box to the nearest
+			// sensible edge (centered / flush-bottom) instead.
+			var minX = Math.min( halfWPct, 50 );
+			var maxX = Math.max( 100 - halfWPct, 50 );
+			var minY = Math.min( heightPct, 100 );
+			group.pos.x = clamp( group.pos.x, minX, maxX );
+			group.pos.y = clamp( group.pos.y, minY, 100 );
+		}
+
+		group.el.style.left = group.pos.x + '%';
+		group.el.style.bottom = ( 100 - group.pos.y ) + '%';
+		group.el.style.top = 'auto';
+		group.el.style.transform = 'translateX(-50%)';
+	}
+
+	function updateTextGroupFontSize( group ) {
+		var zoneRect = els.zone.getBoundingClientRect();
+		var px = Math.max( 8, zoneRect.width * ( group.fontSize / 100 ) );
+		group.el.style.fontSize = px + 'px';
+	}
+
+	els.quoteAddBtn.addEventListener( 'click', addTextGroup );
+	els.quoteRemoveBtn.addEventListener( 'click', removeActiveGroup );
+
+	els.quoteText.addEventListener( 'input', function () {
+		// The textarea's value at the moment this fires already includes
+		// the character just typed — but if this is the FIRST character
+		// (no group exists yet), addTextGroup() -> loadGroupIntoControls()
+		// resets els.quoteText.value back to the new (empty) group's text,
+		// wiping that character out from under the user. Capture it first.
+		var typedValue = els.quoteText.value;
+		var group = activeGroup();
+		if ( ! group ) {
+			addTextGroup();
+			group = activeGroup();
+		}
+		group.text = typedValue;
+		els.quoteText.value = typedValue;
+		renderTextGroup( group );
+	} );
+
+	els.btnBold.addEventListener( 'click', function () {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.bold = ! group.bold;
+		els.btnBold.classList.toggle( 'selected', group.bold );
+		renderTextGroup( group );
+	} );
+
+	els.btnItalic.addEventListener( 'click', function () {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.italic = ! group.italic;
+		els.btnItalic.classList.toggle( 'selected', group.italic );
+		renderTextGroup( group );
+	} );
+
+	els.fsSlider.addEventListener( 'input', function () {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.fontSize = parseFloat( els.fsSlider.value );
+		// updateTextGroupFontSize() only sets font-size — it never
+		// touches position, so the hard-wall clamp (and the resulting
+		// left/bottom re-apply) has to be driven explicitly here, same
+		// as renderTextGroup() does for every other style change. This
+		// is the fix for text popping outside the canvas when enlarged
+		// to the point of wrapping to a second line.
+		updateTextGroupFontSize( group );
+		clampGroupToZone( group );
+	} );
+
+	els.boxSideMargin.addEventListener( 'input', function () {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.sideMargin = parseFloat( els.boxSideMargin.value );
+		renderTextGroup( group );
+	} );
+
+	els.fontRadios.forEach( function ( radio ) {
+		radio.addEventListener( 'change', function () {
+			var group = activeGroup();
+			if ( ! group || ! radio.checked ) {
+				return;
+			}
+			group.font = radio.value;
+			renderTextGroup( group );
+		} );
+	} );
+
+	els.shadowColorRow.querySelectorAll( '.toggle-btn' ).forEach( function ( btn ) {
+		btn.addEventListener( 'click', function () {
+			var group = activeGroup();
+			if ( ! group ) {
+				return;
+			}
+			group.shadowColor = btn.dataset.shadowColor;
+			group.textColor = null; // WHITE/BLACK TYPE and the custom palette are mutually exclusive.
+			loadGroupIntoControls( group );
+			renderTextGroup( group );
+		} );
+	} );
+
+	// Pete, 2026-10-17: "there's room next to black type... let's add a 5
+	// color pallette for text color" + "make it adjustable, slide into
+	// your color" — the 5 fixed swatches and the native color picker both
+	// just set group.textColor to a hex string; renderTextGroup() picks a
+	// readable outline for whatever color lands there.
+	els.textColorSwatches.querySelectorAll( '.color-swatch' ).forEach( function ( swatch ) {
+		swatch.addEventListener( 'click', function () {
+			var group = activeGroup();
+			if ( ! group ) {
+				return;
+			}
+			group.textColor = TEXT_COLOR_SWATCHES[ swatch.dataset.color ] || null;
+			loadGroupIntoControls( group );
+			renderTextGroup( group );
+		} );
+	} );
+
+	els.textColorCustom.addEventListener( 'input', function () {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.textColor = els.textColorCustom.value;
+		loadGroupIntoControls( group );
+		renderTextGroup( group );
+	} );
+
+	els.textShadowToggle.addEventListener( 'change', function () {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.shadowEnabled = els.textShadowToggle.checked;
+		renderTextGroup( group );
+	} );
+
+	els.shadowIntensitySlider.addEventListener( 'input', function () {
+		var group = activeGroup();
+		if ( ! group ) {
+			return;
+		}
+		group.shadowIntensity = parseFloat( els.shadowIntensitySlider.value );
+		renderTextGroup( group );
+	} );
+
+	// Keep font sizes correct as the stage's rendered size changes.
+	if ( window.ResizeObserver ) {
+		new ResizeObserver( function () {
+			state.textGroups.forEach( updateTextGroupFontSize );
+		} ).observe( els.zone );
+	}
+
+	// --- slider step buttons (the small − / + next to every slider in the
+	// copied markup — logo size, font size, text width, etc.) — generic,
+	// not tied to any one slider: reads data-for/data-dir, nudges that
+	// slider's value by its own step, and fires a real 'input' event so
+	// whichever listener already owns that slider (e.g. logoSizeSlider's
+	// or fsSlider's above) runs exactly as if the user had dragged it. */
+	document.querySelectorAll( '.slider-step-btn' ).forEach( function ( btn ) {
+		btn.addEventListener( 'click', function () {
+			var slider = document.getElementById( btn.dataset.for );
+			if ( ! slider ) {
+				return;
+			}
+			var step = parseFloat( slider.step ) || 1;
+			var dir = parseFloat( btn.dataset.dir ) || 1;
+			var min = parseFloat( slider.min );
+			var max = parseFloat( slider.max );
+			var value = parseFloat( slider.value ) + dir * step;
+			slider.value = Math.max( min, Math.min( max, value ) );
+			slider.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+		} );
+	} );
+
+	// --- slider fill indicator (.style-slider's colored track is driven
+	// by a --fill CSS custom property, not the native thumb position —
+	// the copied CSS defaults it to a fixed 20% and nothing ever updated
+	// it, so the red fill looked frozen no matter where the thumb/value
+	// actually was. Generic: applies to every .style-slider, updates on
+	// both real drags and the synthetic 'input' events the step buttons
+	// above dispatch. */
+	function updateSliderFill( slider ) {
+		var min = parseFloat( slider.min ) || 0;
+		var max = parseFloat( slider.max ) || 100;
+		var pct = ( ( parseFloat( slider.value ) - min ) / ( max - min ) ) * 100;
+		slider.style.setProperty( '--fill', pct + '%' );
+	}
+
+	document.querySelectorAll( '.style-slider' ).forEach( function ( slider ) {
+		updateSliderFill( slider );
+		slider.addEventListener( 'input', function () {
+			updateSliderFill( slider );
+		} );
+	} );
+
+	// --- font drum (ported from the real site's quote-module.js — the
+	// markup was copied over with the down-arrow ".font-drum-rotator"
+	// button already in it, but nothing ever wired it or the drum's own
+	// wheel/swipe scroll, so the arrow did nothing ("broken"). Pure
+	// scroll — never changes which font is selected, just moves the
+	// visible list by one row and wraps at the end. ---
+	document.querySelectorAll( '.font-drum' ).forEach( function ( drum ) {
+		drum.addEventListener( 'wheel', function ( evt ) {
+			evt.preventDefault();
+			var card = drum.querySelector( '.radio-card' );
+			var itemH = card ? card.offsetHeight : 40;
+			var down = evt.deltaY > 0;
+			var atBot = drum.scrollTop + drum.clientHeight >= drum.scrollHeight - 4;
+			var atTop = drum.scrollTop <= 4;
+			if ( down && atBot ) {
+				drum.scrollTo( { top: 0, behavior: 'smooth' } );
+			} else if ( ! down && atTop ) {
+				drum.scrollTo( { top: drum.scrollHeight, behavior: 'smooth' } );
+			} else {
+				drum.scrollBy( { top: down ? itemH : -itemH, behavior: 'smooth' } );
+			}
+		}, { passive: false } );
+
+		var touchStartX = 0;
+		drum.addEventListener( 'touchstart', function ( evt ) {
+			touchStartX = evt.touches[ 0 ].clientX;
+		}, { passive: true } );
+		drum.addEventListener( 'touchend', function ( evt ) {
+			var dx = touchStartX - evt.changedTouches[ 0 ].clientX;
+			if ( Math.abs( dx ) < 10 ) {
+				return;
+			}
+			setTimeout( function () {
+				var maxScroll = drum.scrollWidth - drum.clientWidth;
+				if ( dx > 0 && drum.scrollLeft >= maxScroll - 4 ) {
+					drum.scrollTo( { left: 0, behavior: 'smooth' } );
+				} else if ( dx < 0 && drum.scrollLeft <= 4 ) {
+					drum.scrollTo( { left: maxScroll, behavior: 'smooth' } );
+				}
+			}, 300 );
+		}, { passive: true } );
+	} );
+
+	document.querySelectorAll( '.font-drum-rotator' ).forEach( function ( btn ) {
+		var row = btn.closest( '.font-drum-row' );
+		var drum = row ? row.querySelector( '.font-drum' ) : null;
+		if ( ! drum ) {
+			return;
+		}
+		btn.addEventListener( 'click', function () {
+			var card = drum.querySelector( '.radio-card' );
+			var itemH = card ? card.offsetHeight : 40;
+			var atBot = drum.scrollTop + drum.clientHeight >= drum.scrollHeight - 4;
+			if ( atBot ) {
+				drum.scrollTo( { top: 0, behavior: 'smooth' } );
+			} else {
+				drum.scrollBy( { top: itemH, behavior: 'smooth' } );
+			}
+		} );
+	} );
+
+	// --- logo (same "multiple instances, pick which one you're editing"
+	// pattern as text groups — CHOOSE FILE replaces the ACTIVE logo's
+	// image, +Add starts a brand-new one, matching #logo-add-btn/
+	// #logo-selector-btns already in the copied markup, which weren't
+	// wired on the first pass — that's why "choose file" clobbered the
+	// one logo you already had instead of adding another.) ---
+
+	function activeLogo() {
+		return state.logos.filter( function ( l ) {
+			return l.id === state.activeLogoId;
+		} )[ 0 ] || null;
+	}
+
+	// A logo is either a real customer upload (logo.file, a File object) or
+	// one of the bundled ART pieces (logo.artKey/artLabel, no File at all)
+	// — this reads whichever applies instead of assuming .file exists.
+	function logoDisplayName( logo ) {
+		return logo.artKey ? logo.artLabel : ( logo.file ? logo.file.name : '' );
+	}
+
+	// Pete, 2026-10-17: "a library of holiday/birthday/celebration art
+	// icons we can use to click like adding logos... a drop down box on
+	// the add logo line simply a button that says ART" — picking one adds
+	// it as a brand-new logo-type layer, same drag/resize/stacking as a
+	// real uploaded logo, just sourced from this plugin's own bundled PNG
+	// (config.art) instead of an uploaded file. Always adds a new one
+	// (never replaces the active logo) — simplest, unambiguous behavior,
+	// matching "+ Add" rather than "CHOOSE FILE".
+	function addArtLogo( key ) {
+		var art = config.art && config.art[ key ];
+		if ( ! art ) {
+			return;
+		}
+		var img = document.createElement( 'img' );
+		img.className = 'rrt-lc-logo-layer';
+		img.alt = '';
+		img.src = art.url;
+		els.zone.appendChild( img );
+		var logo = {
+			id: state.nextLogoId++,
+			file: null,
+			artKey: key,
+			artLabel: art.label,
+			scale: parseFloat( els.logoSizeSlider.value ),
+			pos: defaultPos( state.logos.length ),
+			el: img,
+		};
+		state.logos.push( logo );
+		state.activeLogoId = logo.id;
+		attachDrag( img, logo, 'logo' );
+		renderLogoSelectorPills();
+		els.logoFilename.textContent = logoDisplayName( logo );
+		renderLogo( logo );
+	}
+
+	// A native <select>'s <option> can only ever show plain text — no
+	// browser lets you put an image in one — so "see the art, not a
+	// description" rules that out entirely. This is a small custom
+	// popover instead: the ART button toggles a grid of real thumbnails
+	// (rendered server-side in quote-module-card.part.php), clicking one
+	// adds it and closes the panel.
+	// Pete, 2026-10-17: "can't look at art" / "circle with arrows... page
+	// goes up and down" — #logo-selector-row has overflow-y:hidden (a
+	// fix for an earlier, unrelated stray-scrollbar bug), which CLIPS any
+	// absolutely-positioned child that pops outside the row's own height
+	// — exactly what this panel needs to do, making it invisible, and
+	// its phantom off-screen footprint was dragging the row's own
+	// scrollable area around under the cursor. Fixed the standard way a
+	// popover escapes a clipped/scrolling ancestor: move it to be a
+	// direct child of <body> (position:fixed in its own CSS), positioned
+	// under the button fresh every time it opens.
+	document.body.appendChild( els.artPickerPanel );
+
+	function positionArtPanel() {
+		var rect = els.artPickerBtn.getBoundingClientRect();
+		els.artPickerPanel.style.left = rect.left + 'px';
+		els.artPickerPanel.style.top = ( rect.bottom + 4 ) + 'px';
+	}
+
+	els.artPickerBtn.addEventListener( 'click', function ( evt ) {
+		evt.stopPropagation();
+		var isOpen = els.artPickerPanel.style.display !== 'none';
+		if ( isOpen ) {
+			els.artPickerPanel.style.display = 'none';
+		} else {
+			positionArtPanel();
+			els.artPickerPanel.style.display = 'grid';
+		}
+	} );
+
+	els.artPickerPanel.querySelectorAll( '.art-picker-item' ).forEach( function ( btn ) {
+		btn.addEventListener( 'click', function ( evt ) {
+			evt.stopPropagation();
+			addArtLogo( btn.dataset.artKey );
+			els.artPickerPanel.style.display = 'none';
+		} );
+	} );
+
+	// Click anywhere outside the panel (or its own toggle button) closes it.
+	document.addEventListener( 'click', function ( evt ) {
+		if ( els.artPickerPanel.style.display === 'none' ) {
+			return;
+		}
+		if ( ! els.artPicker.contains( evt.target ) && ! els.artPickerPanel.contains( evt.target ) ) {
+			els.artPickerPanel.style.display = 'none';
+		}
+	} );
+
+	els.logoUploadBtn.addEventListener( 'click', function () {
+		state.addingNewLogo = false;
+		els.logoFileInput.value = '';
+		els.logoFileInput.click();
+	} );
+
+	els.logoAddBtn.addEventListener( 'click', function () {
+		state.addingNewLogo = true;
+		els.logoFileInput.value = '';
+		els.logoFileInput.click();
+	} );
+
+	els.logoFileInput.addEventListener( 'change', function () {
+		var file = els.logoFileInput.files[ 0 ];
+		if ( ! file || ! /^image\/(png|jpe?g)$/.test( file.type ) ) {
+			return;
+		}
+		var reader = new FileReader();
+		reader.onload = function ( evt ) {
+			var logo = state.addingNewLogo ? null : activeLogo();
+			if ( ! logo ) {
+				var img = document.createElement( 'img' );
+				img.className = 'rrt-lc-logo-layer';
+				img.alt = '';
+				els.zone.appendChild( img );
+				logo = {
+					id: state.nextLogoId++,
+					file: file,
+					scale: parseFloat( els.logoSizeSlider.value ),
+					pos: defaultPos( state.logos.length ),
+					el: img,
+				};
+				state.logos.push( logo );
+				state.activeLogoId = logo.id;
+				attachDrag( img, logo, 'logo' );
+				renderLogoSelectorPills();
+			} else {
+				logo.file = file;
+				logo.artKey = null; // CHOOSE FILE on an ART logo replaces it with a real upload.
+				logo.artLabel = null;
+			}
+			state.addingNewLogo = false;
+			logo.el.src = evt.target.result;
+			els.logoFilename.textContent = file.name;
+			renderLogo( logo );
+		};
+		reader.readAsDataURL( file );
+	} );
+
+	els.logoRemoveBtn.addEventListener( 'click', function () {
+		var logo = activeLogo();
+		if ( ! logo ) {
+			return;
+		}
+		logo.el.remove();
+		state.logos = state.logos.filter( function ( l ) {
+			return l.id !== logo.id;
+		} );
+		state.activeLogoId = state.logos.length ? state.logos[ state.logos.length - 1 ].id : null;
+		renderLogoSelectorPills();
+		var next = activeLogo();
+		els.logoFilename.textContent = next ? logoDisplayName( next ) : '';
+		if ( next ) {
+			els.logoSizeSlider.value = next.scale;
+		}
+	} );
+
+	els.logoSizeSlider.addEventListener( 'input', function () {
+		var logo = activeLogo();
+		if ( ! logo ) {
+			return;
+		}
+		logo.scale = parseFloat( els.logoSizeSlider.value );
+		renderLogo( logo );
+	} );
+
+	function renderLogoSelectorPills() {
+		els.logoSelectorBtns.innerHTML = '';
+		state.logos.forEach( function ( logo, i ) {
+			var pill = document.createElement( 'button' );
+			pill.type = 'button';
+			pill.className = 'toggle-btn' + ( logo.id === state.activeLogoId ? ' selected' : '' );
+			pill.style.width = '1.6rem';
+			pill.style.fontSize = '0.65rem';
+			pill.textContent = String( i + 1 );
+			pill.addEventListener( 'click', function () {
+				state.activeLogoId = logo.id;
+				renderLogoSelectorPills();
+				els.logoFilename.textContent = logoDisplayName( logo );
+				els.logoSizeSlider.value = logo.scale;
+			} );
+			els.logoSelectorBtns.appendChild( pill );
+		} );
+	}
+
+	function renderLogo( logo ) {
+		logo.el.style.width = logo.scale + '%';
+		positionEl( logo.el, logo.pos );
+	}
+
+	// --- drag to reposition (same x/y % storage for text groups and logo,
+	// but applied to the element differently per kind — see
+	// renderTextGroup()'s comment for why text uses left+bottom while the
+	// logo uses left+top+translate(-50%,-50%), matching the real site) ---
+
+	function attachDrag( el, item, kind ) {
+		el.addEventListener( 'pointerdown', function ( evt ) {
+			evt.preventDefault();
+			el.setPointerCapture( evt.pointerId );
+			el.classList.add( 'rrt-dragging' );
+			var zoneRect = els.zone.getBoundingClientRect();
+			var elRect = el.getBoundingClientRect();
+			state.dragging = {
+				item: item,
+				el: el,
+				kind: kind,
+				startPoint: { x: evt.clientX, y: evt.clientY },
+				startPos: { x: item.pos.x, y: item.pos.y },
+				// Element's own size as a % of the zone, captured once at
+				// drag-start (size doesn't change mid-drag — only the
+				// slider changes it, not the pointer) — this is what makes
+				// the dashed zone edge a hard wall for the element's
+				// actual edges, not just its anchor point.
+				halfWPct: ( elRect.width / zoneRect.width ) * 50,
+				halfHPct: ( elRect.height / zoneRect.height ) * 50,
+			};
+		} );
+		el.addEventListener( 'pointermove', onDragMove );
+		el.addEventListener( 'pointerup', endDrag );
+		el.addEventListener( 'pointercancel', endDrag );
+	}
+
+	function onDragMove( evt ) {
 		if ( ! state.dragging ) {
 			return;
 		}
-		var size = activeSize();
-		var point = canvasToImagePoint( evt );
-		var dx = ( point.x - state.dragging.startPoint.x ) / size.zone_width;
-		var dy = ( point.y - state.dragging.startPoint.y ) / size.zone_height;
-		var box = state.dragging.what === 'logo' ? state.logoBox : state.textBox;
-		var start = state.dragging.startBox;
+		var zoneRect = els.zone.getBoundingClientRect();
+		var d = state.dragging;
+		var dxPct = ( ( evt.clientX - d.startPoint.x ) / zoneRect.width ) * 100;
+		var dyPct = ( ( evt.clientY - d.startPoint.y ) / zoneRect.height ) * 100;
+		var rawX = d.startPos.x + dxPct;
+		var rawY = d.startPos.y + dyPct;
 
-		if ( state.dragging.mode === 'move' ) {
-			box.x = clamp( start.x + dx, 0, 1 - start.w );
-			box.y = clamp( start.y + dy, 0, 1 - start.h );
+		// Hard wall: clamp so the element's own rendered edges never cross
+		// the zone boundary, not just its anchor point — EXCEPT for ART,
+		// where Pete confirmed the dashed zone is the right boundary but
+		// "we still need more room to move art closer to the dashed
+		// lines": even dragged to the absolute limit, a fully-contained
+		// box can only ever get flush with the line (verified — 0px gap
+		// at every size tested), never past it, so "closer" has to mean
+		// letting the box actually CROSS the line. ART's anchor (center)
+		// is allowed the full [0,100] zone range instead of being pulled
+		// in by half its own size, so up to half the art can overlap past
+		// the dashed line — logos/text are unaffected, still fully
+		// contained. Logo is center-anchored on both axes; text is
+		// center-anchored on X but BOTTOM-anchored on Y (see
+		// renderTextGroup()'s comment), so its vertical room to move is
+		// measured from the bottom edge upward. Same min>max guard as
+		// clampGroupToZone() — if the box is wider/taller than the zone
+		// itself, cap the bounds to a sane [0,100] window first so
+		// clamp() can't return an out-of-range value.
+		var isArt = !! d.item.artKey;
+		var dragMinX = isArt ? 0 : Math.min( d.halfWPct, 50 );
+		var dragMaxX = isArt ? 100 : Math.max( 100 - d.halfWPct, 50 );
+		d.item.pos.x = clamp( rawX, dragMinX, dragMaxX );
+		if ( 'text' === d.kind ) {
+			var dragMinY = Math.min( d.halfHPct * 2, 100 );
+			d.item.pos.y = clamp( rawY, dragMinY, 100 );
+			d.el.style.left = d.item.pos.x + '%';
+			d.el.style.bottom = ( 100 - d.item.pos.y ) + '%';
+			updateCenterBtn();
 		} else {
-			box.w = clamp( start.w + dx, 0.05, 1 - start.x );
-			box.h = clamp( start.h + dy, 0.05, 1 - start.y );
+			var dragMinYLogo = isArt ? 0 : Math.min( d.halfHPct, 100 - d.halfHPct );
+			var dragMaxYLogo = isArt ? 100 : Math.max( 100 - d.halfHPct, d.halfHPct );
+			d.item.pos.y = clamp( rawY, dragMinYLogo, dragMaxYLogo );
+			positionEl( d.el, d.item.pos );
 		}
-		draw();
-	} );
+	}
 
-	[ 'pointerup', 'pointercancel' ].forEach( function ( evtName ) {
-		els.canvas.addEventListener( evtName, function () {
-			state.dragging = null;
-			els.canvas.classList.remove( 'rrt-dragging' );
-		} );
-	} );
+	function endDrag() {
+		if ( ! state.dragging ) {
+			return;
+		}
+		state.dragging.el.classList.remove( 'rrt-dragging' );
+		state.dragging = null;
+	}
 
 	function clamp( value, min, max ) {
 		return Math.max( min, Math.min( max, value ) );
 	}
 
-	// --- controls ---
-
-	els.size.addEventListener( 'change', function () {
-		loadTemplate( els.size.value );
-	} );
-
-	els.logoInput.addEventListener( 'change', function () {
-		var file = els.logoInput.files[ 0 ];
-		if ( ! file ) {
-			return;
+	// Resolves whatever is actually controlling a text group's color right
+	// now — the custom palette/picker (group.textColor) if set, otherwise
+	// the WHITE TYPE/BLACK TYPE preset — down to one { color, outline }
+	// pair. Shared by renderTextGroup() (the live preview) AND the submit
+	// handler below (so the emailed/composited label Pete reviews uses
+	// the exact same color the customer saw, not GD's old hardcoded
+	// near-black default).
+	// Pete, 2026-10-17: "shadow check box does nothing, except remove from
+	// white type" — root cause: the outline color used to be picked by
+	// the TEXT's OWN luminance (light text -> dark outline, dark text ->
+	// white outline), which makes sense for outline-vs-TEXT contrast, but
+	// ignores what the outline needs to contrast against: the label
+	// template itself, which is a plain light/white print background, not
+	// a photo. A white outline is invisible there regardless of the
+	// text's color, so BLACK TYPE / dark custom colors effectively never
+	// showed one — the checkbox looked like it "did nothing" except for
+	// WHITE TYPE. Fix: always use the dark outline recipe — it's visible
+	// against this light backdrop in every case, including a harmless,
+	// subtle self-outline when the text itself is already dark.
+	function resolveTextColor( group ) {
+		if ( group.textColor ) {
+			return { color: group.textColor, outline: '#000000' };
 		}
-		state.logoFile = file;
-		var reader = new FileReader();
-		reader.onload = function ( evt ) {
-			var img = new Image();
-			img.onload = function () {
-				state.logoImg = img;
-				// Default: a reasonably sized box in the upper-left of
-				// the zone, keeping the logo's own aspect ratio.
-				var aspect = img.width / img.height;
-				var w = 0.5;
-				var h = clamp( w / aspect * ( activeSize().zone_width / activeSize().zone_height ), 0.05, 1 );
-				state.logoBox = { x: 0.05, y: 0.05, w: w, h: h };
-				els.logoRemove.hidden = false;
-				draw();
-			};
-			img.src = evt.target.result;
-		};
-		reader.readAsDataURL( file );
-	} );
+		if ( 'black' === group.shadowColor ) {
+			return { color: '#1a1a1a', outline: '#000000' };
+		}
+		return { color: '#ffffff', outline: '#000000' };
+	}
 
-	els.logoRemove.addEventListener( 'click', function () {
-		state.logoImg = null;
-		state.logoFile = null;
-		state.logoBox = null;
-		els.logoInput.value = '';
-		els.logoRemove.hidden = true;
-		draw();
-	} );
+	// Pete, 2026-10-17: "black type shadow really needs to be backed way
+	// off" -> "move shadow checkbox up to the add/remove line with a
+	// shadow intensity adjustment slider" — the fixed full/subtle
+	// auto-switch (based on how dark the text color was) is now a plain
+	// continuous 0-100 dial (group.shadowIntensity) the customer drags
+	// themselves: 0 is invisible, 100 matches the original full-strength
+	// outline, everything between scales the same ring+blur recipe
+	// proportionally.
+	function outlineShadow( intensity ) {
+		var amount = Math.max( 0, Math.min( 100, intensity ) ) / 100;
+		var ring = ( 0.95 * amount ).toFixed( 2 );
+		var nearBlur = ( 1 * amount ).toFixed( 2 );
+		var farBlur = ( 0.5 * amount ).toFixed( 2 );
+		return '-1px -1px 0 rgba(0,0,0,' + ring + '), 1px -1px 0 rgba(0,0,0,' + ring + '), -1px 1px 0 rgba(0,0,0,' + ring + '), 1px 1px 0 rgba(0,0,0,' + ring + '), 2px 2px 5px rgba(0,0,0,' + nearBlur + '), 0 0 12px rgba(0,0,0,' + farBlur + ')';
+	}
 
-	els.textInput.addEventListener( 'input', draw );
+	// --- submit ---
 
 	function setStatus( message, type ) {
 		els.status.textContent = message;
@@ -313,11 +1031,15 @@
 	}
 
 	els.submit.addEventListener( 'click', function () {
+		var hasText = state.textGroups.some( function ( g ) {
+			return g.text.trim();
+		} );
+
 		if ( ! els.name.value.trim() || ! els.email.value.trim() ) {
 			setStatus( 'Please fill in your name and email.', 'error' );
 			return;
 		}
-		if ( ! state.logoFile && ! els.textInput.value.trim() ) {
+		if ( ! state.logos.length && ! hasText ) {
 			setStatus( 'Please add a logo and/or some text to your label.', 'error' );
 			return;
 		}
@@ -340,16 +1062,39 @@
 			body.append( 'email', els.email.value.trim() );
 			body.append( 'phone', els.phone.value.trim() );
 			body.append( 'message', els.message.value.trim() );
-			body.append( 'label_text', els.textInput.value.trim() );
-			if ( state.logoBox ) {
-				body.append( 'logo_box', JSON.stringify( state.logoBox ) );
-			}
-			if ( els.textInput.value.trim() ) {
-				body.append( 'text_box', JSON.stringify( state.textBox ) );
-			}
-			if ( state.logoFile ) {
-				body.append( 'logo', state.logoFile );
-			}
+
+			var layersMeta = [];
+			state.logos.forEach( function ( logo ) {
+				// ART logos have no uploaded File at all — nothing to send
+				// in logo_files[], just the art_key so the server can pull
+				// its own bundled asset (see rrt_label_art_library() in
+				// inc/handle-submission.php). Real uploads still go through
+				// logo_files[] exactly as before.
+				if ( ! logo.artKey ) {
+					body.append( 'logo_files[]', logo.file );
+				}
+				layersMeta.push( { type: 'logo', pos: logo.pos, scale: logo.scale, art_key: logo.artKey || '' } );
+			} );
+			state.textGroups.forEach( function ( group ) {
+				if ( group.text.trim() ) {
+					var resolvedColor = resolveTextColor( group );
+					layersMeta.push( {
+						type: 'text',
+						pos: group.pos,
+						text: group.text,
+						font: group.font,
+						font_size: group.fontSize,
+						// So the server-side composite (what Pete actually
+						// reviews/approves) matches the color the customer
+						// saw, instead of GD's old hardcoded near-black text.
+						color: resolvedColor.color,
+						outline: resolvedColor.outline,
+						shadow: group.shadowEnabled,
+						shadow_intensity: group.shadowIntensity,
+					} );
+				}
+			} );
+			body.append( 'layers', JSON.stringify( layersMeta ) );
 
 			fetch( config.ajaxUrl, { method: 'POST', body: body } )
 				.then( function ( r ) {
@@ -371,8 +1116,13 @@
 	} );
 
 	// --- init ---
+	// No default tab/text group — Pete: "let's start with no default,
+	// buttons ready to get you where you ask." Clicking a pill opens its
+	// panel; typing in the text box (or the font-drum's own fallback in
+	// the text-input handler above) is what actually creates the first
+	// text group, same moment a real customer would expect one to exist.
 	var firstSize = Object.keys( config.sizes )[ 0 ];
 	if ( firstSize ) {
-		loadTemplate( firstSize );
+		loadSize( firstSize );
 	}
 } )();

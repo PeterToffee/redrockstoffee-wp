@@ -1,24 +1,181 @@
-/* RRT Label Configurator — plain CSS, no build step. */
+/* RRT Label Configurator — plain CSS, no build step.
+ *
+ * TheUnframer.com's real upload-configurator.css + the relevant chunk of
+ * custom.css are copied BYTE-FOR-BYTE into configurator-base.css /
+ * configurator-components.css (Pete: "copy means copy" — not ported,
+ * not reinterpreted, an actual file copy). This markup uses the REAL,
+ * UNPREFIXED class names from that copy (.configurator-grid,
+ * .configurator-sidebar, .configurator-main, .config-card) — not
+ * renamed/rrt-prefixed versions — specifically so the copied layout
+ * rules actually apply (an earlier rrt-prefixed version silently broke
+ * the whole grid/sidebar/sticky-preview layout, which is what "looking
+ * really stupid" turned out to be). This file is only:
+ *   1. mobile `order:` values for the few sidebar cards that are new in
+ *      this plugin (the copy's own mobile reordering is keyed to IDs
+ *      like #photo-upload-container that don't exist here);
+ *   2. a few deliberate, explicitly-requested visibility overrides on
+ *      top of the untouched copy (see below) — never edits to the
+ *      copied files themselves;
+ *   3. this plugin's own canvas/stage/zone preview (the part Pete
+ *      confirmed is already right) and the contact-info card.
+ *
+ * Colors/font: Pete wants this to look and feel almost identical to
+ * TheUnframer.com, not just structurally similar — same customer base,
+ * same tool, same trust signal — so these are TheUnframer's own actual
+ * colors (purple #991e21 / gradient highlight #7a181b) and its own font
+ * (Poppins), not Red Rocks' separate brand kit.
+ */
+
+/* --- deliberate overrides on top of the untouched quote-module-card
+   copy: Pete wants the customer to "open with the add text/logo/
+   cartoon balloon choices available" from the start, rather than
+   TheUnframer's own gated default (hidden until a photo is uploaded,
+   which doesn't apply here — there's no "photo" step in this tool).
+   The copied file itself is never edited for this; these overrides
+   live here instead, so the copy stays diffable against the source. */
+#quote-module-card {
+	display: block !important;
+}
+
+/* The tabs/textarea/font-drum/logo-panel content itself — also hidden
+   by default in the source until #quote-toggle is checked via JS. */
+#text-layers-wrap {
+	display: block !important;
+}
+
+/* These two are ALSO separately gated behind JS in the source (the
+   textarea via its own inline display:none, the font-drum/sliders via
+   the plain .quote-options class needing JS to add a .visible class) —
+   missed on the first pass, which is why the actual typing box and font
+   picker were still invisible even after #text-layers-wrap itself was
+   force-shown. */
+#textarea-wrapper {
+	display: block !important;
+}
+
+.quote-options {
+	display: block !important;
+}
+
+/* The three pills (LOGO FILE / TEXT ON LABEL / CARTOON BALLOON) ARE the
+   tab switcher now — Pete: the checkboxes went away and the separate
+   "EDIT ..." button row was removed, folding both into one row of pills
+   that do what the EDIT buttons used to do. New markup/class (not part
+   of the TheUnframer copy), styled to match the pills' original look,
+   with a deliberately strong "selected" state. */
+.rrt-pill-tab {
+	display: inline-block;
+	border: none;
+	padding: 0.3rem 0.08rem;
+	background: linear-gradient( 135deg, var( --rrt-primary ), var( --rrt-primary-dark ) );
+	color: #fff;
+	border-radius: 6px;
+	font-size: 0.42rem;
+	font-weight: 400;
+	font-family: 'Luckiest Guy', cursive;
+	letter-spacing: 0;
+	cursor: pointer;
+	box-shadow: 0 2px 7px rgba( 153, 30, 33, 0.35 );
+	line-height: 1.25;
+	text-align: center;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.rrt-pill-tab.active {
+	background: linear-gradient( 135deg, #c0282c, var( --rrt-primary ) );
+	box-shadow: 0 0 0 3px #fff, 0 0 0 5px var( --rrt-primary ), 0 4px 14px rgba( 153, 30, 33, 0.55 );
+	transform: scale( 1.06 );
+}
 
 .rrt-label-configurator {
-	max-width: 900px;
+	--rrt-primary: #991e21;
+	--rrt-primary-dark: #7a181b;
+	--rrt-accent: #7a181b;
+	--rrt-text: #333333;
+	--rrt-heading-font: 'Poppins', sans-serif;
+	--rrt-body-font: 'Poppins', sans-serif;
+
+	max-width: 1400px;
 	margin: 0 auto;
-	display: flex;
-	flex-direction: column;
-	gap: 20px;
-	font-family: inherit;
+	padding: 0.5rem 1rem 2rem;
+	font-family: var( --rrt-body-font );
+	color: var( --rrt-text );
 }
+
+.rrt-lc-heading {
+	font-family: var( --rrt-heading-font );
+	font-weight: 500;
+	font-size: 1.2rem;
+	color: var( --rrt-primary );
+	margin: 0 0 14px;
+}
+
+.rrt-lc-hint {
+	font-size: 0.82rem;
+	color: #777;
+	margin: 14px 0 0;
+}
+
+/* --- mobile card order: the copied configurator-base.css already makes
+   .configurator-sidebar `display:contents` on mobile (so its children
+   can be freely reordered) and already handles .configurator-main's own
+   mobile positioning — this just assigns `order` to the few sidebar
+   cards that are new in this plugin, same technique, same breakpoint. --- */
+
+@media ( max-width: 991px ) {
+	.rrt-lc-card--size {
+		order: 1;
+	}
+
+	.rrt-lc-card--design {
+		order: 2;
+	}
+
+	.configurator-main {
+		order: 3;
+	}
+
+	.rrt-lc-card--contact {
+		order: 4;
+	}
+}
+
+/* NOTE: .config-card itself has NO styling in the real source either —
+   it's a bare semantic wrapper there too, so it's left alone here rather
+   than inventing a card/box look that doesn't exist in the copy. Only
+   this plugin's OWN two new cards (size picker, contact info) get a
+   light box treatment, via their own modifier classes, so the real
+   quote-module-card's appearance is never touched. */
+.rrt-lc-card--size,
+.rrt-lc-card--contact {
+	background: #fff;
+	border: 1px solid #e3ddd2;
+	border-radius: 10px;
+	padding: 18px;
+}
+
+/* --- form basics --- */
 
 .rrt-lc-field {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
-	margin-bottom: 12px;
+	margin-bottom: 14px;
 }
 
-.rrt-lc-field label {
+.rrt-lc-field:last-child {
+	margin-bottom: 0;
+}
+
+.rrt-lc-field label,
+.rrt-config-label {
+	display: block;
 	font-weight: 600;
-	font-size: 0.95rem;
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var( --rrt-primary );
+	margin-bottom: 0.25rem;
 }
 
 .rrt-lc-field input[type="text"],
@@ -26,72 +183,278 @@
 .rrt-lc-field input[type="tel"],
 .rrt-lc-field select,
 .rrt-lc-field textarea {
-	padding: 8px 10px;
+	padding: 10px 12px;
 	border: 1px solid #ccc;
 	border-radius: 6px;
+	font-family: inherit;
 	font-size: 1rem;
+	color: var( --rrt-text );
 }
 
-.rrt-lc-stage {
-	width: 100%;
+.rrt-lc-field input:focus,
+.rrt-lc-field select:focus,
+.rrt-lc-field textarea:focus {
+	outline: none;
+	border-color: var( --rrt-primary );
+	box-shadow: 0 0 0 3px rgba( 153, 30, 33, 0.15 );
+}
+
+/* --- "+ Add" buttons (same pill shape as TheUnframer's add-text-label-btn,
+   used for both "Add logo" and "Add text" — this plugin has no separate
+   big dropzone step since there's no "main photo" to upload, the label
+   template itself is always present; logo/text are just overlay layers,
+   same role as TheUnframer's quote-module logo/text toggle buttons) --- */
+
+.rrt-lc-add-buttons {
 	display: flex;
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+.rrt-lc-btn-add {
+	flex: 1 1 0;
+	display: inline-flex;
+	align-items: center;
 	justify-content: center;
-	background: #f4f4f4;
-	border: 1px solid #ddd;
-	border-radius: 8px;
-	padding: 12px;
-}
-
-#rrt-lc-canvas {
-	max-width: 100%;
-	height: auto;
-	touch-action: none;
-	cursor: grab;
-	border: 1px solid #ccc;
-	background: #fff;
-}
-
-#rrt-lc-canvas.rrt-dragging {
-	cursor: grabbing;
-}
-
-.rrt-lc-hint {
-	font-size: 0.85rem;
-	color: #666;
-	margin: 0 0 12px;
-}
-
-.rrt-lc-btn-primary,
-.rrt-lc-btn-secondary {
+	gap: 6px;
+	padding: 0.5rem 0.85rem;
+	background: linear-gradient( 135deg, var( --rrt-primary ) 0%, var( --rrt-primary-dark ) 100% );
+	color: #fff;
 	border: none;
-	border-radius: 999px;
-	padding: 12px 24px;
+	border-radius: 6px;
+	font-family: inherit;
+	font-size: 0.8rem;
 	font-weight: 700;
-	font-size: 1rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	cursor: pointer;
+	box-shadow: 0 2px 7px rgba( 153, 30, 33, 0.32 );
+	transition: filter 0.15s, box-shadow 0.15s;
+}
+
+.rrt-lc-btn-add:hover {
+	filter: brightness( 1.12 );
+	box-shadow: 0 3px 12px rgba( 153, 30, 33, 0.48 );
+}
+
+.rrt-lc-btn-add svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* --- layer list: one row per added logo/text --- */
+
+.rrt-lc-layers {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.rrt-lc-layer {
+	border: 1px solid #e3ddd2;
+	border-radius: 8px;
+	padding: 10px 12px;
+}
+
+.rrt-lc-layer-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.rrt-lc-layer-label {
+	font-weight: 700;
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+	color: var( --rrt-primary );
+}
+
+.rrt-lc-layer-remove {
+	border: none;
+	background: #eee;
+	color: #666;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	font-size: 0.9rem;
+	line-height: 1;
 	cursor: pointer;
 }
 
+.rrt-lc-layer-remove:hover {
+	background: #e2b8b8;
+	color: var( --rrt-primary-dark );
+}
+
+.rrt-lc-layer-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.rrt-lc-layer-row:last-child {
+	margin-bottom: 0;
+}
+
+.rrt-lc-layer-thumb {
+	width: 32px;
+	height: 32px;
+	object-fit: contain;
+	border: 1px solid #eee;
+	border-radius: 4px;
+	flex: 0 0 auto;
+}
+
+.rrt-lc-layer-text {
+	flex: 1 1 auto;
+	padding: 7px 10px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	font-family: inherit;
+	font-size: 0.92rem;
+}
+
+.rrt-lc-layer-font {
+	flex: 0 0 auto;
+	padding: 6px 8px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	font-size: 0.85rem;
+	max-width: 110px;
+}
+
+/* --- sliders (ported from custom.css's .style-slider / .slider-with-btns) --- */
+
+.rrt-slider-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 0.1rem;
+}
+
+.rrt-slider-name {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var( --rrt-primary );
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+}
+
+.rrt-style-slider {
+	flex: 1;
+	accent-color: var( --rrt-primary );
+}
+
+.rrt-slider-with-btns {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+/* --- live preview stage --- */
+
+.rrt-lc-stage {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	border: 1px solid #e3ddd2;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.rrt-lc-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	max-width: none;
+	pointer-events: none;
+	user-select: none;
+}
+
+.rrt-lc-zone {
+	position: absolute;
+	outline: 2px dashed rgba( 153, 30, 33, 0.55 );
+	outline-offset: -2px;
+	touch-action: none;
+}
+
+/* Logo: left/top % + translate(-50%,-50%) — true center-point anchoring,
+   matching the real site's logo positioning exactly. */
+.rrt-lc-logo-layer {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate( -50%, -50% );
+	cursor: grab;
+	user-select: none;
+	touch-action: none;
+	max-width: none;
+}
+
+/* Text: position (left/bottom/top/transform) is set entirely inline by
+   renderTextGroup() per the real site's own convention (bottom-anchored,
+   translateX only) — this just supplies the non-positional defaults. */
+.preview-text-layer {
+	cursor: grab;
+	user-select: none;
+	touch-action: none;
+}
+
+.rrt-lc-logo-layer.rrt-dragging,
+.preview-text-layer.rrt-dragging {
+	cursor: grabbing;
+}
+
+/* .preview-text-layer's own base rules (position/line-height/white-space/
+   max-width:72%) come from the copied configurator-components.css. Width/
+   max-width/position are all set per-element inline by
+   renderTextGroup() in label-configurator.js (ported from the real
+   site's renderLayerOnEl() — max-width is driven live by the TEXT WIDTH
+   slider, not a fixed value), which always wins over this static rule —
+   only text-align is left as a plain CSS default here. */
+.preview-text-layer {
+	text-align: center;
+}
+
+/* The copied base rule's `padding: 0.4em 0.6em` exists so text sitting
+   inside the whitebox/blackbox background styles has breathing room
+   from the box edge — but it scales WITH font size, and for our default
+   "dropshadow" style (plain text, no background box) it was eating well
+   over 100px per side at large font sizes, wrapping text to a second
+   line long before the zone actually ran out of room. Not needed at all
+   without a background box, so zeroed out for just that style —
+   style-whitebox/style-blackbox keep the original padding. */
+.preview-text-layer.style-dropshadow {
+	padding: 0;
+}
+
+/* --- buttons --- */
+
 .rrt-lc-btn-primary {
-	background: #8e2434;
+	border: none;
+	border-radius: 999px;
+	padding: 13px 26px;
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 1rem;
+	cursor: pointer;
+	background: var( --rrt-primary );
 	color: #fff;
+	width: 100%;
 }
 
 .rrt-lc-btn-primary:hover {
-	background: #6f1c28;
-}
-
-.rrt-lc-btn-secondary {
-	background: #eee;
-	color: #333;
-	padding: 6px 14px;
-	font-size: 0.85rem;
-	margin-top: 6px;
-	align-self: flex-start;
+	background: var( --rrt-primary-dark );
 }
 
 .rrt-lc-status {
 	font-size: 0.9rem;
 	min-height: 1.2em;
+	margin-top: 10px;
 }
 
 .rrt-lc-status.is-error {
@@ -102,8 +465,71 @@
 	color: #1a7a3c;
 }
 
-@media (max-width: 480px) {
-	.rrt-lc-btn-primary {
-		width: 100%;
-	}
+/* --- text color palette ---
+   .color-row / .color-swatch / .selected are the real site's OWN swatch
+   component (copied verbatim into configurator-components.css) — it just
+   only ever shipped white/black variants, never wired up. These 5
+   data-color values are new, RRT-specific (toffee-appropriate: brand red,
+   gold, brown, cream, slate) — the deviation is the palette, not the
+   component. */
+.color-swatch[ data-color="red" ]   { background: #991e21; }
+.color-swatch[ data-color="gold" ]  { background: #c89b3c; }
+.color-swatch[ data-color="brown" ] { background: #5c3a21; }
+.color-swatch[ data-color="cream" ] { background: #fdf6e3; box-shadow: inset 0 0 0 1px #cbd5e0; }
+.color-swatch[ data-color="slate" ] { background: #708090; }
+
+/* The "slide into your own color" picker — a native <input type="color">
+   styled to sit in the same row, same size, as the fixed swatches above. */
+#text-color-custom {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 26px;
+	height: 26px;
+	border: 2.5px solid transparent;
+	border-radius: 50%;
+	padding: 0;
+	cursor: pointer;
+	background: none;
+	flex-shrink: 0;
+	transition: transform 0.12s, border-color 0.12s;
+}
+#text-color-custom:hover {
+	transform: scale( 1.15 );
+}
+#text-color-custom.selected {
+	border-color: #991e21;
+	transform: scale( 1.18 );
+}
+#text-color-custom::-webkit-color-swatch-wrapper {
+	padding: 0;
+	border-radius: 50%;
+}
+#text-color-custom::-webkit-color-swatch {
+	border: none;
+	border-radius: 50%;
+}
+
+/* Pete, 2026-10-17: "no arrow or indication on the drum scroll button" —
+   root cause (confirmed by enumerating every matching stylesheet rule via
+   a headless test): redrockstoffee.com's own Elementor Kit has a global
+   reset, `.elementor-kit-4045 button { background-color: var(--e-global-
+   color-accent); border-style: none; ... }`, which is MORE specific than
+   .font-drum-rotator's own rule in quote-module-style.part.php (1 class +
+   1 type beats 1 class alone), so it silently overrode the white
+   background/red border with the site's orange brand button look and no
+   border — the button was there and clickable, just invisible as a
+   button, with no room left for the chevron icon to read clearly either.
+   Can't raise the copied .part.php rule's own specificity without
+   diverging from the real site's source, so this one deviation uses
+   !important — a plugin needing to win over the host theme/kit's global
+   button reset is exactly what it's for. */
+.font-drum-rotator {
+	background: #fff !important;
+	border: 1.5px solid #991e21 !important;
+}
+.font-drum-rotator svg {
+	width: 22px !important;
+	height: 22px !important;
+	min-width: 22px !important;
+	flex-shrink: 0 !important;
 }
