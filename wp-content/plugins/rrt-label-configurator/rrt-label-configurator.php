@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.16.1' );
+define( 'RRT_LABEL_VERSION', '3.17.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -115,18 +115,33 @@ function rrt_label_fonts() {
  * "fill the art dropdown with that good stuff" — most of these (assets/
  * art/noto-*.png) are Google's own Noto Emoji graphics (fonts.google.com/
  * noto/specimen/Noto+Color+Emoji, source: github.com/googlefonts/noto-
- * emoji, 2D/png/512/), Apache 2.0 licensed — free for any use, no
- * attribution required. The 3 flags (assets/art/twemoji-*-flag.png) are
- * NOT from Noto — that build deliberately drops country flags
- * (drop_flags.py in the repo) — they're from Twitter's Twemoji instead
- * (github.com/twitter/twemoji, assets/svg/), which IS properly licensed
- * for this use but under CC-BY 4.0, NOT Apache — that license requires
- * attribution (a visible credit somewhere, e.g. "Flag icons by Twemoji"),
- * unlike everything else in this folder. All of it downloaded once (not
- * loaded live at request time) so this works offline and isn't a 3rd-
- * party runtime dependency. Swap in different art later the same "just
- * replace the file" way as the label templates, if Pete ever wants a
- * different style.
+ * emoji), Apache 2.0 licensed — free for any use, no attribution
+ * required. The 3 flags (assets/art/twemoji-*-flag.png) are NOT from
+ * Noto — that build deliberately drops country flags (drop_flags.py in
+ * the repo) — they're from Twitter's Twemoji instead (github.com/
+ * twitter/twemoji), which IS properly licensed for this use but under
+ * CC-BY 4.0, NOT Apache — that license requires attribution (a visible
+ * credit somewhere, e.g. "Flag icons by Twemoji"), unlike everything
+ * else in this folder.
+ *
+ * Pete, 2026-10-18: "I want the best quality... true 300 DPI on the
+ * label when we're printing" — all 41 pieces are rendered at 1800x1800px
+ * from each source's TRUE VECTOR SVG (github's .../2D/svg/ for Noto,
+ * .../assets/svg/ for Twemoji — originally downloaded from the lower-
+ * res pre-rendered 512px PNGs instead, which blurred visibly once placed
+ * large on the canvas). 1800px covers 600 DPI even at the biggest
+ * possible placement (80% of the 8oz zone's 3.75" width = 3", the
+ * largest the logo-size slider allows) — double the 300 DPI floor Pete
+ * asked for, with real margin. The original .svg sources are kept
+ * alongside the .png files (assets/art/svg-src/ for Noto, the matching
+ * .svg next to each twemoji-*.png) so any one piece can be re-rendered
+ * at an even higher resolution later with zero quality loss, same
+ * reasoning as keeping the hand-drawn SVGs for the templates.
+ *
+ * All of it downloaded once (not loaded live at request time) so this
+ * works offline and isn't a 3rd-party runtime dependency. Swap in
+ * different art later the same "just replace the file" way as the label
+ * templates, if Pete ever wants a different style.
  */
 function rrt_label_art_library() {
 	return array(
@@ -586,6 +601,7 @@ function rrt_label_configurator_shortcode( $atts ) {
 	return ob_get_clean();
 }
 add_shortcode( 'rrt_label_configurator', 'rrt_label_configurator_shortcode' );
+
 
 
 
