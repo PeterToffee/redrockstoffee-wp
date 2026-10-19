@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.18.2' );
+define( 'RRT_LABEL_VERSION', '3.18.3' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -55,7 +55,11 @@ function rrt_label_sizes() {
 			'zone'            => array(
 				'width_in'  => 3.75,
 				'height_in' => 2.5,
-				'top_in'    => 5.25,
+				// Pete, 2026-10-19: "move the dotted outline box up the
+				// label by 1/16 of an inch, keep it the same from side to
+				// side" — same width/height, top_in moved from 5.25 to
+				// 5.1875 (5.25 - 1/16).
+				'top_in'    => 5.1875,
 			),
 		),
 		'4oz' => array(
@@ -67,7 +71,7 @@ function rrt_label_sizes() {
 			'zone'            => array(
 				'width_in'  => 2.375,
 				'height_in' => 2.5,
-				'top_in'    => 5.25,
+				'top_in'    => 5.1875, // see note above — same 1/16" shift
 			),
 		),
 	);
