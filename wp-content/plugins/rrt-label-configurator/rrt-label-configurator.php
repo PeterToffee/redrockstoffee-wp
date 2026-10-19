@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.19.0' );
+define( 'RRT_LABEL_VERSION', '3.19.1' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -410,29 +410,49 @@ function rrt_label_zone_px( $size_key ) {
  * showing the whole 11"-long strip, which is too tall to use on screen.
  * Purely a display crop — never changes the zone geometry used for the
  * actual GD compositing in inc/handle-submission.php.
+ *
+ * Pete, 2026-10-19: "show more of the label... more of the logo... at
+ * least half of the logo, the tops of the lettering with the mountain.
+ * Need to exude user confidence." The mountain-logo lockup
+ * (redrockstoffee.com / "RED ROCKS TOFFEE COMPANY" arched lettering /
+ * mountain graphic) sits well below the zone, starting ~0.82in past
+ * zone_bottom and running to ~1.4in+ — measured directly off
+ * 8oz-template.jpg (zone_bottom=2306px; the lockup's top text starts
+ * ~2461px, its "RED ROCKS" arch + mountain peak around ~2600-2660px).
+ * 1.5in of bottom margin reaches past the "RED ROCKS" arch and the full
+ * mountain-peak shape, into the top of "TOFFEE COMPANY" — a recognizable
+ * chunk of the lockup, not just a sliver of the mountain's tip. The
+ * OTHER side (toward the Nutrition Facts panel) wasn't part of this ask,
+ * so it keeps the original 0.75in.
  */
-function rrt_label_crop_margin_in() {
-	return 0.75;
+function rrt_label_crop_margins_in() {
+	return array(
+		'top'    => 0.75, // toward the Nutrition Facts end
+		'bottom' => 1.5, // toward the mountain-logo end
+	);
 }
 
 /**
  * The on-screen preview's crop window, in the template's own full-image
- * pixel space: the zone plus a vertical margin, clamped to the image's
- * actual bounds. Full image width is always shown (the zone already
- * spans nearly the whole width on both sizes, so there's nothing useful
- * to crop horizontally).
+ * pixel space: the zone plus a vertical margin (top/bottom independent —
+ * see rrt_label_crop_margins_in()), clamped to the image's actual
+ * bounds. Full image width is always shown (the zone already spans
+ * nearly the whole width on both sizes, so there's nothing useful to
+ * crop horizontally).
  */
 function rrt_label_crop_px( $size_key ) {
 	$px = rrt_label_zone_px( $size_key );
 	if ( ! $px ) {
 		return null;
 	}
-	$sizes     = rrt_label_sizes();
-	$dpi       = $sizes[ $size_key ]['dpi'];
-	$margin_px = round( rrt_label_crop_margin_in() * $dpi );
+	$sizes      = rrt_label_sizes();
+	$dpi        = $sizes[ $size_key ]['dpi'];
+	$margins_in = rrt_label_crop_margins_in();
+	$top_px     = round( $margins_in['top'] * $dpi );
+	$bottom_px  = round( $margins_in['bottom'] * $dpi );
 
-	$crop_y      = max( 0, $px['zone_y'] - $margin_px );
-	$crop_bottom = min( $px['image_height'], $px['zone_y'] + $px['zone_height'] + $margin_px );
+	$crop_y      = max( 0, $px['zone_y'] - $top_px );
+	$crop_bottom = min( $px['image_height'], $px['zone_y'] + $px['zone_height'] + $bottom_px );
 
 	return array(
 		'crop_x'      => 0,
