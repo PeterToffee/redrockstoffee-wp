@@ -794,7 +794,18 @@
 		}
 		var reader = new FileReader();
 		reader.onload = function ( evt ) {
-			var logo = state.addingNewLogo ? null : activeLogo();
+			// Pete, 2026-10-19: "I can bring in multiple art, from library,
+			// but no more of my own... it'll swap my file for the new file."
+			// "YOUR FILE" was reusing the active logo whenever ANY logo was
+			// active, which was only ever meant to let an ART placeholder
+			// get swapped for a real upload (see the artKey check below) —
+			// but it also caught a second real upload, replacing the first
+			// instead of adding it. Now it only reuses the active slot when
+			// that slot is currently an ART piece; an active real upload (or
+			// no active logo at all) always adds a new layer, matching how
+			// the ART picker already behaves.
+			var active = state.addingNewLogo ? null : activeLogo();
+			var logo   = ( active && active.artKey ) ? active : null;
 			if ( ! logo ) {
 				var img = document.createElement( 'img' );
 				img.className = 'rrt-lc-logo-layer';
