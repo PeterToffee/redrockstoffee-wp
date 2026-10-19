@@ -105,6 +105,7 @@
 		name: document.getElementById( 'rrt-lc-name' ),
 		email: document.getElementById( 'rrt-lc-email' ),
 		phone: document.getElementById( 'rrt-lc-phone' ),
+		quantity: document.getElementById( 'rrt-lc-quantity' ),
 		message: document.getElementById( 'rrt-lc-message' ),
 		submit: document.getElementById( 'rrt-lc-submit' ),
 		status: document.getElementById( 'rrt-lc-status' ),
@@ -132,12 +133,25 @@
 		loadSize( els.size.value );
 	} );
 
+	// Pete, 2026-10-18: "min of 2 for the 8 oz, and min of 6 for the 4 oz."
+	// Same numbers as rrt_label_min_qty_for_size() server-side (inc/
+	// handle-submission.php) — this just keeps the quantity field's own
+	// min/default in sync with that server-side floor, matching instead of
+	// contradicting it.
+	var MIN_QTY = { '8oz': 2, '4oz': 6 };
+
 	function loadSize( sizeKey ) {
 		var size = config.sizes[ sizeKey ];
 		if ( ! size ) {
 			return;
 		}
 		state.sizeKey = sizeKey;
+
+		var minQty = MIN_QTY[ sizeKey ] || 1;
+		els.quantity.min = minQty;
+		if ( ! els.quantity.value || parseInt( els.quantity.value, 10 ) < minQty ) {
+			els.quantity.value = minQty;
+		}
 
 		els.stage.style.aspectRatio = size.crop_width + ' / ' + size.crop_height;
 		els.bg.src = size.template_url;
@@ -1050,6 +1064,11 @@
 			setStatus( 'Please fill in your name and email.', 'error' );
 			return;
 		}
+		var minQty = MIN_QTY[ state.sizeKey ] || 1;
+		if ( parseInt( els.quantity.value, 10 ) < minQty ) {
+			setStatus( 'Minimum order for ' + config.sizes[ state.sizeKey ].label + ' is ' + minQty + '.', 'error' );
+			return;
+		}
 		if ( ! state.logos.length && ! hasText ) {
 			setStatus( 'Please add a logo and/or some text to your label.', 'error' );
 			return;
@@ -1072,6 +1091,7 @@
 			body.append( 'name', els.name.value.trim() );
 			body.append( 'email', els.email.value.trim() );
 			body.append( 'phone', els.phone.value.trim() );
+			body.append( 'quantity', els.quantity.value );
 			body.append( 'message', els.message.value.trim() );
 
 			var layersMeta = [];

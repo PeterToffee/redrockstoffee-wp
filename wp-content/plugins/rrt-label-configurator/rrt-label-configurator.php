@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.18.3' );
+define( 'RRT_LABEL_VERSION', '3.19.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -75,6 +75,49 @@ function rrt_label_sizes() {
 			),
 		),
 	);
+}
+
+/**
+ * Pete, 2026-10-19: "the label needs to be doubled, side by side on a
+ * file 8.25in wide and 11in tall" — the print-ready sheet that gets
+ * built from the flat composite (rrt_label_composite_sheet() in
+ * inc/handle-submission.php). One place to tune labels-per-sheet/sheet
+ * width per box size, same spirit as rrt_label_sizes() above.
+ *
+ * 8oz numbers are exactly what Pete specified. 4oz's (3 per sheet,
+ * 7.881in wide = 3 x its 2.627in label width) come from the earlier
+ * print-production planning pass, not yet separately confirmed with
+ * Pete for this specific sheet-file feature — safe to use, but flag it
+ * before relying on it for a real print run.
+ */
+function rrt_label_sheet_config( $size_key ) {
+	$sheets = array(
+		'8oz' => array(
+			'labels_per_sheet' => 2,
+			'width_in'         => 8.25,
+		),
+		'4oz' => array(
+			'labels_per_sheet' => 3,
+			'width_in'         => 7.881,
+		),
+	);
+	return $sheets[ $size_key ] ?? null;
+}
+
+/**
+ * The minimum order quantity per box size — Pete, 2026-10-18: "min of 2
+ * for the 8 oz, and min of 6 for the 4 oz." Already built once as dormant
+ * WooCommerce-product-meta logic (inc/woocommerce-min-qty.php, not yet
+ * activated); this is the same two numbers, used right now to validate
+ * the configurator's own temporary quantity field (see rrt-lc-quantity)
+ * since real WooCommerce order quantities aren't wired in yet.
+ */
+function rrt_label_min_qty_for_size( $size_key ) {
+	$mins = array(
+		'8oz' => 2,
+		'4oz' => 6,
+	);
+	return $mins[ $size_key ] ?? 1;
 }
 
 /**
@@ -577,6 +620,10 @@ function rrt_label_configurator_shortcode( $atts ) {
 					<div class="rrt-lc-field">
 						<label for="rrt-lc-phone">Phone</label>
 						<input type="tel" id="rrt-lc-phone">
+					</div>
+					<div class="rrt-lc-field">
+						<label for="rrt-lc-quantity">Quantity (boxes)</label>
+						<input type="number" id="rrt-lc-quantity" min="1" step="1" value="2">
 					</div>
 					<div class="rrt-lc-field">
 						<label for="rrt-lc-message">Anything else we should know?</label>

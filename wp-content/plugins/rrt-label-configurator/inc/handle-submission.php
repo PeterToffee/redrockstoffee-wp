@@ -47,6 +47,16 @@ function rrt_label_handle_submit() {
 		wp_send_json_error( array( 'message' => 'Please fill in your name and a valid email.' ) );
 	}
 
+	// Pete, 2026-10-19: "quantity plus 5% in the file name" — this is a
+	// stand-in for a real WooCommerce order quantity (that integration is
+	// explicitly deferred — "we'll coordinate with woocommerce, but not
+	// right now"), just enough to get the print-ready sheet feature
+	// working end to end today. Clamped up to the known per-size minimum
+	// (never silently under-delivers) rather than rejecting the
+	// submission over a quantity mistake.
+	$quantity = isset( $_POST['quantity'] ) ? (int) $_POST['quantity'] : 1;
+	$quantity = max( rrt_label_min_qty_for_size( $size_key ), $quantity );
+
 	// One entry per layer the customer added, in the same order they were
 	// added (= stacking/z-order). Logo layers carry pos+scale; text
 	// layers carry pos+text+font+font_size. The actual uploaded logo
@@ -170,6 +180,19 @@ function rrt_label_handle_submit() {
 		$layer_paths = array(); // not fatal — the flat composite alone still gets emailed.
 	}
 
+	// Pete, 2026-10-19: "the label needs to be doubled, side by side on a
+	// file 8.25in wide and 11in tall, with the order's name attached...
+	// and quantity plus 5% in the file name... attached to any customer
+	// emails and on the order confirmation page" — the actual print-ready
+	// sheet. Pete reprints this SAME file as many times as it takes to
+	// cover the order (the filename's qty already includes the 5% buffer,
+	// so he doesn't have to do that math by hand each time).
+	$labels_needed = (int) ceil( $quantity * 1.05 );
+	$sheet_path    = rrt_label_composite_sheet( $size_key, $composite_path, $name, $labels_needed );
+	if ( is_wp_error( $sheet_path ) ) {
+		$sheet_path = null; // not fatal — the flat composite alone still gets emailed.
+	}
+
 	// Email is attempted (useful once this is live on GoDaddy, where real
 	// mail delivery works), but Pete, 2026-10-18: "don't need mail, it can
 	// go to a file, just give me the folder/filename" — on local XAMPP
@@ -180,18 +203,21 @@ function rrt_label_handle_submit() {
 	// an email arriving.
 	rrt_label_email_submission(
 		array(
-			'size'    => $sizes[ $size_key ]['label'],
-			'name'    => $name,
-			'email'   => $email,
-			'phone'   => $phone,
-			'message' => $message,
-			'layers'  => $layers,
+			'size'          => $sizes[ $size_key ]['label'],
+			'name'          => $name,
+			'email'         => $email,
+			'phone'         => $phone,
+			'message'       => $message,
+			'layers'        => $layers,
+			'quantity'      => $quantity,
+			'labels_needed' => $labels_needed,
 		),
 		$composite_path,
-		$layer_paths
+		$layer_paths,
+		$sheet_path
 	);
 
-	$all_paths = array_merge( array( $composite_path ), $layer_paths );
+	$all_paths = array_merge( array( $composite_path ), $layer_paths, $sheet_path ? array( $sheet_path ) : array() );
 	$folder    = wp_normalize_path( dirname( $composite_path ) );
 	$filenames = array_map( 'basename', $all_paths );
 
@@ -348,6 +374,67 @@ function rrt_label_composite_layers( $size_key, $layers ) {
 	}
 
 	return $paths;
+}
+
+/**
+ * Pete, 2026-10-19: "the label needs to be doubled, side by side on a
+ * file 8.25in wide and 11in tall. with the order's name attached...
+ * and quantity plus 5% in the file name." Builds the actual print-ready
+ * sheet: N copies of the already-composited flat label (same file
+ * rrt_label_composite() just produced) tiled side by side, per
+ * rrt_label_sheet_config()'s labels-per-sheet/width for this size. The
+ * flat composite has no transparency (drawn onto an opaque JPEG-sourced
+ * canvas), so a plain imagecopy per slot is enough — no alpha blending
+ * needed here.
+ */
+function rrt_label_composite_sheet( $size_key, $composite_path, $customer_name, $labels_needed ) {
+	$sheet_cfg = rrt_label_sheet_config( $size_key );
+	if ( ! $sheet_cfg ) {
+		return new WP_Error( 'rrt_no_sheet_layout', 'No print-sheet layout defined for this box size.' );
+	}
+
+	$single = imagecreatefrompng( $composite_path );
+	if ( ! $single ) {
+		return new WP_Error( 'rrt_bad_composite', 'Could not open the composited label.' );
+	}
+	$single_w = imagesx( $single );
+	$single_h = imagesy( $single );
+
+	$sizes   = rrt_label_sizes();
+	$dpi     = $sizes[ $size_key ]['dpi'];
+	$sheet_w = max( (int) round( $sheet_cfg['width_in'] * $dpi ), $single_w * $sheet_cfg['labels_per_sheet'] );
+	$sheet_h = $single_h;
+
+	$sheet = imagecreatetruecolor( $sheet_w, $sheet_h );
+	$white = imagecolorallocate( $sheet, 255, 255, 255 );
+	imagefilledrectangle( $sheet, 0, 0, $sheet_w - 1, $sheet_h - 1, $white );
+
+	for ( $i = 0; $i < $sheet_cfg['labels_per_sheet']; $i++ ) {
+		imagecopy( $sheet, $single, $i * $single_w, 0, 0, 0, $single_w, $single_h );
+	}
+	imagedestroy( $single );
+
+	$upload_dir = wp_upload_dir();
+	$tmp_dir    = trailingslashit( $upload_dir['basedir'] ) . 'rrt-label-temp';
+	if ( ! file_exists( $tmp_dir ) ) {
+		wp_mkdir_p( $tmp_dir );
+	}
+
+	$name_part = sanitize_file_name( $customer_name ? $customer_name : 'customer' );
+	$out_path  = sprintf(
+		'%s/sheet-%s-%s-qty%d-%s.png',
+		$tmp_dir,
+		$size_key,
+		$name_part,
+		$labels_needed,
+		wp_generate_password( 6, false )
+	);
+
+	imagepng( $sheet, $out_path, 6 );
+	imagedestroy( $sheet );
+	rrt_label_set_png_dpi( $out_path, 300 );
+
+	return $out_path;
 }
 
 /**
@@ -545,8 +632,15 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
  * layer, all print-resolution, same full 11" size/position as the flat
  * file, so the whole design can be reconstructed as real separate layers
  * in Photoshop/GIMP.
+ *
+ * Pete, 2026-10-19: $sheet_path (from rrt_label_composite_sheet(), may be
+ * null if that step failed) is the actual print-ready sheet — the flat
+ * label doubled/tripled side by side per rrt_label_sheet_config() — also
+ * attached here since this is the only working delivery channel right
+ * now ("this file will be attached to any customer emails" — the order
+ * confirmation page version is explicitly deferred, pending WooCommerce).
  */
-function rrt_label_email_submission( $fields, $composite_path, $layer_paths = array() ) {
+function rrt_label_email_submission( $fields, $composite_path, $layer_paths = array(), $sheet_path = null ) {
 	$to      = get_option( 'admin_email' );
 	$subject = sprintf( '[Co-Branding Label] New design from %s', $fields['name'] );
 
@@ -565,6 +659,8 @@ function rrt_label_email_submission( $fields, $composite_path, $layer_paths = ar
 	$body .= 'Name: ' . $fields['name'] . "\n";
 	$body .= 'Email: ' . $fields['email'] . "\n";
 	$body .= 'Phone: ' . $fields['phone'] . "\n";
+	$body .= 'Quantity requested: ' . $fields['quantity'] . "\n";
+	$body .= 'Labels to print (qty + 5% buffer): ' . $fields['labels_needed'] . "\n";
 	$body .= 'Logos: ' . $logo_count . "\n";
 	foreach ( $text_lines as $i => $line ) {
 		$body .= 'Text ' . ( $i + 1 ) . ': ' . $line . "\n";
@@ -577,9 +673,15 @@ function rrt_label_email_submission( $fields, $composite_path, $layer_paths = ar
 	if ( $layer_paths ) {
 		$body .= "- The same design as separate layers (bare template + one file per logo/text piece, numbered in stacking order) — open them all in Photoshop/GIMP as individual layers if you need to adjust any one piece by hand.\n";
 	}
-	$body .= "- The original uploaded logo file(s), if any, in case you want to work from the source image directly.";
+	$body .= "- The original uploaded logo file(s), if any, in case you want to work from the source image directly.\n";
+	if ( $sheet_path ) {
+		$body .= "- The print-ready sheet (multiple labels tiled side by side) — reprint this same file as many times as it takes to cover {$fields['labels_needed']} labels.";
+	}
 
 	$attachments = array( $composite_path );
+	if ( $sheet_path && file_exists( $sheet_path ) ) {
+		$attachments[] = $sheet_path;
+	}
 	foreach ( $layer_paths as $layer_path ) {
 		if ( file_exists( $layer_path ) ) {
 			$attachments[] = $layer_path;
