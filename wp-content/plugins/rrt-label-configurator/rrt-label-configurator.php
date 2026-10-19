@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.19.2' );
+define( 'RRT_LABEL_VERSION', '3.19.3' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -486,14 +486,15 @@ function rrt_label_display_geometry( $size_key ) {
 	$dpi   = $sizes[ $size_key ]['dpi'];
 
 	// Pete, 2026-10-19: "if it's too long(tall) it'll be a problem on
-	// mobile" — the VISIBLE stage box stays the original, mobile-safe
-	// size (top+bottom both 0.75in, same as before the mountain-logo
-	// ask). The extra room reaching the mountain logo (crop_height above,
-	// via rrt_label_crop_margins_in()'s bottom=1.5in) is still extracted
-	// and positioned — it's just taller than the visible box, which is
-	// what makes it scrollable instead of permanently enlarging the
-	// layout.
-	$visible_bottom_in   = 0.75;
+	// mobile" — the VISIBLE stage box stays short and mobile-safe. The
+	// extra room reaching the mountain logo (crop_height above, via
+	// rrt_label_crop_margins_in()'s bottom=1.5in) is still extracted and
+	// positioned — it's just taller than the visible box, which is what
+	// makes it scrollable instead of permanently enlarging the layout.
+	// 2026-10-19: "make the visible box a little less tall" — trimmed
+	// from the original 0.75in down to 0.5in (zone itself is untouched;
+	// only this bottom-side breathing room shrank).
+	$visible_bottom_in   = 0.5;
 	$visible_crop_height = ( $px['zone_y'] - $crop['crop_y'] ) + $px['zone_height'] + round( $visible_bottom_in * $dpi );
 
 	// Pete: "loads initially with the logo at least partially visible" —
