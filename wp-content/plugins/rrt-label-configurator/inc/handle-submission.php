@@ -409,8 +409,16 @@ function rrt_label_composite_sheet( $size_key, $composite_path, $customer_name, 
 	$white = imagecolorallocate( $sheet, 255, 255, 255 );
 	imagefilledrectangle( $sheet, 0, 0, $sheet_w - 1, $sheet_h - 1, $white );
 
+	// 2026-10-19: 4oz's 3 labels (3 x 2.627in = 7.881in) don't exactly
+	// fill an 8.25in sheet the way 8oz's 2 labels do (2 x 4.127in =
+	// 8.254in, essentially edge to edge) — center the row instead of
+	// pinning it to the left edge, so the leftover ~0.37in splits evenly
+	// as a margin on both sides. No-op for 8oz (row already fills the
+	// sheet, so the centering offset is 0).
+	$row_width = $single_w * $sheet_cfg['labels_per_sheet'];
+	$start_x   = (int) round( ( $sheet_w - $row_width ) / 2 );
 	for ( $i = 0; $i < $sheet_cfg['labels_per_sheet']; $i++ ) {
-		imagecopy( $sheet, $single, $i * $single_w, 0, 0, 0, $single_w, $single_h );
+		imagecopy( $sheet, $single, $start_x + $i * $single_w, 0, 0, 0, $single_w, $single_h );
 	}
 	imagedestroy( $single );
 

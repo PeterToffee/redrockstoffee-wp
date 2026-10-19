@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.19.3' );
+define( 'RRT_LABEL_VERSION', '3.19.4' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -84,11 +84,13 @@ function rrt_label_sizes() {
  * inc/handle-submission.php). One place to tune labels-per-sheet/sheet
  * width per box size, same spirit as rrt_label_sizes() above.
  *
- * 8oz numbers are exactly what Pete specified. 4oz's (3 per sheet,
- * 7.881in wide = 3 x its 2.627in label width) come from the earlier
- * print-production planning pass, not yet separately confirmed with
- * Pete for this specific sheet-file feature — safe to use, but flag it
- * before relying on it for a real print run.
+ * 2026-10-19: Pete confirmed 4oz as "three across on an 8.25in x 11in
+ * file" — same sheet width as 8oz (not the narrower 7.881in = 3 x
+ * 2.627in this used as a placeholder before being confirmed), so one
+ * sheet size serves both box sizes. The 3 labels don't exactly fill
+ * 8.25in (3 x 2.627in = 7.881in, leaving ~0.37in left over), so
+ * rrt_label_composite_sheet() centers the row instead of pinning it to
+ * the left edge.
  */
 function rrt_label_sheet_config( $size_key ) {
 	$sheets = array(
@@ -98,7 +100,7 @@ function rrt_label_sheet_config( $size_key ) {
 		),
 		'4oz' => array(
 			'labels_per_sheet' => 3,
-			'width_in'         => 7.881,
+			'width_in'         => 8.25,
 		),
 	);
 	return $sheets[ $size_key ] ?? null;
