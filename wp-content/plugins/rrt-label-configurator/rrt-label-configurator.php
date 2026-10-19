@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.19.1' );
+define( 'RRT_LABEL_VERSION', '3.19.2' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -482,10 +482,38 @@ function rrt_label_display_geometry( $size_key ) {
 		return null;
 	}
 
+	$sizes = rrt_label_sizes();
+	$dpi   = $sizes[ $size_key ]['dpi'];
+
+	// Pete, 2026-10-19: "if it's too long(tall) it'll be a problem on
+	// mobile" — the VISIBLE stage box stays the original, mobile-safe
+	// size (top+bottom both 0.75in, same as before the mountain-logo
+	// ask). The extra room reaching the mountain logo (crop_height above,
+	// via rrt_label_crop_margins_in()'s bottom=1.5in) is still extracted
+	// and positioned — it's just taller than the visible box, which is
+	// what makes it scrollable instead of permanently enlarging the
+	// layout.
+	$visible_bottom_in   = 0.75;
+	$visible_crop_height = ( $px['zone_y'] - $crop['crop_y'] ) + $px['zone_height'] + round( $visible_bottom_in * $dpi );
+
+	// Pete: "loads initially with the logo at least partially visible" —
+	// scroll down from the very top of the crop by this many extra px
+	// beyond the original cutoff, so a bit of the mountain-logo lockup is
+	// already in view on load, not hidden until the customer finds the
+	// scrollbar themselves.
+	$initial_reveal_in  = 0.45;
+	$initial_scroll_pct = 100 * round( $initial_reveal_in * $dpi ) / $crop['crop_height'];
+
 	return array(
-		// Stage aspect ratio (CSS `aspect-ratio`).
-		'crop_width'      => $crop['crop_width'],
-		'crop_height'     => $crop['crop_height'],
+		// The full scrollable content (background image + zone), sized
+		// to reach the mountain logo.
+		'crop_width'          => $crop['crop_width'],
+		'crop_height'         => $crop['crop_height'],
+		// The VISIBLE stage box — shorter than the full content above,
+		// which is what makes the box scrollable (see rrt-lc-stage-inner
+		// in label-configurator.js).
+		'visible_crop_height' => $visible_crop_height,
+		'initial_scroll_pct'  => $initial_scroll_pct,
 		// Full template <img>: rendered width as a % of the stage, and
 		// how far to shift it up/left (in %, of the IMAGE'S OWN
 		// rendered size — matches CSS `transform: translate()` percent
@@ -658,10 +686,12 @@ function rrt_label_configurator_shortcode( $atts ) {
 
 			<div class="configurator-main">
 				<div class="rrt-lc-stage" id="rrt-lc-stage">
-					<img class="rrt-lc-bg" id="rrt-lc-bg" alt="">
-					<div class="rrt-lc-zone" id="rrt-lc-zone">
-						<!-- logo/text layers are added here by JS as the customer clicks
-						     "Add logo" / "Add text" — the zone starts empty on purpose. -->
+					<div class="rrt-lc-stage-inner" id="rrt-lc-stage-inner">
+						<img class="rrt-lc-bg" id="rrt-lc-bg" alt="">
+						<div class="rrt-lc-zone" id="rrt-lc-zone">
+							<!-- logo/text layers are added here by JS as the customer clicks
+							     "Add logo" / "Add text" — the zone starts empty on purpose. -->
+						</div>
 					</div>
 				</div>
 			</div>

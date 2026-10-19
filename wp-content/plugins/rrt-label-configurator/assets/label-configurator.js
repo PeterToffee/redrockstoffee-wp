@@ -65,6 +65,7 @@
 	var els = {
 		size: document.getElementById( 'rrt-lc-size' ),
 		stage: document.getElementById( 'rrt-lc-stage' ),
+		stageInner: document.getElementById( 'rrt-lc-stage-inner' ),
 		bg: document.getElementById( 'rrt-lc-bg' ),
 		zone: document.getElementById( 'rrt-lc-zone' ),
 
@@ -153,7 +154,15 @@
 			els.quantity.value = minQty;
 		}
 
-		els.stage.style.aspectRatio = size.crop_width + ' / ' + size.crop_height;
+		// Pete, 2026-10-19: "the previous window... loads with the same
+		// size as before" — .rrt-lc-stage (the VISIBLE box) sizes to
+		// visible_crop_height, the original mobile-safe height.
+		// .rrt-lc-stage-inner (the actual scrollable content, reaching the
+		// mountain logo) sizes to the taller crop_height, which is what
+		// makes the stage scroll at all — see rrt_label_display_geometry()
+		// in rrt-label-configurator.php.
+		els.stage.style.aspectRatio = size.crop_width + ' / ' + size.visible_crop_height;
+		els.stageInner.style.aspectRatio = size.crop_width + ' / ' + size.crop_height;
 		els.bg.src = size.template_url;
 		els.bg.style.width = size.bg_width_pct + '%';
 		els.bg.style.transform = 'translate(-' + size.bg_translate_x + '%, -' + size.bg_translate_y + '%)';
@@ -165,6 +174,14 @@
 
 		state.textGroups.forEach( renderTextGroup );
 		state.logos.forEach( renderLogo );
+
+		// Pete: "loads initially with the logo at least partially
+		// visible" — nudge the scroll down from the very top so a bit of
+		// the mountain-logo lockup is already in view, without
+		// permanently enlarging the visible box itself.
+		requestAnimationFrame( function () {
+			els.stage.scrollTop = ( size.initial_scroll_pct / 100 ) * els.stage.scrollHeight;
+		} );
 	}
 
 	function positionEl( el, pos ) {

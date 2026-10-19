@@ -359,11 +359,22 @@
 
 .rrt-lc-stage {
 	position: relative;
-	overflow: hidden;
+	overflow-x: hidden;
+	overflow-y: auto;
 	width: 100%;
 	border: 1px solid #e3ddd2;
 	border-radius: 8px;
 	background: #fff;
+}
+
+/* Pete, 2026-10-19: "scroll outside on the side that loads with the same
+   size as before" — .rrt-lc-stage above is the VISIBLE box, kept at its
+   original (mobile-safe) height. This inner wrapper is the full
+   scrollable content (reaches the mountain logo) — taller than its
+   parent by design, which is what makes .rrt-lc-stage scroll at all. */
+.rrt-lc-stage-inner {
+	position: relative;
+	width: 100%;
 }
 
 .rrt-lc-bg {
