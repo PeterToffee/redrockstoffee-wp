@@ -156,7 +156,11 @@ function rrt_label_handle_submit() {
 		wp_send_json_error( array( 'message' => 'Please add a logo and/or some text to your label.' ) );
 	}
 
-	$composite_path = rrt_label_composite( $size_key, $layers );
+	// Pete, 2026-10-20: tiny sort mark baked into the label itself (see
+	// rrt_label_draw_order_id()) — name + quantity, the two things he'd
+	// actually look for while sorting a stack of freshly cut labels.
+	$order_id_text  = sprintf( "%s \xC2\xB7 Qty %d", $name, $quantity );
+	$composite_path = rrt_label_composite( $size_key, $layers, $order_id_text );
 
 	if ( is_wp_error( $composite_path ) ) {
 		wp_send_json_error( array( 'message' => $composite_path->get_error_message() ) );
@@ -251,8 +255,13 @@ function rrt_label_handle_submit() {
  * assets/label-configurator.js). A logo's `scale` is its rendered width
  * as a percent of the zone's own width. A text layer's `font_size` is
  * the font's pixel size as a percent of the zone's own width.
+ *
+ * $order_id_text (optional) bakes a tiny sort mark into the label itself
+ * — see rrt_label_draw_order_id() — BEFORE this file gets tiled into the
+ * print sheet (rrt_label_composite_sheet() just copies this same saved
+ * PNG N times), so every copy on the printed sheet already carries it.
  */
-function rrt_label_composite( $size_key, $layers ) {
+function rrt_label_composite( $size_key, $layers, $order_id_text = '' ) {
 	$px = rrt_label_zone_px( $size_key );
 	if ( ! $px ) {
 		return new WP_Error( 'rrt_bad_size', 'Unknown box size.' );
@@ -277,6 +286,8 @@ function rrt_label_composite( $size_key, $layers ) {
 		}
 	}
 
+	rrt_label_draw_order_id( $canvas, $size_key, $order_id_text );
+
 	$upload_dir = wp_upload_dir();
 	$tmp_dir    = trailingslashit( $upload_dir['basedir'] ) . 'rrt-label-temp';
 	if ( ! file_exists( $tmp_dir ) ) {
@@ -288,6 +299,45 @@ function rrt_label_composite( $size_key, $layers ) {
 	rrt_label_set_png_dpi( $out_path, 300 );
 
 	return $out_path;
+}
+
+/**
+ * Pete, 2026-10-20: "we need to identify each single label with order
+ * info/person/user/quantity near the top of each single label (a little
+ * more than 1/4" down from the top), very tiny lettering... so when we
+ * print and cut, we can sort out the labels by the end." A utilitarian
+ * sort mark, not part of the customer's design — plain small text,
+ * centered, placed in the wide blank margin above the Nutrition Facts
+ * panel (confirmed empty from the top edge down to roughly 1in on both
+ * box sizes, by directly cropping/inspecting both templates), so it
+ * never collides with real label artwork.
+ *
+ * Font size 16 measured (imagettfbbox) at ~0.073in tall on this 300 DPI
+ * canvas — comparable to real fine-print text, legible but out of the
+ * way.
+ */
+function rrt_label_draw_order_id( $canvas, $size_key, $id_text ) {
+	if ( '' === trim( $id_text ) ) {
+		return;
+	}
+	$sizes = rrt_label_sizes();
+	$dpi   = $sizes[ $size_key ]['dpi'];
+	$width = imagesx( $canvas );
+
+	$ttf_path = RRT_LABEL_PATH . 'assets/fonts/opensans-variable.ttf';
+	if ( ! file_exists( $ttf_path ) ) {
+		return;
+	}
+
+	$font_size_px = 16;
+	$color        = imagecolorallocate( $canvas, 40, 40, 40 );
+	$y            = (int) round( 0.3 * $dpi ); // "a little more than 1/4 inch down from the top"
+
+	$bbox       = imagettfbbox( $font_size_px, 0, $ttf_path, $id_text );
+	$text_width = $bbox[2] - $bbox[0];
+	$x          = (int) round( ( $width - $text_width ) / 2 );
+
+	imagettftext( $canvas, $font_size_px, 0, $x, $y, $color, $ttf_path, $id_text );
 }
 
 /**
