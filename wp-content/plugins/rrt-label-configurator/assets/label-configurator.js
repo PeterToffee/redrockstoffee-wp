@@ -1008,6 +1008,51 @@
 		return Math.max( min, Math.min( max, value ) );
 	}
 
+	// Pete, 2026-10-20: "need to be able to slide the label in the window
+	// by grabbing, not just rely on the side slider... important for
+	// mobile." .rrt-lc-zone has touch-action:none (needed so dragging a
+	// logo/text item doesn't fight the browser's own touch-scroll), which
+	// also blocks native touch-scrolling of the stage anywhere inside the
+	// zone — leaving only the thin native scrollbar, which is a poor touch
+	// target. This adds an explicit grab-to-pan gesture directly on the
+	// stage: dragging on any empty background (NOT on a logo/text layer,
+	// which keeps its own existing attachDrag() behavior — checked via
+	// state.dragging, which an item's own pointerdown sets first since it
+	// fires before this bubbles up) scrolls the preview.
+	var panState = null;
+
+	els.stage.addEventListener( 'pointerdown', function ( evt ) {
+		if ( state.dragging ) {
+			return; // a logo/text item is already handling this pointer
+		}
+		evt.preventDefault();
+		panState = {
+			pointerId: evt.pointerId,
+			startY: evt.clientY,
+			startScrollTop: els.stage.scrollTop,
+		};
+		els.stage.setPointerCapture( evt.pointerId );
+		els.stage.classList.add( 'rrt-lc-panning' );
+	} );
+
+	els.stage.addEventListener( 'pointermove', function ( evt ) {
+		if ( ! panState || evt.pointerId !== panState.pointerId ) {
+			return;
+		}
+		evt.preventDefault();
+		els.stage.scrollTop = panState.startScrollTop - ( evt.clientY - panState.startY );
+	} );
+
+	function endPan( evt ) {
+		if ( ! panState || ( evt && evt.pointerId !== panState.pointerId ) ) {
+			return;
+		}
+		els.stage.classList.remove( 'rrt-lc-panning' );
+		panState = null;
+	}
+	els.stage.addEventListener( 'pointerup', endPan );
+	els.stage.addEventListener( 'pointercancel', endPan );
+
 	// Resolves whatever is actually controlling a text group's color right
 	// now — the custom palette/picker (group.textColor) if set, otherwise
 	// the WHITE TYPE/BLACK TYPE preset — down to one { color, outline }

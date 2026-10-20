@@ -365,6 +365,16 @@
 	border: 1px solid #e3ddd2;
 	border-radius: 8px;
 	background: #fff;
+	/* Pete, 2026-10-20: grab-to-pan (see label-configurator.js) drives
+	   scrolling itself via scrollTop — touch-action:none stops the browser
+	   from ALSO trying to handle the touch gesture natively, which would
+	   otherwise fight the JS and cause jittery double-scrolling. */
+	touch-action: none;
+	cursor: grab;
+}
+
+.rrt-lc-stage.rrt-lc-panning {
+	cursor: grabbing;
 }
 
 /* Pete, 2026-10-19: "scroll outside on the side that loads with the same
