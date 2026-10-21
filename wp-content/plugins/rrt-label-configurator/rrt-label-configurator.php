@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.21.1' );
+define( 'RRT_LABEL_VERSION', '3.22.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -123,12 +123,36 @@ function rrt_label_min_qty_for_size( $size_key ) {
 }
 
 /**
- * The fonts offered for the typed text, trimmed down from TheUnframer's
- * 15-font "font drum" to a small, distinct set. Each needs a real local
- * .ttf (assets/fonts/) for the server-side GD compositing (GD/FreeType
- * can't use a webfont's .woff), plus a matching Google Fonts family for
- * the on-screen DOM preview so what the customer sees matches what gets
- * composited.
+ * The fonts offered for the typed text. inc/quote-module-card.part.php's
+ * font-drum shows all 15 of TheUnframer's original fonts (copied
+ * verbatim, same values/labels/preview styling) — this array is the
+ * server-side half: one real local .ttf per key (assets/fonts/) for the
+ * GD compositing (GD/FreeType can't use a webfont's .woff/.woff2), so
+ * the PRINTED label actually comes out in whatever font the customer
+ * picked and saw on screen, not a silent fallback.
+ *
+ * 2026-10-21: until now only 3 of these 15 keys had a real .ttf
+ * registered (opensans/oswald/dancingscript) — every other font choice
+ * silently composited as "Clean" (Open Sans) server-side with no
+ * warning anywhere, a real WYSIWYG break between the live preview (pure
+ * CSS, already supported all 15 fine) and the final printed file. Fixed
+ * by sourcing the other 12 as real TTFs (all standard, freely-licensed
+ * Google Fonts, same place the original 3 came from) instead of trimming
+ * the picker down to the 3 that already worked.
+ *
+ * Two key names below differ from their on-screen label for a reason:
+ * - 'scripty' (label "Scripty") was 'dancingscript' here — same file,
+ *   renamed to match the actual `value="scripty"` the font-drum radio
+ *   card posts, which is what `rrt_label_draw_text()` looks up by.
+ * - 'arial' (label "Clean & Simple") composites with Arimo, not real
+ *   Arial — Arial itself isn't a freely redistributable font file.
+ *   Arimo is Google's own metric-compatible open-source substitute
+ *   (what Google Docs/LibreOffice use for the same reason), so spacing/
+ *   line-wrapping still matches what the on-screen preview (which uses
+ *   the system's real Arial/Helvetica, see .font-preview.arial in
+ *   configurator-components.css) shows almost exactly, even though the
+ *   exact glyph shapes differ slightly. No google_font to enqueue for
+ *   it — the live preview never uses Arimo, only this print path does.
  */
 function rrt_label_fonts() {
 	return array(
@@ -144,11 +168,89 @@ function rrt_label_fonts() {
 			'ttf_file'    => 'assets/fonts/oswald-variable.ttf',
 			'google_font' => 'Oswald:wght@600',
 		),
-		'dancingscript' => array(
-			'label'       => 'Handwritten',
+		'luckiest'      => array(
+			'label'       => 'Luckiest Guy',
+			'css_family'  => "'Luckiest Guy', cursive",
+			'ttf_file'    => 'assets/fonts/luckiest.ttf',
+			'google_font' => 'Luckiest+Guy',
+		),
+		'comic'         => array(
+			'label'       => 'Comic Balloon',
+			'css_family'  => "'Boogaloo', cursive",
+			'ttf_file'    => 'assets/fonts/comic.ttf',
+			'google_font' => 'Boogaloo',
+		),
+		'satisfy'       => array(
+			'label'       => 'Bold Script',
+			'css_family'  => "'Satisfy', cursive",
+			'ttf_file'    => 'assets/fonts/satisfy.ttf',
+			'google_font' => 'Satisfy',
+		),
+		'lobster'       => array(
+			'label'       => 'Lobster',
+			'css_family'  => "'Lobster', cursive",
+			'ttf_file'    => 'assets/fonts/lobster.ttf',
+			'google_font' => 'Lobster',
+		),
+		'bangers'       => array(
+			'label'       => 'Bangers Bold',
+			'css_family'  => "'Bangers', cursive",
+			'ttf_file'    => 'assets/fonts/bangers.ttf',
+			'google_font' => 'Bangers',
+		),
+		'fredoka'       => array(
+			'label'       => 'Rounded & Fun',
+			'css_family'  => "'Fredoka One', cursive",
+			'ttf_file'    => 'assets/fonts/fredoka.ttf',
+			'google_font' => 'Fredoka+One',
+		),
+		'montserrat'    => array(
+			'label'       => 'Clean Modern',
+			'css_family'  => "'Montserrat', sans-serif",
+			'ttf_file'    => 'assets/fonts/montserrat-bold.ttf',
+			'google_font' => 'Montserrat:wght@700',
+		),
+		'abril'         => array(
+			'label'       => 'Abril Fatface',
+			'css_family'  => "'Abril Fatface', cursive",
+			'ttf_file'    => 'assets/fonts/abril.ttf',
+			'google_font' => 'Abril+Fatface',
+		),
+		'greatvibes'    => array(
+			'label'       => 'Great Vibes',
+			'css_family'  => "'Great Vibes', cursive",
+			'ttf_file'    => 'assets/fonts/greatvibes.ttf',
+			'google_font' => 'Great+Vibes',
+		),
+		'sniglet'       => array(
+			'label'       => 'Sniglet',
+			'css_family'  => "'Sniglet', cursive",
+			'ttf_file'    => 'assets/fonts/sniglet.ttf',
+			'google_font' => 'Sniglet',
+		),
+		'arial'         => array(
+			'label'       => 'Clean & Simple',
+			'css_family'  => 'Arial, Helvetica, sans-serif',
+			'ttf_file'    => 'assets/fonts/arial.ttf',
+			'google_font' => '',
+		),
+		'playfair'      => array(
+			'label'       => 'Classic Serif',
+			'css_family'  => "'Playfair Display', serif",
+			'ttf_file'    => 'assets/fonts/playfair-italic.ttf',
+			'google_font' => 'Playfair+Display:ital@1',
+		),
+		'scripty'       => array(
+			'label'       => 'Scripty',
 			'css_family'  => "'Dancing Script', cursive",
 			'ttf_file'    => 'assets/fonts/dancingscript-variable.ttf',
 			'google_font' => 'Dancing+Script:wght@600',
+		),
+		'pacifico'      => array(
+			'label'       => 'Casual Script',
+			'css_family'  => "'Pacifico', cursive",
+			'ttf_file'    => 'assets/fonts/pacifico.ttf',
+			'google_font' => 'Pacifico',
 		),
 	);
 }
@@ -587,7 +689,9 @@ function rrt_label_configurator_shortcode( $atts ) {
 		'Kaushan+Script',
 	);
 	foreach ( $fonts as $f ) {
-		$font_families[] = $f['google_font'];
+		if ( ! empty( $f['google_font'] ) ) { // 'arial' composites with Arimo but never loads it for the (system-font) preview — see rrt_label_fonts().
+			$font_families[] = $f['google_font'];
+		}
 	}
 	wp_enqueue_style(
 		'rrt-label-fonts',
