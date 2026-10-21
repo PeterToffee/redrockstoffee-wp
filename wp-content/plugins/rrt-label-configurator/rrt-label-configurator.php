@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.22.5' );
+define( 'RRT_LABEL_VERSION', '3.22.7' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -48,6 +48,12 @@ function rrt_label_sizes() {
 	return array(
 		'8oz' => array(
 			'label'           => '8oz Box',
+			// Pete, 2026-10-21: exact wording for the size dropdown's extra
+			// note (see the <select> markup below) — kept as a separate
+			// field from 'label' since that one's also used in the
+			// submission email and the JS "minimum order" error message,
+			// where this phrasing wouldn't read right.
+			'dropdown_note'   => 'Customized Min. ONLY 2 Boxes',
 			'template_file'   => 'assets/templates/8oz-template.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 4.127,
@@ -64,6 +70,7 @@ function rrt_label_sizes() {
 		),
 		'4oz' => array(
 			'label'           => '4oz Box',
+			'dropdown_note'   => 'Customized Min. ONLY 6 Boxes, sold in twin packs',
 			'template_file'   => 'assets/templates/4oz-template.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 2.627,
@@ -754,7 +761,16 @@ function rrt_label_configurator_shortcode( $atts ) {
 						<label for="rrt-lc-size">Box size</label>
 						<select id="rrt-lc-size">
 							<?php foreach ( $sizes as $key => $cfg ) : ?>
-								<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $cfg['label'] ); ?></option>
+								<?php
+								// Pete, 2026-10-21: "need the appropriate Minimum number" shown
+								// right in the dropdown — exact wording per size in
+								// rrt_label_sizes()'s 'dropdown_note'. $cfg['label'] itself
+								// (e.g. "8oz Box") is left untouched — it's also used in the
+								// submission email and the JS "minimum order" error message,
+								// where this longer phrasing wouldn't read right.
+								$option_text = $cfg['label'] . ' — ' . $cfg['dropdown_note'];
+								?>
+								<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $option_text ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</div>
