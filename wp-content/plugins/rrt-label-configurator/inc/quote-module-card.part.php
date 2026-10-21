@@ -21,27 +21,39 @@
 									     old flex-wrap:wrap, so it broke to a second line. Same nowrap +
 									     overflow-x:auto safety net as the font/width/color row below, plus
 									     compact 18px step buttons on the shadow slider to match. -->
+									<!-- Pete, 2026-10-21: "remove the lettering 'text group' and make
+									     the line look exactly like the line on theunframer upload
+									     configurator" — label dropped, shadow on/off checkbox removed
+									     (shadow-intensity-slider at 0 IS "off" now, same as Unframer's
+									     version of this row — see renderTextGroup() in
+									     label-configurator.js), Color moved up from the row below to
+									     sit here too, all matching Unframer's current layout exactly. -->
 									<div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;">
-										<span class="config-label" style="margin-bottom:0; flex-shrink:0;">Text Group</span>
 										<div id="quote-selector-btns" style="display:flex; gap:0.3rem; flex-wrap:nowrap;"></div>
 										<button id="quote-add-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.45rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">+ Add</button>
 										<button id="quote-remove-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.45rem; background:#e53e3e; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">× Remove</button>
-										<!-- Pete, 2026-10-17: "move shadow checkbox up to the add/remove
-										     line with a shadow intensity adjustment slider" — relocated from
-										     the font/width/color row below, and the old auto full-vs-subtle
-										     switch (based on how dark the text color was) is now a plain
-										     continuous 0-100 slider the customer drags themselves instead,
-										     so any look from "off" to "very heavy" is reachable directly,
-										     not just two fixed presets. See group.shadowIntensity /
-										     outlineShadow() in label-configurator.js. -->
-										<label style="display:flex; align-items:center; gap:0.2rem; font-size:0.65rem; font-weight:700; color:#991e21; cursor:pointer; flex-shrink:0;" title="Outline/glow behind the text">
-											<input type="checkbox" id="text-shadow-toggle" checked style="width:16px; height:16px; margin:0; cursor:pointer; accent-color:#991e21;">
-											Shadow
-										</label>
-										<div class="slider-with-btns" style="flex-shrink:0;">
-											<button class="slider-step-btn" data-for="shadow-intensity-slider" data-dir="-1" style="width:18px;height:18px;flex-shrink:0;">−</button>
-											<input type="range" class="style-slider" id="shadow-intensity-slider" min="0" max="100" value="60" step="5" style="width:32px; flex-shrink:0;" title="Shadow intensity">
-											<button class="slider-step-btn" data-for="shadow-intensity-slider" data-dir="1" style="width:18px;height:18px;flex-shrink:0;">+</button>
+										<div style="flex-shrink:0;">
+											<div class="slider-header">
+												<span class="slider-name">Shadow</span>
+											</div>
+											<div class="slider-with-btns">
+												<button class="slider-step-btn" data-for="shadow-intensity-slider" data-dir="-1" style="width:18px;height:18px;flex-shrink:0;">−</button>
+												<input type="range" class="style-slider" id="shadow-intensity-slider" min="0" max="100" value="60" step="5" style="width:32px; flex-shrink:0;" title="Shadow intensity">
+												<button class="slider-step-btn" data-for="shadow-intensity-slider" data-dir="1" style="width:18px;height:18px;flex-shrink:0;">+</button>
+											</div>
+										</div>
+										<div id="text-color-row" style="display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0;">
+											<div class="slider-header">
+												<span class="slider-name">Color</span>
+											</div>
+											<div class="color-row" id="text-color-swatches" style="display:none;">
+												<div class="color-swatch" data-color="red" title="Red"></div>
+												<div class="color-swatch" data-color="gold" title="Gold"></div>
+												<div class="color-swatch" data-color="brown" title="Brown"></div>
+												<div class="color-swatch" data-color="cream" title="Cream"></div>
+												<div class="color-swatch" data-color="slate" title="Slate"></div>
+											</div>
+											<input type="color" id="text-color-custom" value="#991e21" title="Custom color">
 										</div>
 									</div>
 
@@ -90,43 +102,10 @@
 												<button class="toggle-btn" data-shadow-color="white" style="padding:0.25rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">WHITE<br>TYPE</button>
 												<button class="toggle-btn" data-shadow-color="black" style="padding:0.25rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">BLACK<br>TYPE</button>
 											</div>
-											<!-- Pete, 2026-10-17: "there's room next to black type... let's
-											     add a 5 color pallette for text color" + "make it adjustable,
-											     slide into your color". New control, no real-site precedent for
-											     a TEXT color picker (the real site only ever toggles white/black
-											     type) — but .color-row/.color-swatch themselves are NOT new: they're
-											     the real site's own existing swatch component (configurator-
-											     components.css, copied verbatim from custom.css), already used
-											     elsewhere for a white/black palette, just never wired to text
-											     color. Re-using that real component here, with 5 new RRT-relevant
-											     data-color values (deviations live in label-configurator.css) plus
-											     one native <input type="color"> swatch for "slide into your own
-											     color".
-											     Pete, 2026-10-17 (same day, follow-up): "hide the preset colors...
-											     B/I, two size sliders, white type/black type and the custom color
-											     ALL on the same line" — #text-color-swatches (the 5 presets) is
-											     now display:none; markup/JS left intact (not deleted) in case he
-											     wants them back. Pulled #text-color-custom OUT of that now-hidden
-											     div (it used to be nested inside — hiding the presets was silently
-											     hiding the custom picker too, found via headless test) and gave it
-											     its own small "COLOR" label (same .slider-header/.slider-name
-											     pattern as Font/Text Width above) since Pete flagged "we have to
-											     label the custom color somehow, so it's understood" — without the
-											     5 swatches next to it for context, a single bare color dot wasn't
-											     self-explanatory. -->
-											<div id="text-color-row" style="display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0;">
-												<div class="slider-header">
-													<span class="slider-name">Color</span>
-												</div>
-												<div class="color-row" id="text-color-swatches" style="display:none;">
-													<div class="color-swatch" data-color="red" title="Red"></div>
-													<div class="color-swatch" data-color="gold" title="Gold"></div>
-													<div class="color-swatch" data-color="brown" title="Brown"></div>
-													<div class="color-swatch" data-color="cream" title="Cream"></div>
-													<div class="color-swatch" data-color="slate" title="Slate"></div>
-												</div>
-												<input type="color" id="text-color-custom" value="#991e21" title="Custom color">
-											</div>
+											<!-- 2026-10-21: "move the colorpicker up to that line as well" —
+											     #text-color-row relocated up to the Text Group/Add/Remove/Shadow
+											     row above (same change already made on TheUnframer's own upload
+											     configurator). -->
 										</div>
 
 										<div class="font-drum-row">

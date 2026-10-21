@@ -89,7 +89,6 @@
 		shadowColorRow: document.getElementById( 'shadow-color-row' ),
 		textColorSwatches: document.getElementById( 'text-color-swatches' ),
 		textColorCustom: document.getElementById( 'text-color-custom' ),
-		textShadowToggle: document.getElementById( 'text-shadow-toggle' ),
 		shadowIntensitySlider: document.getElementById( 'shadow-intensity-slider' ),
 		centerTextBtn: document.getElementById( 'center-text-btn' ),
 		fontRadios: document.querySelectorAll( 'input[name="quote-font"]' ),
@@ -240,7 +239,6 @@
 			italic: false,
 			shadowColor: 'white', // WHITE TYPE (default): white text, black outline. BLACK TYPE: inverted — see renderTextGroup().
 			textColor: null, // null = use shadowColor's white/black preset. A hex string (palette swatch or custom picker) overrides it — see renderTextGroup().
-			shadowEnabled: true, // Pete, 2026-10-17: "checkbox to add shadow" then "the default shadow on white type has been lost" — on by default (matches the original always-on look), checkbox is an opt-OUT, not opt-in.
 			shadowIntensity: 60, // Pete, 2026-10-17: "shadow intensity adjustment slider" — 0-100, replaces the old fixed full/subtle auto-switch with a continuous dial the customer controls directly — see outlineShadow().
 			sideMargin: 2, // matches the real site's defaultQuote() — maxWidth = 100-2*this
 			pos: defaultPos( state.textGroups.length ),
@@ -332,7 +330,6 @@
 		if ( group.textColor ) {
 			els.textColorCustom.value = group.textColor;
 		}
-		els.textShadowToggle.checked = group.shadowEnabled;
 		els.shadowIntensitySlider.value = group.shadowIntensity;
 		updateCenterBtn();
 	}
@@ -396,7 +393,12 @@
 		group.el.style.color = resolvedColor.color;
 		// "Shadow" checkbox + intensity slider — on by default at a
 		// middle intensity, unchecks to turn it off entirely.
-		group.el.style.textShadow = group.shadowEnabled ? outlineShadow( group.shadowIntensity ) : 'none';
+		// Pete, 2026-10-21: "make the line look exactly like the line on
+		// theunframer upload configurator" — dropped the separate Shadow
+		// on/off checkbox (matches Unframer's current version of this row,
+		// which never had one); shadowIntensity 0 already reads as fully
+		// invisible per outlineShadow()'s own math, so it doubles as "off".
+		group.el.style.textShadow = group.shadowIntensity > 0 ? outlineShadow( group.shadowIntensity ) : 'none';
 		group.el.style.display = group.text ? 'block' : 'none';
 		group.el.style.fontFamily = TEXT_FONTS[ group.font ] || 'sans-serif';
 		group.el.style.fontWeight = group.bold ? '700' : '400';
@@ -574,15 +576,6 @@
 		}
 		group.textColor = els.textColorCustom.value;
 		loadGroupIntoControls( group );
-		renderTextGroup( group );
-	} );
-
-	els.textShadowToggle.addEventListener( 'change', function () {
-		var group = activeGroup();
-		if ( ! group ) {
-			return;
-		}
-		group.shadowEnabled = els.textShadowToggle.checked;
 		renderTextGroup( group );
 	} );
 
@@ -1190,7 +1183,10 @@
 						// saw, instead of GD's old hardcoded near-black text.
 						color: resolvedColor.color,
 						outline: resolvedColor.outline,
-						shadow: group.shadowEnabled,
+						// No more separate on/off checkbox (see renderTextGroup()) —
+						// derive it from intensity so the PHP side (still expecting
+						// both fields) gets a consistent value either way.
+						shadow: group.shadowIntensity > 0,
 						shadow_intensity: group.shadowIntensity,
 					} );
 				}

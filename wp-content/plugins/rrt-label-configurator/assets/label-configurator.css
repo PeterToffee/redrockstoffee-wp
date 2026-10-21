@@ -83,9 +83,18 @@
 	transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
+/* Pete, 2026-10-21: "we missed the yellow strip box that tells us
+   where we are (a highlight box?)" — TheUnframer's own tab bar marks
+   the active tab with a strong amber highlight (.text-tab-btn.active in
+   its custom.css: background #f59e0b, dark brown text), a much clearer
+   "you are here" cue than this pill's previous same-red-family active
+   state. Ported that exact treatment here — applies equally to
+   whichever pill is active (Art-Logo or Add Text), "same for the logo
+   add thing". */
 .rrt-pill-tab.active {
-	background: linear-gradient( 135deg, #c0282c, var( --rrt-primary ) );
-	box-shadow: 0 0 0 3px #fff, 0 0 0 5px var( --rrt-primary ), 0 4px 14px rgba( 153, 30, 33, 0.55 );
+	background: linear-gradient( 135deg, #f59e0b, #d97e06 );
+	color: #3d1c00;
+	box-shadow: 0 0 0 3px #fff, 0 0 0 5px #f59e0b, 0 4px 14px rgba( 245, 158, 11, 0.55 );
 	transform: scale( 1.06 );
 }
 
