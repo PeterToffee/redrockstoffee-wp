@@ -415,13 +415,16 @@
 	z-index: 5;
 	background: #991e21;
 	color: #fff;
-	font-family: 'Poppins', sans-serif;
-	font-weight: 700;
-	font-size: 0.68rem;
-	letter-spacing: 0.02em;
+	font-family: 'Bangers', cursive;
+	font-weight: 400;
+	font-size: 0.875rem;
+	letter-spacing: 0.03em;
 	text-align: center;
-	padding: 0.3rem 0.5rem;
+	padding: 0.35rem 0.5rem;
 	pointer-events: none;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .rrt-lc-bg {
