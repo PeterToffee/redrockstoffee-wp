@@ -399,6 +399,31 @@
 	width: 100%;
 }
 
+/* Pete, 2026-10-21: "red strip box/white lettering inside the top edge
+   of the window" — position:sticky (not absolute) is the part that
+   actually matters here: .rrt-lc-stage itself is the scrolling box
+   (overflow-y:auto), and an absolutely-positioned child scrolls away
+   with the rest of its content same as anything else — confirmed via a
+   real screenshot where the strip scrolled off along with the initial
+   pulled-back-toward-the-logo view. Sticky keeps it pinned to the top
+   of the VISIBLE window regardless of scroll position. pointer-events:
+   none so it never blocks grab-to-pan or dragging a logo/text layer
+   underneath it. */
+.rrt-lc-instructions {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	background: #991e21;
+	color: #fff;
+	font-family: 'Poppins', sans-serif;
+	font-weight: 700;
+	font-size: 0.68rem;
+	letter-spacing: 0.02em;
+	text-align: center;
+	padding: 0.3rem 0.5rem;
+	pointer-events: none;
+}
+
 .rrt-lc-bg {
 	position: absolute;
 	top: 0;

@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.22.0' );
+define( 'RRT_LABEL_VERSION', '3.22.2' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -807,6 +807,13 @@ function rrt_label_configurator_shortcode( $atts ) {
 
 			<div class="configurator-main">
 				<div class="rrt-lc-stage" id="rrt-lc-stage">
+					<!-- Pete, 2026-10-21: "red strip box/white lettering inside the
+					     top edge of the window" — a sibling of rrt-lc-stage-inner
+					     (not a child of it), so it stays pinned to the top of the
+					     visible window regardless of how far the inner content is
+					     scrolled; pointer-events:none so it never blocks grab-to-pan
+					     or dragging a logo/text layer underneath it. -->
+					<div class="rrt-lc-instructions" id="rrt-lc-instructions">Put your logo/message/greeting INSIDE dotted-line box</div>
 					<div class="rrt-lc-stage-inner" id="rrt-lc-stage-inner">
 						<img class="rrt-lc-bg" id="rrt-lc-bg" alt="">
 						<div class="rrt-lc-zone" id="rrt-lc-zone">
