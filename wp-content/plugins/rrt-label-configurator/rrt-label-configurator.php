@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.21.0' );
+define( 'RRT_LABEL_VERSION', '3.21.1' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -506,6 +506,20 @@ function rrt_label_display_geometry( $size_key ) {
 	$visible_bottom_in   = 0.25;
 	$visible_crop_height = ( $px['zone_y'] - $crop['crop_y'] ) + $px['zone_height'] + round( $visible_bottom_in * $dpi );
 
+	// Pete, 2026-10-21: "have it start/load less toward the bottom of the
+	// label" — landing at the absolute maximum scroll felt too far/stuck
+	// at the bottom edge; pulling back a small amount (0.3in) leaves a
+	// touch more room below (hinting there's a little more to scroll)
+	// and reads as better-centered — confirmed by rendering the exact
+	// pulled-back viewport directly off the template. Expressed as a %
+	// of the MAXIMUM possible scroll distance (not total content height),
+	// so label-configurator.js can apply it against the real rendered
+	// scrollHeight/clientHeight regardless of viewport size.
+	$max_scroll_px      = max( 0, $crop['crop_height'] - $visible_crop_height );
+	$pullback_px        = round( 0.3 * $dpi );
+	$initial_scroll_px  = max( 0, $max_scroll_px - $pullback_px );
+	$initial_scroll_pct = $max_scroll_px > 0 ? 100 * $initial_scroll_px / $max_scroll_px : 0;
+
 	return array(
 		// The full scrollable content (background image + zone), sized
 		// to reach all the way down to the mountain logo and the rest of
@@ -516,6 +530,7 @@ function rrt_label_display_geometry( $size_key ) {
 		// which is what makes the box scrollable (see rrt-lc-stage-inner
 		// in label-configurator.js).
 		'visible_crop_height' => $visible_crop_height,
+		'initial_scroll_pct'  => $initial_scroll_pct,
 		// Full template <img>: rendered width as a % of the stage, and
 		// how far to shift it up/left (in %, of the IMAGE'S OWN
 		// rendered size — matches CSS `transform: translate()` percent

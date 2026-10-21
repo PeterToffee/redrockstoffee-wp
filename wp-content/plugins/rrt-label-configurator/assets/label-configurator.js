@@ -177,16 +177,20 @@
 
 		// Pete, 2026-10-21: "see the top portion of the logo first [on
 		// load], and the user can slide up to reveal the rest of the
-		// canvas dotted line area" — start scrolled all the way to the
-		// BOTTOM of the full crop (rrt_label_crop_px() now extends that
-		// all the way to the image's bottom edge), showing as much of the
-		// mountain logo/footer as the viewport's own height allows,
-		// whatever that height turns out to be on this device (desktop
-		// aspect-ratio or the mobile 50vh cap — see label-configurator.css)
-		// — simpler and viewport-height-independent compared to a
-		// precomputed percentage. Scrolling back up reveals the zone.
+		// canvas dotted line area" — start scrolled most of the way down
+		// the full crop (rrt_label_crop_px() now extends that all the way
+		// to the image's bottom edge), showing the mountain logo. Then,
+		// same day: "have it start/load less toward the bottom of the
+		// label" — landing at the absolute max scroll felt too far down;
+		// size.initial_scroll_pct (a % of the real max scroll distance,
+		// not total content height) pulls it back up slightly. Read against
+		// the actual rendered scrollHeight/clientHeight here (not a
+		// PHP-predicted pixel value), so it lines up regardless of which
+		// viewport height this device ends up rendering (desktop
+		// aspect-ratio or the mobile 50vh cap — see label-configurator.css).
 		requestAnimationFrame( function () {
-			els.stage.scrollTop = els.stage.scrollHeight;
+			var maxScroll = els.stage.scrollHeight - els.stage.clientHeight;
+			els.stage.scrollTop = ( size.initial_scroll_pct / 100 ) * maxScroll;
 		} );
 	}
 
