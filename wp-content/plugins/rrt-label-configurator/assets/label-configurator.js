@@ -4,8 +4,12 @@
  * Wires up the REAL copied TheUnframer quote-module-card markup
  * (inc/quote-module-card.part.php) to this plugin's own fixed-zone
  * preview (assets/label-configurator.css's .rrt-lc-stage/.rrt-lc-zone).
- * Cartoon Balloon is left visible (copy means copy) but NOT wired —
- * Pete: "we won't need the cartoon balloons."
+ * 2026-10-21: Cartoon Balloon's markup (never wired here — Pete:
+ * "we won't need the cartoon balloons") has been removed outright, after
+ * briefly considering building it out and learning GD (the server-side
+ * print renderer) can't match TheUnframer's smooth SVG balloon shapes
+ * pixel-for-pixel — Pete chose to drop the feature instead of shipping
+ * an approximation.
  *
  * Text groups and the logo are each positioned as absolutely-positioned
  * elements inside .rrt-lc-zone, left/top % + `transform:
@@ -71,10 +75,8 @@
 
 		tabBtnQuote: document.getElementById( 'tab-btn-quote' ),
 		tabBtnLogo: document.getElementById( 'tab-btn-logo' ),
-		tabBtnBalloon: document.getElementById( 'tab-btn-balloon' ),
 		panelQuote: document.getElementById( 'tab-panel-quote' ),
 		panelLogo: document.getElementById( 'tab-panel-logo' ),
-		panelBalloon: document.getElementById( 'tab-panel-balloon' ),
 
 		quoteSelectorBtns: document.getElementById( 'quote-selector-btns' ),
 		quoteAddBtn: document.getElementById( 'quote-add-btn' ),
@@ -205,7 +207,6 @@
 		var map = {
 			quote: { btn: els.tabBtnQuote, panel: els.panelQuote },
 			logo: { btn: els.tabBtnLogo, panel: els.panelLogo },
-			balloon: { btn: els.tabBtnBalloon, panel: els.panelBalloon },
 		};
 		Object.keys( map ).forEach( function ( key ) {
 			var active = key === tab;
@@ -219,9 +220,6 @@
 	} );
 	els.tabBtnLogo.addEventListener( 'click', function () {
 		selectTab( 'logo' );
-	} );
-	els.tabBtnBalloon.addEventListener( 'click', function () {
-		selectTab( 'balloon' );
 	} );
 
 	// --- text groups ---

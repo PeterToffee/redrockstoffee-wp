@@ -27,12 +27,12 @@
  */
 
 /* --- deliberate overrides on top of the untouched quote-module-card
-   copy: Pete wants the customer to "open with the add text/logo/
-   cartoon balloon choices available" from the start, rather than
-   TheUnframer's own gated default (hidden until a photo is uploaded,
-   which doesn't apply here — there's no "photo" step in this tool).
-   The copied file itself is never edited for this; these overrides
-   live here instead, so the copy stays diffable against the source. */
+   copy: Pete wants the customer to "open with the add text/logo
+   choices available" from the start, rather than TheUnframer's own
+   gated default (hidden until a photo is uploaded, which doesn't apply
+   here — there's no "photo" step in this tool). The copied file itself
+   is never edited for this; these overrides live here instead, so the
+   copy stays diffable against the source. */
 #quote-module-card {
 	display: block !important;
 }
@@ -57,12 +57,14 @@
 	display: block !important;
 }
 
-/* The three pills (LOGO FILE / TEXT ON LABEL / CARTOON BALLOON) ARE the
-   tab switcher now — Pete: the checkboxes went away and the separate
-   "EDIT ..." button row was removed, folding both into one row of pills
-   that do what the EDIT buttons used to do. New markup/class (not part
-   of the TheUnframer copy), styled to match the pills' original look,
-   with a deliberately strong "selected" state. */
+/* The pills (ART-LOGO / ADD TEXT) ARE the tab switcher now — Pete: the
+   checkboxes went away and the separate "EDIT ..." button row was
+   removed, folding both into one row of pills that do what the EDIT
+   buttons used to do. New markup/class (not part of the TheUnframer
+   copy), styled to match the pills' original look, with a deliberately
+   strong "selected" state. (A third pill, Cartoon Balloon, existed here
+   too until 2026-10-21 — removed, see label-configurator.js's header
+   comment.) */
 .rrt-pill-tab {
 	display: inline-block;
 	border: none;

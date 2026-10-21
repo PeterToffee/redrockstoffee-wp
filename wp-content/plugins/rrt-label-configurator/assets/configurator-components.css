@@ -143,9 +143,6 @@
 .pos-btn.nudge-flash { border-color: #fbb44c; background: #fbb44c; color: #fff; transition: none; }
 .pos-grid-inline { max-width: 72px; gap: 3px; flex-shrink: 0; }
 .pos-grid-inline .pos-btn { font-size: 0.5rem; border-width: 1px; }
-[data-tail-dir].pos-btn { border-color: #c084b8; color: #991e21; font-size: 1rem; width: 28px; height: 28px; }
-[data-tail-dir].pos-btn:hover { border-color: #991e21; color: #991e21; background: #ecdaec; }
-[data-tail-dir].pos-btn.selected { border-color: #991e21; background: #991e21; color: #fff; }
 
 /* Color swatches */
 .color-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
@@ -171,8 +168,7 @@
 .toggle-btn.selected { background: #991e21; color: #fff; border-color: #991e21; }
 
 /* Bold/Italic buttons — more compact than generic toggle-btn */
-#btn-bold, #btn-italic,
-#balloon-btn-bold, #balloon-btn-italic {
+#btn-bold, #btn-italic {
   padding: 0.1rem 0.25rem;
   font-size: 0.65rem;
 }
@@ -245,9 +241,8 @@
                2px 2px 5px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.5);
 }
 
-/* Text/balloon module labels — brand purple */
-#tab-panel-quote .config-label,
-#tab-panel-balloon .config-label { color: #991e21; }
+/* Text module labels — brand purple */
+#tab-panel-quote .config-label { color: #991e21; }
 
 /* Placement row — desktop compact */
 #placement-row .radio-card-label { font-size: 0.65rem; }
@@ -271,12 +266,10 @@
   .slider-step-btn { width: 36px; height: 36px; font-size: 1.3rem; }
   .size-controls.compact .slider-step-btn { width: 30px; height: 30px; font-size: 1.1rem; }
 
-  #tab-panel-quote .slider-step-btn,
-  #tab-panel-balloon .slider-step-btn { display: flex !important; width: 24px !important; height: 24px !important; font-size: 1.05rem !important; padding: 0 !important; }
+  #tab-panel-quote .slider-step-btn { display: flex !important; width: 24px !important; height: 24px !important; font-size: 1.05rem !important; padding: 0 !important; }
 
   .slider-with-btns { gap: 0.4rem; }
-  #tab-panel-quote .slider-with-btns,
-  #tab-panel-balloon .slider-with-btns { gap: 0.2rem; }
+  #tab-panel-quote .slider-with-btns { gap: 0.2rem; }
 
   #fs-style-wrap .config-label,
   #bfs-style-wrap .config-label { display: none; }
