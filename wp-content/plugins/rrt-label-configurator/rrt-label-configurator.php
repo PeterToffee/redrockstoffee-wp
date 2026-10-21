@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.22.9' );
+define( 'RRT_LABEL_VERSION', '3.22.10' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -70,7 +70,7 @@ function rrt_label_sizes() {
 		),
 		'4oz' => array(
 			'label'           => '4oz Box',
-			'dropdown_note'   => 'Custom Min. 6 Boxes, sold in twin packs',
+			'dropdown_note'   => 'Custom Min. 6 Boxes, sold in 2 packs',
 			'template_file'   => 'assets/templates/4oz-template.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 2.627,
