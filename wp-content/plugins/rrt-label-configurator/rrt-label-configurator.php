@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.20.1' );
+define( 'RRT_LABEL_VERSION', '3.21.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -418,29 +418,35 @@ function rrt_label_zone_px( $size_key ) {
  * Need to exude user confidence." The mountain-logo lockup
  * (redrockstoffee.com / "RED ROCKS TOFFEE COMPANY" arched lettering /
  * mountain graphic) sits well below the zone, starting ~0.82in past
- * zone_bottom and running to ~1.4in+ — measured directly off
- * 8oz-template.jpg (zone_bottom=2306px; the lockup's top text starts
- * ~2461px, its "RED ROCKS" arch + mountain peak around ~2600-2660px).
- * 1.5in of bottom margin reaches past the "RED ROCKS" arch and the full
- * mountain-peak shape, into the top of "TOFFEE COMPANY" — a recognizable
- * chunk of the lockup, not just a sliver of the mountain's tip. The
- * OTHER side (toward the Nutrition Facts panel) wasn't part of this ask,
- * so it keeps the original 0.75in.
+ * zone_bottom — measured directly off 8oz-template.jpg (zone_bottom=
+ * 2306px; the lockup's top text starts ~2461px).
+ *
+ * 2026-10-21: "it would be great to see the top portion of the logo
+ * first [on load], and the user can slide up to reveal the rest of the
+ * canvas dotted line area" — the bottom side now extends all the way to
+ * the image's actual bottom edge (see rrt_label_crop_px()) instead of a
+ * fixed margin, maximizing how much of the logo/footer can be scrolled
+ * into view; label-configurator.js starts each size scrolled all the
+ * way down (showing as much of that as the viewport's own height
+ * allows), so the zone is reached by scrolling back up — a simple,
+ * viewport-height-independent "start at the bottom" instead of a
+ * precomputed percentage. The OTHER side (toward the Nutrition Facts
+ * panel) wasn't part of either ask, so it keeps the original 0.75in.
  */
 function rrt_label_crop_margins_in() {
 	return array(
-		'top'    => 0.75, // toward the Nutrition Facts end
-		'bottom' => 1.5, // toward the mountain-logo end
+		'top' => 0.75, // toward the Nutrition Facts end
 	);
 }
 
 /**
  * The on-screen preview's crop window, in the template's own full-image
- * pixel space: the zone plus a vertical margin (top/bottom independent —
- * see rrt_label_crop_margins_in()), clamped to the image's actual
- * bounds. Full image width is always shown (the zone already spans
- * nearly the whole width on both sizes, so there's nothing useful to
- * crop horizontally).
+ * pixel space: from a bit above the zone (see rrt_label_crop_margins_in())
+ * all the way down to the image's actual bottom edge — i.e. the zone
+ * plus EVERYTHING below it (mountain logo, tagline, footer), so the full
+ * remainder is available to scroll into view. Full image width is
+ * always shown (the zone already spans nearly the whole width on both
+ * sizes, so there's nothing useful to crop horizontally).
  */
 function rrt_label_crop_px( $size_key ) {
 	$px = rrt_label_zone_px( $size_key );
@@ -451,10 +457,9 @@ function rrt_label_crop_px( $size_key ) {
 	$dpi        = $sizes[ $size_key ]['dpi'];
 	$margins_in = rrt_label_crop_margins_in();
 	$top_px     = round( $margins_in['top'] * $dpi );
-	$bottom_px  = round( $margins_in['bottom'] * $dpi );
 
 	$crop_y      = max( 0, $px['zone_y'] - $top_px );
-	$crop_bottom = min( $px['image_height'], $px['zone_y'] + $px['zone_height'] + $bottom_px );
+	$crop_bottom = $px['image_height'];
 
 	return array(
 		'crop_x'      => 0,
@@ -488,35 +493,29 @@ function rrt_label_display_geometry( $size_key ) {
 	$dpi   = $sizes[ $size_key ]['dpi'];
 
 	// Pete, 2026-10-19: "if it's too long(tall) it'll be a problem on
-	// mobile" — the VISIBLE stage box stays short and mobile-safe. The
-	// extra room reaching the mountain logo (crop_height above, via
-	// rrt_label_crop_margins_in()'s bottom=1.5in) is still extracted and
-	// positioned — it's just taller than the visible box, which is what
-	// makes it scrollable instead of permanently enlarging the layout.
-	// 2026-10-19: "make the visible box a little less tall" — trimmed
-	// from the original 0.75in down to 0.5in (zone itself is untouched;
-	// only this bottom-side breathing room shrank).
-	$visible_bottom_in   = 0.5;
+	// mobile" / "make the visible box a little less tall" — the VISIBLE
+	// stage box stays short: just enough past the zone's bottom edge to
+	// read as "there's more below" (0.25in), not the full reach to the
+	// mountain logo. The full scrollable content below (crop_height)
+	// still extends all the way to the image's bottom edge (see
+	// rrt_label_crop_px()) — it's just taller than this visible box,
+	// which is what makes it scrollable instead of permanently enlarging
+	// the layout. 2026-10-21: on top of this, label-configurator.js also
+	// applies a `max-height: 50vh` mobile cap (matching TheUnframer's own
+	// upload-configurator preview sizing) as a safety ceiling.
+	$visible_bottom_in   = 0.25;
 	$visible_crop_height = ( $px['zone_y'] - $crop['crop_y'] ) + $px['zone_height'] + round( $visible_bottom_in * $dpi );
-
-	// Pete: "loads initially with the logo at least partially visible" —
-	// scroll down from the very top of the crop by this many extra px
-	// beyond the original cutoff, so a bit of the mountain-logo lockup is
-	// already in view on load, not hidden until the customer finds the
-	// scrollbar themselves.
-	$initial_reveal_in  = 0.45;
-	$initial_scroll_pct = 100 * round( $initial_reveal_in * $dpi ) / $crop['crop_height'];
 
 	return array(
 		// The full scrollable content (background image + zone), sized
-		// to reach the mountain logo.
+		// to reach all the way down to the mountain logo and the rest of
+		// the label below the zone.
 		'crop_width'          => $crop['crop_width'],
 		'crop_height'         => $crop['crop_height'],
 		// The VISIBLE stage box — shorter than the full content above,
 		// which is what makes the box scrollable (see rrt-lc-stage-inner
 		// in label-configurator.js).
 		'visible_crop_height' => $visible_crop_height,
-		'initial_scroll_pct'  => $initial_scroll_pct,
 		// Full template <img>: rendered width as a % of the stage, and
 		// how far to shift it up/left (in %, of the IMAGE'S OWN
 		// rendered size — matches CSS `transform: translate()` percent

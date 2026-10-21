@@ -123,6 +123,18 @@
    cards that are new in this plugin, same technique, same breakpoint. --- */
 
 @media ( max-width: 991px ) {
+	/* Pete, 2026-10-21: "make the window about the same size as the
+	   canvas preview window on the unframer configurator, it fits well
+	   on mobile" — matches .preview-image's own max-height: 50vh rule at
+	   this same breakpoint in TheUnframer's assets/css/upload-
+	   configurator.css, as a safety ceiling on top of the aspect-ratio
+	   sizing in loadSize() (which already shrinks naturally on a narrower
+	   screen, but a tall/narrow phone could still render it too tall
+	   without this cap). */
+	.rrt-lc-stage {
+		max-height: 50vh;
+	}
+
 	.rrt-lc-card--size {
 		order: 1;
 	}

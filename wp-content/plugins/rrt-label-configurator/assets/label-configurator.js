@@ -175,12 +175,18 @@
 		state.textGroups.forEach( renderTextGroup );
 		state.logos.forEach( renderLogo );
 
-		// Pete: "loads initially with the logo at least partially
-		// visible" — nudge the scroll down from the very top so a bit of
-		// the mountain-logo lockup is already in view, without
-		// permanently enlarging the visible box itself.
+		// Pete, 2026-10-21: "see the top portion of the logo first [on
+		// load], and the user can slide up to reveal the rest of the
+		// canvas dotted line area" — start scrolled all the way to the
+		// BOTTOM of the full crop (rrt_label_crop_px() now extends that
+		// all the way to the image's bottom edge), showing as much of the
+		// mountain logo/footer as the viewport's own height allows,
+		// whatever that height turns out to be on this device (desktop
+		// aspect-ratio or the mobile 50vh cap — see label-configurator.css)
+		// — simpler and viewport-height-independent compared to a
+		// precomputed percentage. Scrolling back up reveals the zone.
 		requestAnimationFrame( function () {
-			els.stage.scrollTop = ( size.initial_scroll_pct / 100 ) * els.stage.scrollHeight;
+			els.stage.scrollTop = els.stage.scrollHeight;
 		} );
 	}
 
