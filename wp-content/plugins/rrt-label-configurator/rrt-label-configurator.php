@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.22.8' );
+define( 'RRT_LABEL_VERSION', '3.22.9' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -53,7 +53,7 @@ function rrt_label_sizes() {
 			// field from 'label' since that one's also used in the
 			// submission email and the JS "minimum order" error message,
 			// where this phrasing wouldn't read right.
-			'dropdown_note'   => 'Custom Min. ONLY 2 Boxes',
+			'dropdown_note'   => 'Custom Min. 2 Boxes',
 			'template_file'   => 'assets/templates/8oz-template.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 4.127,
@@ -70,7 +70,7 @@ function rrt_label_sizes() {
 		),
 		'4oz' => array(
 			'label'           => '4oz Box',
-			'dropdown_note'   => 'Custom Min. ONLY 6 Boxes, sold in twin packs',
+			'dropdown_note'   => 'Custom Min. 6 Boxes, sold in twin packs',
 			'template_file'   => 'assets/templates/4oz-template.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 2.627,
