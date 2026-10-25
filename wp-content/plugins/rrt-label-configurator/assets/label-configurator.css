@@ -618,21 +618,121 @@
    standard "CSS cube" recipe: centered on the box's middle via
    top:50%/left:50%/negative margin, then pushed out along their own
    local Z axis by half the box's size on that axis.
+
+   2026-10-25 (same day): moved from an always-visible inline block into
+   a popup (see .rrt-lc-box-modal below) opened by
+   #rrt-lc-box-preview-btn — the custom properties below now live on
+   .rrt-lc-box-modal-panel instead of a standalone wrapper.
    -------------------------------------------------------------------- */
 
-.rrt-lc-box-mockup {
-	--box-tilt: 30deg; /* looking down from above */
-	--box-turn: 30deg; /* turned toward the left side */
+.rrt-lc-box-preview-btn {
 	margin-top: 1.5rem;
 }
 
+/* `:not([hidden])` on purpose, not a bare `display:flex` — an author
+   rule of equal specificity to the browser's own `[hidden]{display:
+   none}` would win by cascade order and silently defeat `hidden`. */
+.rrt-lc-box-modal:not( [hidden] ) {
+	position: fixed;
+	inset: 0;
+	/* Pete, 2026-10-25: "the dropdown arrow fo the font selector... is
+	   visible in popupbox and actually functions to move font drum below
+	   the popup" — configurator-base.css (the TheUnframer copy this
+	   plugin's built on) uses z-index values up to 100000 for its own
+	   dropdowns/overlays elsewhere on the page; 1000 was nowhere near
+	   high enough to actually sit on top of that, so the font drum's own
+	   arrow was rendering (and receiving clicks) right through the
+	   popup. Set well above anything else on the page instead of trying
+	   to track down and out-number every individual control. */
+	z-index: 2147483000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+}
+
+.rrt-lc-box-modal-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba( 0, 0, 0, 0.55 );
+}
+
+.rrt-lc-box-modal-panel {
+	--box-tilt: 30deg; /* Pete, 2026-10-25: "roll forward... look at the top flat on" — now live, drag-driven (vertical) same as --box-turn (horizontal) */
+	--box-turn: 30deg; /* turned left/right — live, drag-driven */
+	position: relative;
+	background: #fff;
+	border-radius: 12px;
+	padding: 1.25rem;
+	width: 100%;
+	max-width: 600px; /* Pete, 2026-10-25: widened to match the bigger box (BOX_PX_PER_INCH bump in label-configurator.js) */
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 12px 40px rgba( 0, 0, 0, 0.3 );
+}
+
+.rrt-lc-box-modal-actions {
+	display: flex;
+	gap: 0.75rem;
+	margin-top: 0.5rem;
+}
+.rrt-lc-box-modal-actions .rrt-lc-btn-primary,
+.rrt-lc-box-modal-actions .rrt-lc-btn-secondary {
+	flex: 1 1 0;
+	width: auto;
+}
+
+.rrt-lc-btn-secondary {
+	border: 1.5px solid var( --rrt-primary );
+	border-radius: 999px;
+	padding: 13px 26px;
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 1rem;
+	cursor: pointer;
+	background: #fff;
+	color: var( --rrt-primary );
+}
+.rrt-lc-btn-secondary:hover {
+	background: rgba( 153, 30, 33, 0.06 );
+}
+
+/* Pete, 2026-10-25: "remove the - and + on either end... a grab/smoosh
+   to slide it" — replaced the range slider with a direct drag on the box
+   itself (see the pointer handlers on #rrt-lc-box-perspective in
+   label-configurator.js). */
+.rrt-lc-box-drag-hint {
+	margin: 0 0 0.35rem;
+	text-align: center;
+	font-size: 0.75rem;
+	color: #777;
+}
+
+.rrt-lc-box-perspective.rrt-lc-box-dragging {
+	cursor: grabbing;
+}
+
 .rrt-lc-box-perspective {
+	cursor: grab;
+	touch-action: none; /* same reason #rrt-lc-zone sets this — a drag gesture here shouldn't also try to scroll the page */
 	/* Pete, 2026-10-25: generous padding, not a precise bounding-box
 	   calc — the tilted scene's real on-screen footprint is awkward to
 	   compute exactly, and overflow:visible lets it show fully anyway;
-	   this just keeps the surrounding layout from collapsing around it. */
+	   this just keeps the surrounding layout from collapsing around it.
+	   Padding's a bit more generous than the minimum so the glossy-white
+	   box still reads as "on" the dark backdrop even swung to the
+	   slider's extremes, not cut off at the backdrop's own edge. */
 	position: relative;
-	padding: 2.5rem 1rem;
+	padding: 4.5rem 1.5rem; /* Pete, 2026-10-25: "package box doesn't hit edges" after the bigger BOX_PX_PER_INCH — was 3.3rem top/bottom */
+	margin: 0.75rem 0;
+	border-radius: 10px;
+	/* Pete, 2026-10-25: "our background the logo red color, but a
+	   infinity horizon look" — a studio-cyclorama/"infinity cove" sweep:
+	   a bright band where the floor would curve seamlessly up into the
+	   wall (roughly 60% down), fading out to a near-black red at the
+	   edges for depth, all within the brand red family (--rrt-primary
+	   #991e21 sits in the middle of this range) rather than neutral gray. */
+	background: radial-gradient( ellipse 150% 70% at 50% 60%, #c0302b 0%, #991e21 30%, #5a1012 62%, #210505 100% );
 	perspective: 1400px;
 	display: flex;
 	justify-content: center;
@@ -644,7 +744,12 @@
 	width: var( --box-w );
 	height: var( --box-h );
 	transform-style: preserve-3d;
-	transform: rotateX( var( --box-tilt ) ) rotateY( calc( -1 * var( --box-turn ) ) );
+	/* Pete, 2026-10-25: was showing the blank bottom instead of the top —
+	   rotateX's sign was backwards (positive tilted the camera to look
+	   UP at the underside, not DOWN onto the top). Negated so a positive
+	   --box-tilt now reads as "looking down from above", matching its
+	   own comment above. */
+	transform: rotateX( calc( -1 * var( --box-tilt ) ) ) rotateY( calc( -1 * var( --box-turn ) ) );
 }
 
 .rrt-lc-box-face {
@@ -652,7 +757,15 @@
 	top: 50%;
 	left: 50%;
 	background: #fdfdfb; /* glossy white box stock, showing through any unlabeled margin */
-	box-shadow: inset 0 0 0 1px rgba( 0, 0, 0, 0.06 );
+	/* Pete, 2026-10-25: "a little more grey to the edges/corners of the
+	   3d box" — an inset blur (no spread) naturally concentrates where
+	   two edges meet, i.e. the corners, fading toward the middle of each
+	   face — a cheap stand-in for ambient occlusion that reads as real
+	   dimension/form instead of flat pasted-on faces. */
+	/* Pete, 2026-10-25: "take the edges/color back to halfway between
+	   what it was" — halfway between none (the original 1px outline
+	   only) and the first pass (16px blur, 0.3 opacity). */
+	box-shadow: inset 0 0 0 1px rgba( 0, 0, 0, 0.06 ), inset 0 0 8px rgba( 60, 60, 60, 0.15 );
 	overflow: hidden;
 }
 
@@ -672,13 +785,24 @@
 	transform: translateZ( calc( 0.5 * var( --box-d ) ) );
 }
 
-.rrt-lc-box-endcap {
+/* Pete, 2026-10-25: added a right end cap once the swing slider could
+   turn the box far enough to expose that side too — same plain glossy
+   white as the left one, mirrored (rotateY sign flipped, gradient
+   direction flipped to match which side catches the light). */
+.rrt-lc-box-endcap-left,
+.rrt-lc-box-endcap-right {
 	width: var( --box-d );
 	height: var( --box-h );
 	margin: calc( -0.5 * var( --box-h ) ) 0 0 calc( -0.5 * var( --box-d ) );
-	transform: rotateY( -90deg ) translateZ( calc( 0.5 * var( --box-w ) ) );
 	/* bare glossy white, no label ever reaches the end caps */
+}
+.rrt-lc-box-endcap-left {
+	transform: rotateY( -90deg ) translateZ( calc( 0.5 * var( --box-w ) ) );
 	background-image: linear-gradient( to right, rgba( 0, 0, 0, 0.05 ), rgba( 255, 255, 255, 0.5 ) 70% );
+}
+.rrt-lc-box-endcap-right {
+	transform: rotateY( 90deg ) translateZ( calc( 0.5 * var( --box-w ) ) );
+	background-image: linear-gradient( to left, rgba( 0, 0, 0, 0.05 ), rgba( 255, 255, 255, 0.5 ) 70% );
 }
 
 /* The printed label strip is narrower than the box (confirmed with
@@ -698,11 +822,35 @@
 	user-select: none;
 }
 
+/* Pete, 2026-10-25: "the label itself need to be the regular label
+   color... a light butter yellow" through several rounds (cougar
+   natural -> lavender bug with multiply blend -> flat alpha wash that
+   traded paper color against ink legibility -> a sepia filter that
+   still wasn't the real original colors) -> "start from scratch...
+   for that part of the image" — every CSS-only trick applies uniformly
+   to every pixel, so it could never color ONLY the paper while leaving
+   the logo's true printed colors alone. Real fix: the template JPGs
+   themselves are pre-tinted at build time (scratchpad's
+   tint-template.php, GD-based — recolors only near-white background
+   pixels, leaves ink/logo colors untouched) and the 3D mockup loads
+   that version (template_tinted_url in rrt-label-configurator.php)
+   instead of applying any live CSS effect at all. No tint
+   div/filter/blend needed here anymore — the image already carries its
+   correct color. */
+
 /* The live clone of #rrt-lc-zone (see mirrorZoneToBox() in
    label-configurator.js) — purely decorative, never interactive. */
 .rrt-lc-zone-mirror {
+	/* Pete, 2026-10-25: "two lines of type and the bottom line was
+	   partially missing the bottoms of the letters" — text grows upward
+	   from a bottom anchor and is allowed to sit slightly past the dashed
+	   line in the real editor too (clampGroupToZone() in
+	   label-configurator.js), just never clipped there since #rrt-lc-zone
+	   itself has no overflow:hidden. This did, cutting off descenders.
+	   Dropped to match — anything that overflows now clips only at
+	   .rrt-lc-box-label-strip's edge (the actual print panel boundary),
+	   same as what would really get printed. */
 	position: absolute;
-	overflow: hidden;
 	pointer-events: none;
 }
 
@@ -716,6 +864,6 @@
 
 @media ( max-width: 991px ) {
 	.rrt-lc-box-perspective {
-		padding: 2rem 0.5rem;
+		padding: 3rem 0.5rem; /* same top/bottom bump as the desktop rule above */
 	}
 }

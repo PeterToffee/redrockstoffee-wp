@@ -81,6 +81,12 @@
 		boxFrontImg: document.getElementById( 'rrt-lc-box-front-img' ),
 		zoneMirror: document.getElementById( 'rrt-lc-zone-mirror' ),
 		zoneMirrorInner: document.getElementById( 'rrt-lc-zone-mirror-inner' ),
+		boxPerspective: document.getElementById( 'rrt-lc-box-perspective' ),
+		boxPreviewBtn: document.getElementById( 'rrt-lc-box-preview-btn' ),
+		boxModal: document.getElementById( 'rrt-lc-box-modal' ),
+		boxModalBackdrop: document.getElementById( 'rrt-lc-box-modal-backdrop' ),
+		boxLoveBtn: document.getElementById( 'rrt-lc-box-love-btn' ),
+		boxBackBtn: document.getElementById( 'rrt-lc-box-back-btn' ),
 
 		tabBtnQuote: document.getElementById( 'tab-btn-quote' ),
 		tabBtnLogo: document.getElementById( 'tab-btn-logo' ),
@@ -228,7 +234,20 @@
 	// zone) and "front" (the fixed mountain-logo artwork) are ever
 	// visible from this angle, so those are the only two crop windows
 	// computed here.
-	var BOX_PX_PER_INCH = 34; // on-screen scale for the mockup only — tune freely, doesn't touch print sizing anywhere
+	var BOX_PX_PER_INCH = 46; // Pete, 2026-10-25: "bigger, it's quite small" (was 34) — tune freely, doesn't touch print sizing anywhere
+
+	// Pete, 2026-10-25: "remove the - and + on either end and make it
+	// easier to work on the swing/arc, a grab/smoosh to slide it" —
+	// replaced the range slider with a direct drag on the box (see the
+	// pointer handlers below). This remembers the current angle across
+	// re-renders (switching size, reopening the popup) the same way the
+	// old slider's value used to.
+	var boxTurnDeg = 30; // matches the old slider's starting value
+	// Pete, 2026-10-25: "integrate a roll forward so we can actually look
+	// at the top of the box flat on" — tilt is now draggable too (see the
+	// pointer handlers below), not just the left/right turn. 90 = looking
+	// straight down at the top; 0 = edge-on, no top visible at all.
+	var boxTiltDeg = 30; // matches the previous fixed angle
 
 	function computeBoxFaces( size ) {
 		if ( ! els.boxScene || ! size.box_width_in ) {
@@ -242,6 +261,8 @@
 		els.boxScene.style.setProperty( '--box-w', boxW + 'px' );
 		els.boxScene.style.setProperty( '--box-d', boxD + 'px' );
 		els.boxScene.style.setProperty( '--box-h', boxH + 'px' );
+		els.boxScene.style.setProperty( '--box-turn', boxTurnDeg + 'deg' );
+		els.boxScene.style.setProperty( '--box-tilt', boxTiltDeg + 'deg' );
 
 		// Where the wrap crosses from one panel to the next, in inches
 		// from the Nutrition-Facts end of the template (the SAME end
@@ -266,7 +287,12 @@
 			f.strip.style.left = stripLeft + 'px';
 			f.strip.style.width = stripW + 'px';
 			f.strip.style.height = f.h + 'px';
-			f.img.src = size.template_url;
+			// Pete, 2026-10-25: "start from scratch... for that part of
+			// the image" — uses the pre-tinted template (see
+			// template_tinted_url in rrt-label-configurator.php) instead
+			// of the real one + a CSS trick, so paper color and ink
+			// legibility stop fighting each other.
+			f.img.src = size.template_tinted_url;
 			f.img.style.width = stripW + 'px';
 			f.img.style.height = imgH + 'px';
 			f.img.style.top = ( -f.cropYIn * scale ) + 'px';
@@ -284,10 +310,17 @@
 			els.zoneMirror.style.top = zoneTop + 'px';
 			els.zoneMirror.style.width = zoneW + 'px';
 			els.zoneMirror.style.height = zoneH + 'px';
+			// syncBoxMirror() needs these too, to scale the clone — stored
+			// here rather than re-measured (see its own big comment below
+			// for why measuring is the wrong move).
+			zoneMirrorTargetW = zoneW;
+			zoneMirrorTargetH = zoneH;
 		}
 
 		syncBoxMirror();
 	}
+	var zoneMirrorTargetW = 0;
+	var zoneMirrorTargetH = 0;
 
 	// The real zone's text font-size is stored in absolute px (sized off
 	// #rrt-lc-zone's own rendered width — see updateTextGroupFontSize()),
@@ -296,20 +329,45 @@
 	// REAL zone's current px dimensions exactly (so every % and px style
 	// inside resolves identically), then CSS-scale the whole wrapper down
 	// to fit the mirror's actual allotted space.
+	//
+	// Pete, 2026-10-25: "text isn't centering sometimes on the box
+	// version, although it's centered by the center button" — first fix
+	// (skip while the popup's hidden, instead of guessing a scale) helped
+	// but didn't fully close it out: "good on the canvas, way off center
+	// on the 3D... still seems a touch off... to the right."
+	//
+	// Actual root cause, found after that: this used to read
+	// #rrt-lc-zone-mirror's size via getBoundingClientRect() — but that
+	// element sits inside a 3D-rotated box (.rrt-lc-box-top's own
+	// rotateX/translateZ, plus .rrt-lc-box-scene's rotateX(tilt)
+	// rotateY(turn), under a perspective). getBoundingClientRect() on
+	// anything inside a 3D transform returns its SCREEN-SPACE (post-
+	// perspective, foreshortened) bounding box, not its flat local size —
+	// and that foreshortening isn't even, so it also isn't centered the
+	// same way, and it changes with the current turn angle (explaining
+	// why a later open, at a settled angle, looked "better" but still
+	// off). Using that distorted number as the scale factor for content
+	// that's actually sized in LOCAL (pre-3D) space was the bug. Fixed:
+	// use the already-known LOCAL target size instead
+	// (zoneMirrorTargetW/H, set in computeBoxFaces() above from plain
+	// inches — no DOM measurement, so no perspective distortion to get
+	// wrong) — the popup-closed case is now just a boolean
+	// els.boxModal.hidden check, not a measurement.
 	var mirrorSyncScheduled = false;
 	function syncBoxMirror() {
 		if ( ! els.zoneMirrorInner || ! els.zoneMirror || ! els.zone ) {
 			return;
 		}
+		if ( ! els.boxModal || els.boxModal.hidden ) {
+			return; // not open — openBoxModal() re-syncs fresh every time it opens
+		}
 		var real = els.zone.getBoundingClientRect();
-		if ( real.width <= 0 || real.height <= 0 ) {
+		if ( real.width <= 0 || real.height <= 0 || zoneMirrorTargetW <= 0 ) {
 			return;
 		}
 		els.zoneMirrorInner.style.width = real.width + 'px';
 		els.zoneMirrorInner.style.height = real.height + 'px';
-		var mirrorW = els.zoneMirror.getBoundingClientRect().width;
-		var scale = mirrorW > 0 ? mirrorW / real.width : 1;
-		els.zoneMirrorInner.style.transform = 'scale(' + scale + ')';
+		els.zoneMirrorInner.style.transform = 'scale(' + ( zoneMirrorTargetW / real.width ) + ')';
 		els.zoneMirrorInner.innerHTML = els.zone.innerHTML;
 	}
 	function scheduleMirrorSync() {
@@ -333,6 +391,133 @@
 			attributeFilter: [ 'style', 'class' ],
 		} );
 	}
+
+	// Pete, 2026-10-25: "when I open it and then closed, then reopened it
+	// looked good" — points at web fonts: opening the popup before a
+	// custom Google Font has actually finished downloading measures (and
+	// scales) off fallback-font metrics; a later sync (a reopen, or any
+	// other edit) re-measures with the real font loaded and looks right.
+	// document.fonts.ready resolves once every requested font is loaded,
+	// so this catches it without needing a reopen at all.
+	if ( window.document && document.fonts && document.fonts.ready ) {
+		document.fonts.ready.then( scheduleMirrorSync );
+	}
+
+	// Pete, 2026-10-25: "slider to change viewing, swing box from side to
+	// side in a convex arc" -> same day, "remove the - and + on either end
+	// and make it easier to work on the swing/arc, a grab/smoosh to slide
+	// it" — the range slider is gone; dragging directly on the box's own
+	// perspective area now drives --box-turn instead, same grab-to-pan
+	// pointer pattern #rrt-lc-stage already uses above for panning the
+	// flat preview.
+	// Pete, 2026-10-25: "grab and smoosh the opposite of what we have
+	// now" — negative flips which way the box turns relative to the
+	// drag direction.
+	var BOX_TURN_SENSITIVITY = -0.25; // degrees per px dragged
+	// Pete, 2026-10-25: "integrate a roll forward so we can actually look
+	// at the top of the box flat on" — same drag now also moves vertically
+	// (up = more tilt, toward a flat top-down view of the top face; down =
+	// less, toward edge-on) alongside the existing left/right turn, one
+	// gesture driving both axes at once (standard "orbit" control feel).
+	// Pete, 2026-10-25: "swap out the roll front to back... seems
+	// backwards to me" — negative flips which way the box tilts
+	// relative to the vertical drag direction (same fix as the turn
+	// direction flip earlier).
+	var BOX_TILT_SENSITIVITY = -0.25; // degrees per px dragged
+	var boxTurnDrag = null;
+
+	if ( els.boxPerspective && els.boxScene ) {
+		els.boxPerspective.addEventListener( 'pointerdown', function ( evt ) {
+			evt.preventDefault();
+			els.boxPerspective.setPointerCapture( evt.pointerId );
+			els.boxPerspective.classList.add( 'rrt-lc-box-dragging' );
+			boxTurnDrag = { startX: evt.clientX, startY: evt.clientY, startTurn: boxTurnDeg, startTilt: boxTiltDeg };
+		} );
+		els.boxPerspective.addEventListener( 'pointermove', function ( evt ) {
+			if ( ! boxTurnDrag ) {
+				return;
+			}
+			var deltaDeg = ( evt.clientX - boxTurnDrag.startX ) * BOX_TURN_SENSITIVITY;
+			boxTurnDeg = clamp( boxTurnDrag.startTurn + deltaDeg, -45, 45 );
+			els.boxScene.style.setProperty( '--box-turn', boxTurnDeg + 'deg' );
+
+			var deltaTiltDeg = ( boxTurnDrag.startY - evt.clientY ) * BOX_TILT_SENSITIVITY;
+			boxTiltDeg = clamp( boxTurnDrag.startTilt + deltaTiltDeg, 0, 90 );
+			els.boxScene.style.setProperty( '--box-tilt', boxTiltDeg + 'deg' );
+		} );
+		[ 'pointerup', 'pointercancel' ].forEach( function ( evtName ) {
+			els.boxPerspective.addEventListener( evtName, function () {
+				boxTurnDrag = null;
+				els.boxPerspective.classList.remove( 'rrt-lc-box-dragging' );
+			} );
+		} );
+	}
+
+	// Pete, 2026-10-25: "'let me see what we have' button and a 'Love
+	// it!' button under the popup image and a 'back to the drawing
+	// board' button" — the box mockup now only renders inside this
+	// popup, not inline. Both action buttons just close it: all the
+	// actual editing already happens live behind it (see
+	// mirrorZoneToBox()'s MutationObserver above), so "back to the
+	// drawing board" needs no separate state to restore — closing IS
+	// going back.
+	function openBoxModal() {
+		if ( ! els.boxModal ) {
+			return;
+		}
+		els.boxModal.hidden = false;
+		// getBoundingClientRect() (in computeBoxFaces() -> syncBoxMirror())
+		// reads 0 for anything under [hidden] — re-run it now that the
+		// popup is actually visible, since edits made while it was closed
+		// never got a real measurement to scale against.
+		//
+		// Pete, 2026-10-25: "still seems off center first time out, then
+		// after closing and reopening it looks pretty darn good" — this
+		// pattern (wrong on a fresh open, right on a later one with
+		// nothing else changed) means SOMETHING is still settling
+		// asynchronously after the popup becomes visible that a single
+		// immediate + rAF re-measure isn't catching (candidates already
+		// ruled out: the old hidden-scale fallback, fonts not yet loaded —
+		// both fixed earlier and didn't fully close it out). Rather than
+		// keep guessing at the exact cause blind, brute-force it: re-sync
+		// on a couple of short delays too, on top of immediate + rAF.
+		// computeBoxFaces() is cheap and idempotent, so extra calls cost
+		// nothing — this should paper over whatever's left regardless of
+		// its exact source.
+		computeBoxFaces( activeSize() );
+		requestAnimationFrame( function () {
+			computeBoxFaces( activeSize() );
+		} );
+		[ 50, 200, 500 ].forEach( function ( delayMs ) {
+			setTimeout( function () {
+				if ( els.boxModal && ! els.boxModal.hidden ) {
+					computeBoxFaces( activeSize() );
+				}
+			}, delayMs );
+		} );
+	}
+	function closeBoxModal() {
+		if ( els.boxModal ) {
+			els.boxModal.hidden = true;
+		}
+	}
+	if ( els.boxPreviewBtn ) {
+		els.boxPreviewBtn.addEventListener( 'click', openBoxModal );
+	}
+	if ( els.boxLoveBtn ) {
+		els.boxLoveBtn.addEventListener( 'click', closeBoxModal );
+	}
+	if ( els.boxBackBtn ) {
+		els.boxBackBtn.addEventListener( 'click', closeBoxModal );
+	}
+	if ( els.boxModalBackdrop ) {
+		els.boxModalBackdrop.addEventListener( 'click', closeBoxModal );
+	}
+	document.addEventListener( 'keydown', function ( evt ) {
+		if ( 'Escape' === evt.key && els.boxModal && ! els.boxModal.hidden ) {
+			closeBoxModal();
+		}
+	} );
 
 	// --- tabs ---
 

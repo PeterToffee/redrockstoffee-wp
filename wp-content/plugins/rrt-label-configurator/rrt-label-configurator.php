@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.24.0' );
+define( 'RRT_LABEL_VERSION', '3.34.5' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -553,16 +553,22 @@ function rrt_label_zone_px( $size_key ) {
  * canvas dotted line area" — the bottom side now extends all the way to
  * the image's actual bottom edge (see rrt_label_crop_px()) instead of a
  * fixed margin, maximizing how much of the logo/footer can be scrolled
- * into view; label-configurator.js starts each size scrolled all the
- * way down (showing as much of that as the viewport's own height
- * allows), so the zone is reached by scrolling back up — a simple,
- * viewport-height-independent "start at the bottom" instead of a
- * precomputed percentage. The OTHER side (toward the Nutrition Facts
- * panel) wasn't part of either ask, so it keeps the original 0.75in.
+ * into view. Superseded 2026-10-25 (see rrt_label_display_geometry() for
+ * the current visible-height/initial-scroll logic), but crop_height
+ * itself still reaches the image's bottom edge so there's still more to
+ * scroll into if wanted.
+ *
+ * 2026-10-25: "tighten up the window by the amount of the lettering at
+ * the top of the label, (not showing... make window that much smaller,
+ * so we see the dottedline area and the top half of the logo" — the
+ * 0.75in margin toward the Nutrition Facts end (previously kept because
+ * "wasn't part of either ask") showed a sliver of that panel's own
+ * (upside-down, out-of-context) text above the zone; dropped to 0 so the
+ * visible window starts right at the zone's own top edge instead.
  */
 function rrt_label_crop_margins_in() {
 	return array(
-		'top' => 0.75, // toward the Nutrition Facts end
+		'top' => 0, // toward the Nutrition Facts end — see 2026-10-25 note above
 	);
 }
 
@@ -619,33 +625,28 @@ function rrt_label_display_geometry( $size_key ) {
 	$sizes = rrt_label_sizes();
 	$dpi   = $sizes[ $size_key ]['dpi'];
 
-	// Pete, 2026-10-19: "if it's too long(tall) it'll be a problem on
-	// mobile" / "make the visible box a little less tall" — the VISIBLE
-	// stage box stays short: just enough past the zone's bottom edge to
-	// read as "there's more below" (0.25in), not the full reach to the
-	// mountain logo. The full scrollable content below (crop_height)
-	// still extends all the way to the image's bottom edge (see
-	// rrt_label_crop_px()) — it's just taller than this visible box,
-	// which is what makes it scrollable instead of permanently enlarging
-	// the layout. 2026-10-21: on top of this, label-configurator.js also
-	// applies a `max-height: 50vh` mobile cap (matching TheUnframer's own
-	// upload-configurator preview sizing) as a safety ceiling.
-	$visible_bottom_in   = 0.25;
+	// Pete, 2026-10-25: "make the configurator window less tall and only
+	// show half the logo, so we see more of the canvas area" — supersedes
+	// the 2026-10-19/21 tuning below (kept scrolled deep toward the logo
+	// by default, which pushed the zone itself out of the initial view —
+	// the opposite of what's wanted here). The mountain-logo lockup starts
+	// ~0.52in past zone_bottom (measured directly off 8oz-template.jpg:
+	// zone_bottom=2306px=7.6875in; the lockup's top text starts
+	// ~2461px=8.203in) — showing roughly another 1in past that lands
+	// partway through the lockup (it's a multi-line stack: site URL /
+	// "RED ROCKS" / "TOFFEE COMPANY" / tagline, so ~1in reaches about
+	// through the mountain graphic and first text line) — "half the
+	// logo," not the whole thing. The VISIBLE box now = zone + this,
+	// shorter than the old reach-for-the-logo height it's replacing.
+	$visible_bottom_in   = 1.5;
 	$visible_crop_height = ( $px['zone_y'] - $crop['crop_y'] ) + $px['zone_height'] + round( $visible_bottom_in * $dpi );
 
-	// Pete, 2026-10-21: "have it start/load less toward the bottom of the
-	// label" — landing at the absolute maximum scroll felt too far/stuck
-	// at the bottom edge; pulling back a small amount (0.3in) leaves a
-	// touch more room below (hinting there's a little more to scroll)
-	// and reads as better-centered — confirmed by rendering the exact
-	// pulled-back viewport directly off the template. Expressed as a %
-	// of the MAXIMUM possible scroll distance (not total content height),
-	// so label-configurator.js can apply it against the real rendered
-	// scrollHeight/clientHeight regardless of viewport size.
-	$max_scroll_px      = max( 0, $crop['crop_height'] - $visible_crop_height );
-	$pullback_px        = round( 0.3 * $dpi );
-	$initial_scroll_px  = max( 0, $max_scroll_px - $pullback_px );
-	$initial_scroll_pct = $max_scroll_px > 0 ? 100 * $initial_scroll_px / $max_scroll_px : 0;
+	// Start at the TOP (showing the zone immediately, not scrolled down
+	// toward the logo) — now that the visible box above already reaches
+	// into the logo on its own, there's no need to pre-scroll there.
+	// Scrolling further down (toward the full logo/footer/Nutrition
+	// Facts) is still possible, just not where it starts.
+	$initial_scroll_pct = 0;
 
 	return array(
 		// The full scrollable content (background image + zone), sized
@@ -733,6 +734,19 @@ function rrt_label_configurator_shortcode( $atts ) {
 			array(
 				'label'           => $cfg['label'],
 				'template_url'    => RRT_LABEL_URL . $cfg['template_file'],
+				// Pete, 2026-10-25: "start from scratch... for that part
+				// of the image" — every CSS-only attempt (multiply blend,
+				// flat alpha wash, sepia filter) either faded the ink or
+				// got the color wrong, because none of them can actually
+				// tell paper from ink. Real fix: a build-time script
+				// (scratchpad's tint-template.php, GD-based) recolors
+				// only the near-white background pixels of the actual
+				// template JPG, leaving true ink/logo colors alone —
+				// used ONLY by the 3D box mockup, never the flat 2D
+				// preview or the real print compositing in
+				// inc/handle-submission.php, which still use the
+				// original untouched template.
+				'template_tinted_url' => RRT_LABEL_URL . str_replace( '.jpg', '-tinted.jpg', $cfg['template_file'] ),
 				// Raw inches for the 3D box-mockup preview (see
 				// assets/label-configurator.js's computeBoxFaces()) — the
 				// mockup computes its own crop windows directly from these
@@ -883,33 +897,77 @@ function rrt_label_configurator_shortcode( $atts ) {
 				 * are skipped outright, never built. Sizes/positions are
 				 * set by assets/label-configurator.js's computeBoxFaces(),
 				 * from the raw box_, image_, and zone_*_in numbers above.
+				 *
+				 * Pete, 2026-10-25 (same day): "show up when we hit a
+				 * button... 'let me see what we have' button and a 'Love
+				 * it!' button under the popup image and a 'back to the
+				 * drawing board' button" — moved from always-visible inline
+				 * to a popup, opened by the button below. Both popup
+				 * buttons just close it (editing already happens live
+				 * behind it, so "drawing board" needs no extra state to
+				 * restore) — see openBoxModal()/closeBoxModal() in
+				 * label-configurator.js.
 				 */
 				?>
-				<div class="rrt-lc-box-mockup" id="rrt-lc-box-mockup">
-					<h3 class="rrt-lc-heading">How it'll look on the box</h3>
-					<div class="rrt-lc-box-perspective" id="rrt-lc-box-perspective">
-						<div class="rrt-lc-box-scene" id="rrt-lc-box-scene">
-							<div class="rrt-lc-box-face rrt-lc-box-top" id="rrt-lc-box-top">
-								<div class="rrt-lc-box-label-strip" id="rrt-lc-box-top-strip">
-									<img class="rrt-lc-box-label-img" id="rrt-lc-box-top-img" alt="">
-									<div class="rrt-lc-zone-mirror" id="rrt-lc-zone-mirror">
-										<div class="rrt-lc-zone-mirror-inner" id="rrt-lc-zone-mirror-inner"></div>
-									</div>
-								</div>
-							</div>
-							<div class="rrt-lc-box-face rrt-lc-box-front" id="rrt-lc-box-front">
-								<div class="rrt-lc-box-label-strip" id="rrt-lc-box-front-strip">
-									<img class="rrt-lc-box-label-img" id="rrt-lc-box-front-img" alt="">
-								</div>
-							</div>
-							<div class="rrt-lc-box-face rrt-lc-box-endcap" id="rrt-lc-box-endcap"></div>
-						</div>
-					</div>
-				</div>
+				<button type="button" id="rrt-lc-box-preview-btn" class="rrt-lc-btn-primary rrt-lc-box-preview-btn">Let me see what we have</button>
 
 			</div>
 
 		</div>
+
+		<div class="rrt-lc-box-modal" id="rrt-lc-box-modal" hidden>
+					<div class="rrt-lc-box-modal-backdrop" id="rrt-lc-box-modal-backdrop"></div>
+					<div class="rrt-lc-box-modal-panel" role="dialog" aria-modal="true" aria-labelledby="rrt-lc-box-modal-heading">
+						<h3 class="rrt-lc-heading" id="rrt-lc-box-modal-heading">How it'll look on the box</h3>
+						<?php
+						/**
+						 * Pete, 2026-10-25: "remove the - and + on either
+						 * end and make it easier to work on the swing/arc,
+						 * a grab/smoosh to slide it" — the slider's gone;
+						 * swing is now a direct drag right on the box
+						 * itself (see the pointerdown/pointermove handlers
+						 * on #rrt-lc-box-perspective in
+						 * label-configurator.js), same grab-to-pan pattern
+						 * already used on the flat preview's #rrt-lc-stage.
+						 */
+						?>
+						<p class="rrt-lc-box-drag-hint">Drag to turn and tilt</p>
+						<div class="rrt-lc-box-perspective" id="rrt-lc-box-perspective">
+							<div class="rrt-lc-box-scene" id="rrt-lc-box-scene">
+								<div class="rrt-lc-box-face rrt-lc-box-top" id="rrt-lc-box-top">
+									<div class="rrt-lc-box-label-strip" id="rrt-lc-box-top-strip">
+										<img class="rrt-lc-box-label-img" id="rrt-lc-box-top-img" alt="">
+										<div class="rrt-lc-zone-mirror" id="rrt-lc-zone-mirror">
+											<div class="rrt-lc-zone-mirror-inner" id="rrt-lc-zone-mirror-inner"></div>
+										</div>
+									</div>
+								</div>
+								<div class="rrt-lc-box-face rrt-lc-box-front" id="rrt-lc-box-front">
+									<div class="rrt-lc-box-label-strip" id="rrt-lc-box-front-strip">
+										<img class="rrt-lc-box-label-img" id="rrt-lc-box-front-img" alt="">
+									</div>
+								</div>
+								<?php
+							/**
+							 * Pete, 2026-10-25: "we will need a white end on
+							 * the right end" — the swing slider (added
+							 * earlier today) can now turn the box far enough
+							 * to expose the RIGHT end cap, which never
+							 * existed (this started as a fixed-angle, left-
+							 * side-only mockup). Same plain glossy-white
+							 * panel as the left one, mirrored.
+							 */
+							?>
+							<div class="rrt-lc-box-face rrt-lc-box-endcap-left" id="rrt-lc-box-endcap-left"></div>
+							<div class="rrt-lc-box-face rrt-lc-box-endcap-right" id="rrt-lc-box-endcap-right"></div>
+							</div>
+						</div>
+						<div class="rrt-lc-box-modal-actions">
+							<button type="button" id="rrt-lc-box-love-btn" class="rrt-lc-btn-primary">Love it!</button>
+							<button type="button" id="rrt-lc-box-back-btn" class="rrt-lc-btn-secondary">Back to the drawing board</button>
+						</div>
+					</div>
+				</div>
 	</div>
 	<?php
 	return ob_get_clean();
