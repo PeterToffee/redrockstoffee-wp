@@ -606,3 +606,116 @@
 	min-width: 22px !important;
 	flex-shrink: 0 !important;
 }
+
+/* --------------------------------------------------------------------
+   3D box mockup — Pete, 2026-10-25: "visual helper... looking at it
+   from the front on a 30 degree up angle and 30 degree angle to the
+   left." Plain CSS 3D transforms on 3 flat divs (top/front/left end
+   cap — the only faces ever visible from this one FIXED angle; this is
+   not a rotatable viewer). --box-tilt/--box-turn are the two numbers to
+   hand-tune the camera; --box-w/--box-d/--box-h are set per-size by
+   computeBoxFaces() in label-configurator.js. All three faces share the
+   standard "CSS cube" recipe: centered on the box's middle via
+   top:50%/left:50%/negative margin, then pushed out along their own
+   local Z axis by half the box's size on that axis.
+   -------------------------------------------------------------------- */
+
+.rrt-lc-box-mockup {
+	--box-tilt: 30deg; /* looking down from above */
+	--box-turn: 30deg; /* turned toward the left side */
+	margin-top: 1.5rem;
+}
+
+.rrt-lc-box-perspective {
+	/* Pete, 2026-10-25: generous padding, not a precise bounding-box
+	   calc — the tilted scene's real on-screen footprint is awkward to
+	   compute exactly, and overflow:visible lets it show fully anyway;
+	   this just keeps the surrounding layout from collapsing around it. */
+	position: relative;
+	padding: 2.5rem 1rem;
+	perspective: 1400px;
+	display: flex;
+	justify-content: center;
+	overflow: visible;
+}
+
+.rrt-lc-box-scene {
+	position: relative;
+	width: var( --box-w );
+	height: var( --box-h );
+	transform-style: preserve-3d;
+	transform: rotateX( var( --box-tilt ) ) rotateY( calc( -1 * var( --box-turn ) ) );
+}
+
+.rrt-lc-box-face {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	background: #fdfdfb; /* glossy white box stock, showing through any unlabeled margin */
+	box-shadow: inset 0 0 0 1px rgba( 0, 0, 0, 0.06 );
+	overflow: hidden;
+}
+
+.rrt-lc-box-top {
+	width: var( --box-w );
+	height: var( --box-d );
+	margin: calc( -0.5 * var( --box-d ) ) 0 0 calc( -0.5 * var( --box-w ) );
+	transform: rotateX( 90deg ) translateZ( calc( 0.5 * var( --box-h ) ) );
+	/* a soft sheen, brightest toward the viewer's side of the top edge */
+	background-image: linear-gradient( to bottom, rgba( 255, 255, 255, 0.85 ), rgba( 255, 255, 255, 0 ) 60% );
+}
+
+.rrt-lc-box-front {
+	width: var( --box-w );
+	height: var( --box-h );
+	margin: calc( -0.5 * var( --box-h ) ) 0 0 calc( -0.5 * var( --box-w ) );
+	transform: translateZ( calc( 0.5 * var( --box-d ) ) );
+}
+
+.rrt-lc-box-endcap {
+	width: var( --box-d );
+	height: var( --box-h );
+	margin: calc( -0.5 * var( --box-h ) ) 0 0 calc( -0.5 * var( --box-d ) );
+	transform: rotateY( -90deg ) translateZ( calc( 0.5 * var( --box-w ) ) );
+	/* bare glossy white, no label ever reaches the end caps */
+	background-image: linear-gradient( to right, rgba( 0, 0, 0, 0.05 ), rgba( 255, 255, 255, 0.5 ) 70% );
+}
+
+/* The printed label strip is narrower than the box (confirmed with
+   Pete) — centered by JS (left offset computed in computeBoxFaces()),
+   leaving bare .rrt-lc-box-face background showing on both sides. */
+.rrt-lc-box-label-strip {
+	position: absolute;
+	top: 0;
+	overflow: hidden;
+}
+
+.rrt-lc-box-label-img {
+	position: absolute;
+	left: 0;
+	max-width: none;
+	pointer-events: none;
+	user-select: none;
+}
+
+/* The live clone of #rrt-lc-zone (see mirrorZoneToBox() in
+   label-configurator.js) — purely decorative, never interactive. */
+.rrt-lc-zone-mirror {
+	position: absolute;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.rrt-lc-zone-mirror-inner {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: top left;
+	pointer-events: none;
+}
+
+@media ( max-width: 991px ) {
+	.rrt-lc-box-perspective {
+		padding: 2rem 0.5rem;
+	}
+}

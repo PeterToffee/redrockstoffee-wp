@@ -73,6 +73,15 @@
 		bg: document.getElementById( 'rrt-lc-bg' ),
 		zone: document.getElementById( 'rrt-lc-zone' ),
 
+		// 3D box mockup (see computeBoxFaces()/mirrorZoneToBox() below).
+		boxScene: document.getElementById( 'rrt-lc-box-scene' ),
+		boxTopStrip: document.getElementById( 'rrt-lc-box-top-strip' ),
+		boxTopImg: document.getElementById( 'rrt-lc-box-top-img' ),
+		boxFrontStrip: document.getElementById( 'rrt-lc-box-front-strip' ),
+		boxFrontImg: document.getElementById( 'rrt-lc-box-front-img' ),
+		zoneMirror: document.getElementById( 'rrt-lc-zone-mirror' ),
+		zoneMirrorInner: document.getElementById( 'rrt-lc-zone-mirror-inner' ),
+
 		tabBtnQuote: document.getElementById( 'tab-btn-quote' ),
 		tabBtnLogo: document.getElementById( 'tab-btn-logo' ),
 		panelQuote: document.getElementById( 'tab-panel-quote' ),
@@ -173,6 +182,8 @@
 		els.zone.style.width = size.zone_width_pct + '%';
 		els.zone.style.height = size.zone_height_pct + '%';
 
+		computeBoxFaces( size );
+
 		state.textGroups.forEach( renderTextGroup );
 		state.logos.forEach( renderLogo );
 
@@ -198,6 +209,129 @@
 	function positionEl( el, pos ) {
 		el.style.left = pos.x + '%';
 		el.style.top = pos.y + '%';
+	}
+
+	// --- 3D box mockup ---
+	//
+	// Pete, 2026-10-25: a visual helper showing the live design wrapped
+	// onto the actual glossy-white box, viewed from one fixed angle (30°
+	// up, 30° left — see --box-tilt/--box-turn in label-configurator.css).
+	// Not a canvas/WebGL thing — plain CSS 3D transforms on 3 flat divs
+	// (top/front/left end cap; see the CSS file for why those 3 and not
+	// all 6 faces of a cube).
+	//
+	// The label is one continuous 11in strip wrapping the box vertically:
+	// front -> top -> back -> bottom -> 1in hidden overlap (2+3+2+3+1=11,
+	// confirmed against size.image_height_in and the template image
+	// itself — the mountain logo sits near the "front" end, Nutrition
+	// Facts near the "back/bottom" end). Only "top" (the customer's own
+	// zone) and "front" (the fixed mountain-logo artwork) are ever
+	// visible from this angle, so those are the only two crop windows
+	// computed here.
+	var BOX_PX_PER_INCH = 34; // on-screen scale for the mockup only — tune freely, doesn't touch print sizing anywhere
+
+	function computeBoxFaces( size ) {
+		if ( ! els.boxScene || ! size.box_width_in ) {
+			return;
+		}
+		var scale = BOX_PX_PER_INCH;
+		var boxW  = size.box_width_in * scale;
+		var boxD  = size.box_depth_in * scale;
+		var boxH  = size.box_height_in * scale;
+
+		els.boxScene.style.setProperty( '--box-w', boxW + 'px' );
+		els.boxScene.style.setProperty( '--box-d', boxD + 'px' );
+		els.boxScene.style.setProperty( '--box-h', boxH + 'px' );
+
+		// Where the wrap crosses from one panel to the next, in inches
+		// from the Nutrition-Facts end of the template (the SAME end
+		// size.zone_top_in is measured from) — see the big comment above
+		// and rrt_label_sizes() in the PHP file for how this partition
+		// (bottom/back/top/front/overlap) was confirmed.
+		var topCropYIn   = size.box_depth_in + size.box_height_in;
+		var frontCropYIn = 2 * size.box_depth_in + size.box_height_in;
+
+		// The printed label strip is narrower than the box, centered —
+		// bare box shows on both sides (confirmed with Pete).
+		var stripW    = size.image_width_in * scale;
+		var stripLeft = ( boxW - stripW ) / 2;
+		var imgH      = size.image_height_in * scale;
+
+		[ { strip: els.boxTopStrip, img: els.boxTopImg, h: boxD, cropYIn: topCropYIn },
+		  { strip: els.boxFrontStrip, img: els.boxFrontImg, h: boxH, cropYIn: frontCropYIn }
+		].forEach( function ( f ) {
+			if ( ! f.strip || ! f.img ) {
+				return;
+			}
+			f.strip.style.left = stripLeft + 'px';
+			f.strip.style.width = stripW + 'px';
+			f.strip.style.height = f.h + 'px';
+			f.img.src = size.template_url;
+			f.img.style.width = stripW + 'px';
+			f.img.style.height = imgH + 'px';
+			f.img.style.top = ( -f.cropYIn * scale ) + 'px';
+		} );
+
+		// The zone-mirror sits at the zone's real position within the
+		// "top" slice — same math as PHP's zone_left/top_pct, just against
+		// this crop window instead of the flat preview's.
+		if ( els.zoneMirror ) {
+			var zoneW = size.zone_width_in * scale;
+			var zoneH = size.zone_height_in * scale;
+			var zoneLeft = ( stripW - zoneW ) / 2; // zone is horizontally centered in the printed strip, same as the flat preview
+			var zoneTop  = ( size.zone_top_in - topCropYIn ) * scale;
+			els.zoneMirror.style.left = zoneLeft + 'px';
+			els.zoneMirror.style.top = zoneTop + 'px';
+			els.zoneMirror.style.width = zoneW + 'px';
+			els.zoneMirror.style.height = zoneH + 'px';
+		}
+
+		syncBoxMirror();
+	}
+
+	// The real zone's text font-size is stored in absolute px (sized off
+	// #rrt-lc-zone's own rendered width — see updateTextGroupFontSize()),
+	// so a bare innerHTML clone would render oversized/undersized in the
+	// mirror's smaller box. Fix: size the clone's wrapper to match the
+	// REAL zone's current px dimensions exactly (so every % and px style
+	// inside resolves identically), then CSS-scale the whole wrapper down
+	// to fit the mirror's actual allotted space.
+	var mirrorSyncScheduled = false;
+	function syncBoxMirror() {
+		if ( ! els.zoneMirrorInner || ! els.zoneMirror || ! els.zone ) {
+			return;
+		}
+		var real = els.zone.getBoundingClientRect();
+		if ( real.width <= 0 || real.height <= 0 ) {
+			return;
+		}
+		els.zoneMirrorInner.style.width = real.width + 'px';
+		els.zoneMirrorInner.style.height = real.height + 'px';
+		var mirrorW = els.zoneMirror.getBoundingClientRect().width;
+		var scale = mirrorW > 0 ? mirrorW / real.width : 1;
+		els.zoneMirrorInner.style.transform = 'scale(' + scale + ')';
+		els.zoneMirrorInner.innerHTML = els.zone.innerHTML;
+	}
+	function scheduleMirrorSync() {
+		if ( mirrorSyncScheduled ) {
+			return;
+		}
+		mirrorSyncScheduled = true;
+		requestAnimationFrame( function () {
+			mirrorSyncScheduled = false;
+			syncBoxMirror();
+		} );
+	}
+	// Catches every way the zone's contents can change — render calls,
+	// drag (which moves layers via direct style writes, not a render
+	// function), add/remove — without needing to hook each one by hand.
+	if ( els.zone && window.MutationObserver ) {
+		new MutationObserver( scheduleMirrorSync ).observe( els.zone, {
+			childList: true,
+			subtree: true,
+			attributes: true,
+			attributeFilter: [ 'style', 'class' ],
+		} );
 	}
 
 	// --- tabs ---

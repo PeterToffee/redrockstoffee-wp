@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.23.1' );
+define( 'RRT_LABEL_VERSION', '3.24.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -58,6 +58,19 @@ function rrt_label_sizes() {
 			'dpi'             => 300,
 			'image_width_in'  => 4.127,
 			'image_height_in' => 11,
+			// Real glossy-white box dimensions, confirmed with Pete
+			// 2026-10-25 — used only by the 3D box-mockup preview below
+			// (rrt_label_box_mockup_geometry()), never by the GD print
+			// compositing. The label wraps the box vertically: front (=
+			// box_height_in) -> top (= box_depth_in) -> back (=
+			// box_height_in) -> bottom (= box_depth_in) -> 1in hidden
+			// overlap, which is exactly 2+3+2+3+1 = 11in = image_height_in
+			// above — not a coincidence, confirmed against the template
+			// image itself (mountain logo near the "front" end, Nutrition
+			// Facts near the "back/bottom" end).
+			'box_width_in'    => 6,
+			'box_depth_in'    => 3,
+			'box_height_in'   => 2,
 			'zone'            => array(
 				'width_in'  => 3.75,
 				'height_in' => 2.5,
@@ -75,6 +88,11 @@ function rrt_label_sizes() {
 			'dpi'             => 300,
 			'image_width_in'  => 2.627,
 			'image_height_in' => 11,
+			// See the 8oz entry above for why these three exist — same
+			// depth/height (the wrap math is identical), narrower box.
+			'box_width_in'    => 3,
+			'box_depth_in'    => 3,
+			'box_height_in'   => 2,
 			'zone'            => array(
 				'width_in'  => 2.375,
 				'height_in' => 2.5,
@@ -713,8 +731,21 @@ function rrt_label_configurator_shortcode( $atts ) {
 		$geo = rrt_label_display_geometry( $key );
 		$js_sizes[ $key ] = array_merge(
 			array(
-				'label'        => $cfg['label'],
-				'template_url' => RRT_LABEL_URL . $cfg['template_file'],
+				'label'           => $cfg['label'],
+				'template_url'    => RRT_LABEL_URL . $cfg['template_file'],
+				// Raw inches for the 3D box-mockup preview (see
+				// assets/label-configurator.js's computeBoxFaces()) — the
+				// mockup computes its own crop windows directly from these
+				// rather than reusing $geo above, which is tuned for the
+				// flat scrollable preview's different framing.
+				'image_width_in'  => $cfg['image_width_in'],
+				'image_height_in' => $cfg['image_height_in'],
+				'box_width_in'    => $cfg['box_width_in'],
+				'box_depth_in'    => $cfg['box_depth_in'],
+				'box_height_in'   => $cfg['box_height_in'],
+				'zone_width_in'   => $cfg['zone']['width_in'],
+				'zone_height_in'  => $cfg['zone']['height_in'],
+				'zone_top_in'     => $cfg['zone']['top_in'],
 			),
 			$geo
 		);
@@ -838,6 +869,44 @@ function rrt_label_configurator_shortcode( $atts ) {
 						</div>
 					</div>
 				</div>
+
+				<?php
+				/**
+				 * Pete, 2026-10-25: "visual helper... put the single label
+				 * on the box of each size... looking at it from the front
+				 * on a 30 degree up angle and 30 degree angle to the left."
+				 * Pure CSS 3D (rotateX/rotateY/translateZ on plain divs) —
+				 * same "no canvas, no framework" rule as the rest of this
+				 * plugin. Only the 3 faces visible from this one FIXED
+				 * angle exist at all (top, front, left end cap) — this
+				 * isn't a rotatable viewer, so back/bottom/right end cap
+				 * are skipped outright, never built. Sizes/positions are
+				 * set by assets/label-configurator.js's computeBoxFaces(),
+				 * from the raw box_, image_, and zone_*_in numbers above.
+				 */
+				?>
+				<div class="rrt-lc-box-mockup" id="rrt-lc-box-mockup">
+					<h3 class="rrt-lc-heading">How it'll look on the box</h3>
+					<div class="rrt-lc-box-perspective" id="rrt-lc-box-perspective">
+						<div class="rrt-lc-box-scene" id="rrt-lc-box-scene">
+							<div class="rrt-lc-box-face rrt-lc-box-top" id="rrt-lc-box-top">
+								<div class="rrt-lc-box-label-strip" id="rrt-lc-box-top-strip">
+									<img class="rrt-lc-box-label-img" id="rrt-lc-box-top-img" alt="">
+									<div class="rrt-lc-zone-mirror" id="rrt-lc-zone-mirror">
+										<div class="rrt-lc-zone-mirror-inner" id="rrt-lc-zone-mirror-inner"></div>
+									</div>
+								</div>
+							</div>
+							<div class="rrt-lc-box-face rrt-lc-box-front" id="rrt-lc-box-front">
+								<div class="rrt-lc-box-label-strip" id="rrt-lc-box-front-strip">
+									<img class="rrt-lc-box-label-img" id="rrt-lc-box-front-img" alt="">
+								</div>
+							</div>
+							<div class="rrt-lc-box-face rrt-lc-box-endcap" id="rrt-lc-box-endcap"></div>
+						</div>
+					</div>
+				</div>
+
 			</div>
 
 		</div>
