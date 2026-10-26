@@ -84,7 +84,18 @@
 												</div>
 												<div class="slider-with-btns">
 													<button class="slider-step-btn" data-for="fs-slider" data-dir="-1" style="width:18px;height:18px;flex-shrink:0;">−</button>
-													<input type="range" class="style-slider" id="fs-slider" min="2" max="25" value="5" step="0.5" style="width:32px;flex-shrink:0;">
+													<!-- Pete, 2026-10-26: "wanting to make letters larger, and it
+													     stalls before I get large enough" — same hardcoded-ceiling
+													     issue as the logo-size-slider (raised 80->150 earlier).
+													     fontSize is % of the ZONE'S WIDTH (see label-configurator.js),
+													     not an arbitrary unit, so 50 isn't a guess: on the 8oz zone
+													     (width 3.75in, height 2.5in) a single line at 50% works out
+													     to ~1.875in tall text (line-height ~2.34in) — right at the
+													     zone's own height, the real ceiling for one line to still
+													     fit. No server-side cap exists (rrt_label_draw_text() uses
+													     the same %-of-zone-width formula with no clamp), so this
+													     flows straight through to the real print file too. -->
+													<input type="range" class="style-slider" id="fs-slider" min="2" max="50" value="5" step="0.5" style="width:32px;flex-shrink:0;">
 													<button class="slider-step-btn" data-for="fs-slider" data-dir="1" style="width:18px;height:18px;flex-shrink:0;">+</button>
 												</div>
 											</div>
@@ -269,6 +280,30 @@
 														<img src="<?php echo esc_url( RRT_LABEL_URL . $art['file'] ); ?>" alt="<?php echo esc_attr( $art['label'] ); ?>" style="width:100%; height:100%; object-fit:contain; display:block; pointer-events:none;">
 													</button>
 												<?php endforeach; ?>
+												<?php
+												/**
+												 * Pete, 2026-10-26: "donate their image for others to
+												 * use... so it immediately goes to our library" —
+												 * customer-donated art (rrt_label_community_art(),
+												 * real Media Library attachments), merged into this
+												 * same grid with a small section divider. Only
+												 * rendered once at least one donated piece exists, so
+												 * a fresh site never shows an empty "Community"
+												 * heading. Same .art-picker-item markup/classes as the
+												 * curated art above, so all existing click/drag/resize
+												 * handling in label-configurator.js just works
+												 * unchanged — it only ever looks at data-art-key.
+												 */
+												$rrt_community_art = rrt_label_community_art();
+												if ( ! empty( $rrt_community_art ) ) :
+													?>
+													<div style="grid-column:1/-1; font-size:0.55rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#991e21; border-top:1px solid #e3ddd2; padding-top:0.35rem; margin-top:0.1rem;">Community</div>
+													<?php foreach ( $rrt_community_art as $art_key => $art ) : ?>
+														<button type="button" class="art-picker-item" data-art-key="<?php echo esc_attr( $art_key ); ?>" title="<?php echo esc_attr( $art['label'] ); ?>" style="border:1px solid #e3ddd2; border-radius:6px; padding:3px; background:#fff; cursor:pointer; width:50px; height:50px;">
+															<img src="<?php echo esc_url( $art['file'] ); ?>" alt="<?php echo esc_attr( $art['label'] ); ?>" style="width:100%; height:100%; object-fit:contain; display:block; pointer-events:none;">
+														</button>
+													<?php endforeach; ?>
+												<?php endif; ?>
 											</div>
 										</div>
 										<div id="logo-selector-btns" style="display:flex; gap:0.3rem; flex-wrap:nowrap;"></div>
@@ -293,6 +328,16 @@
 										<button class="slider-step-btn" data-for="logo-size-slider" data-dir="1" style="width:22px;height:22px;flex-shrink:0;">+</button>
 									</div>
 									<span id="logo-filename" style="font-size:0.6rem; color:#888; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; display:block; margin-bottom:0.25rem;"></span>
+									<!-- Pete, 2026-10-26: "donate their image for others to use... a
+									     very stripped down copyright image thing" — only shown for a
+									     real upload (JS hides it whenever the active logo is an ART-
+									     library pick, see loadLogoIntoControls() in
+									     label-configurator.js); unchecked by default, same opt-in
+									     spirit as every other per-layer toggle in this file. -->
+									<label id="donate-row" style="display:none; align-items:flex-start; gap:0.35rem; font-size:0.65rem; color:#555; font-family:'Poppins',sans-serif; line-height:1.35; margin:0.15rem 0 0.4rem; cursor:pointer;">
+										<input type="checkbox" id="logo-donate-checkbox" style="margin-top:0.15rem; flex-shrink:0;">
+										<span>Donate this image to our Community Art Library so other customers can use it too (no tip needed). By checking this box, I confirm I own this image or have permission to share it. <a href="<?php echo esc_url( home_url( '/community-standards/' ) ); ?>" target="_blank" rel="noopener" style="color:#991e21; font-weight:600;">See our Community Standards &rarr;</a></span>
+									</label>
 									<p class="hint" style="display:none;">Drag logo on preview to position</p>
 								</div><!-- /tab-panel-logo -->
 

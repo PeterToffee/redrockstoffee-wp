@@ -119,6 +119,8 @@
 		logoSizeSlider: document.getElementById( 'logo-size-slider' ),
 		logoSelectorBtns: document.getElementById( 'logo-selector-btns' ),
 		logoFilename: document.getElementById( 'logo-filename' ),
+		donateRow: document.getElementById( 'donate-row' ),
+		donateCheckbox: document.getElementById( 'logo-donate-checkbox' ),
 
 		name: document.getElementById( 'rrt-lc-name' ),
 		email: document.getElementById( 'rrt-lc-email' ),
@@ -1092,6 +1094,29 @@
 		return logo.artKey ? logo.artLabel : ( logo.file ? logo.file.name : '' );
 	}
 
+	// Pete, 2026-10-26: "donate their image for others to use" — the
+	// checkbox only ever makes sense for a real upload, never a bundled
+	// ART piece Pete already owns the rights to, so it's hidden/reset
+	// every time the active logo changes (same lifecycle as the font-size
+	// slider's value just above it).
+	function syncDonateRow( logo ) {
+		if ( ! logo || logo.artKey ) {
+			els.donateRow.style.display = 'none';
+			els.donateCheckbox.checked = false;
+			return;
+		}
+		els.donateRow.style.display = 'flex';
+		els.donateCheckbox.checked = !! logo.donate;
+	}
+
+	els.donateCheckbox.addEventListener( 'change', function () {
+		var logo = activeLogo();
+		if ( ! logo ) {
+			return;
+		}
+		logo.donate = els.donateCheckbox.checked;
+	} );
+
 	// Pete, 2026-10-17: "a library of holiday/birthday/celebration art
 	// icons we can use to click like adding logos... a drop down box on
 	// the add logo line simply a button that says ART" — picking one adds
@@ -1124,6 +1149,7 @@
 		attachDrag( img, logo, 'logo' );
 		renderLogoSelectorPills();
 		els.logoFilename.textContent = logoDisplayName( logo );
+		syncDonateRow( logo );
 		renderLogo( logo );
 	}
 
@@ -1222,6 +1248,7 @@
 					scale: parseFloat( els.logoSizeSlider.value ),
 					pos: defaultPos( state.logos.length ),
 					el: img,
+					donate: false,
 				};
 				state.logos.push( logo );
 				state.activeLogoId = logo.id;
@@ -1231,10 +1258,12 @@
 				logo.file = file;
 				logo.artKey = null; // CHOOSE FILE on an ART logo replaces it with a real upload.
 				logo.artLabel = null;
+				logo.donate = false;
 			}
 			state.addingNewLogo = false;
 			logo.el.src = evt.target.result;
 			els.logoFilename.textContent = file.name;
+			syncDonateRow( logo );
 			renderLogo( logo );
 		};
 		reader.readAsDataURL( file );
@@ -1256,6 +1285,7 @@
 		if ( next ) {
 			els.logoSizeSlider.value = next.scale;
 		}
+		syncDonateRow( next );
 	} );
 
 	els.logoSizeSlider.addEventListener( 'input', function () {
@@ -1281,6 +1311,7 @@
 				renderLogoSelectorPills();
 				els.logoFilename.textContent = logoDisplayName( logo );
 				els.logoSizeSlider.value = logo.scale;
+				syncDonateRow( logo );
 			} );
 			els.logoSelectorBtns.appendChild( pill );
 		} );
@@ -1540,7 +1571,7 @@
 				if ( ! logo.artKey ) {
 					body.append( 'logo_files[]', logo.file );
 				}
-				layersMeta.push( { type: 'logo', pos: logo.pos, scale: logo.scale, art_key: logo.artKey || '' } );
+				layersMeta.push( { type: 'logo', pos: logo.pos, scale: logo.scale, art_key: logo.artKey || '', donate: ! logo.artKey && !! logo.donate } );
 			} );
 			state.textGroups.forEach( function ( group ) {
 				if ( group.text.trim() ) {

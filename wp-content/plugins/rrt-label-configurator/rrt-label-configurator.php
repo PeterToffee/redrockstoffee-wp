@@ -552,6 +552,111 @@ function rrt_label_art_library() {
 }
 
 /**
+ * Pete, 2026-10-26: "we'll need to build our library... donate their image
+ * for others to use... so it immediately goes to our library" — customer-
+ * donated art, merged into the same ART picker as rrt_label_art_library()
+ * above but sourced from real WP Media Library attachments instead of a
+ * hand-curated PHP array. Storage = real attachments (not a new CPT/table/
+ * JSON file) on purpose: Pete can already browse and delete anything in
+ * wp-admin -> Media with zero new admin UI to build or code to touch if a
+ * submission needs removing. Tagged via rrt_label_donate_to_community_library()
+ * below. Capped at 60 (newest first) so the picker can't grow unbounded.
+ */
+function rrt_label_community_art() {
+	$attachments = get_posts(
+		array(
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'posts_per_page' => 60,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'meta_key'       => '_rrt_community_art',
+			'meta_value'     => '1',
+		)
+	);
+
+	$items = array();
+	foreach ( $attachments as $attachment ) {
+		$url = wp_get_attachment_url( $attachment->ID );
+		if ( ! $url ) {
+			continue;
+		}
+		$items[ 'community:' . $attachment->ID ] = array(
+			'label' => $attachment->post_title ? $attachment->post_title : 'Community art',
+			'file'  => $url,
+		);
+	}
+	return $items;
+}
+
+/**
+ * Copies a just-uploaded logo file into the real Media Library and tags it
+ * as donated community art. Called from rrt_label_handle_submit() (inc/
+ * handle-submission.php) AFTER the real order's composite/email already
+ * succeeded — this is purely additive and must never block or fail the
+ * actual order submission, so every failure path here just returns quietly
+ * (no exceptions, no wp_send_json_error).
+ *
+ * Copies (not moves) the tmp file — $tmp_path is still PHP's own upload tmp
+ * file at this point and may be read again elsewhere in the same request;
+ * letting PHP clean it up itself at request end is simpler than coordinating
+ * who deletes it.
+ */
+function rrt_label_donate_to_community_library( $tmp_path, $donor_name, $donor_email ) {
+	if ( ! $tmp_path || ! file_exists( $tmp_path ) ) {
+		return;
+	}
+
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+
+	// wp_check_filetype() goes by the PATH'S OWN extension, but $tmp_path is
+	// PHP's raw upload tmp file (e.g. "phpA1B2.tmp") with no real extension
+	// at all — it would silently fail here for every genuine image.
+	// getimagesize() reads the actual file content instead, same technique
+	// rrt_label_draw_logo() already uses for these exact same tmp files.
+	$logo_info = getimagesize( $tmp_path );
+	$ext       = isset( $logo_info['mime'] ) ? array_search( $logo_info['mime'], array( 'png' => 'image/png', 'jpg' => 'image/jpeg' ), true ) : false;
+	if ( ! $ext ) {
+		return;
+	}
+	$mime = $logo_info['mime'];
+
+	$upload_dir = wp_upload_dir();
+	if ( ! empty( $upload_dir['error'] ) ) {
+		return;
+	}
+
+	$filename = wp_unique_filename( $upload_dir['path'], 'community-art.' . $ext );
+	$dest     = trailingslashit( $upload_dir['path'] ) . $filename;
+
+	if ( ! @copy( $tmp_path, $dest ) ) {
+		return;
+	}
+
+	$attachment_id = wp_insert_attachment(
+		array(
+			'post_mime_type' => $mime,
+			'post_title'     => sanitize_file_name( pathinfo( $filename, PATHINFO_FILENAME ) ),
+			'post_status'    => 'inherit',
+		),
+		$dest
+	);
+
+	if ( ! $attachment_id || is_wp_error( $attachment_id ) ) {
+		return;
+	}
+
+	$metadata = wp_generate_attachment_metadata( $attachment_id, $dest );
+	wp_update_attachment_metadata( $attachment_id, $metadata );
+
+	update_post_meta( $attachment_id, '_rrt_community_art', '1' );
+	update_post_meta( $attachment_id, '_rrt_donor_name', sanitize_text_field( $donor_name ) );
+	update_post_meta( $attachment_id, '_rrt_donor_email', sanitize_email( $donor_email ) );
+}
+
+/**
  * Pixel geometry for one size's zone, derived from the inches above.
  * Returns the template image's own pixel dimensions plus the zone's
  * pixel box (x/y/width/height), horizontally centered automatically.

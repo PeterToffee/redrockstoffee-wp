@@ -119,6 +119,13 @@ function rrt_label_handle_submit() {
 				'pos'        => $pos,
 				'scale'      => (float) ( $raw['scale'] ?? 0 ),
 				'tmp_path'   => $logo_tmp_paths[ $logo_i ],
+				// Pete, 2026-10-26: "donate their image for others to use...
+				// immediately goes to our library" — only meaningful for a
+				// real upload (never set for an art_key layer, handled in
+				// the branch above). Actually copied into the Media Library
+				// near the end of rrt_label_handle_submit(), after the real
+				// order's composite/email already succeeded.
+				'donate'     => ! empty( $raw['donate'] ),
 			);
 			++$logo_i;
 		} elseif ( 'text' === $raw['type'] ) {
@@ -234,6 +241,17 @@ function rrt_label_handle_submit() {
 		$layer_paths,
 		$sheet_path
 	);
+
+	// Pete, 2026-10-26: "donate their image for others to use... immediately
+	// goes to our library" — purely additive, runs AFTER the real order
+	// already succeeded above, so any failure here (bad file, disk issue,
+	// etc.) can never break the actual submission. rrt_label_donate_to_community_library()
+	// (rrt-label-configurator.php) itself quietly no-ops on any error.
+	foreach ( $layers as $layer ) {
+		if ( 'logo' === $layer['type'] && ! empty( $layer['donate'] ) && empty( $layer['art_key'] ) ) {
+			rrt_label_donate_to_community_library( $layer['tmp_path'], $name, $email );
+		}
+	}
 
 	$all_paths = array_merge( array( $composite_path ), $layer_paths, $sheet_path ? array( $sheet_path ) : array() );
 	$folder    = wp_normalize_path( dirname( $composite_path ) );
