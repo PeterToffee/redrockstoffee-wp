@@ -243,16 +243,18 @@ function rrt_label_handle_submit() {
 	);
 
 	// Pete, 2026-10-26: "donate their image for others to use... immediately
-	// goes to our library... keep art donators as anonymous as possible" —
-	// purely additive, runs AFTER the real order already succeeded above,
-	// so any failure here (bad file, disk issue, etc.) can never break the
-	// actual submission. Deliberately does NOT pass $name/$email along —
-	// rrt_label_donate_to_community_library() (rrt-label-configurator.php)
-	// takes no identity at all, by design, and itself quietly no-ops on any
-	// error.
+	// goes to our library" — purely additive, runs AFTER the real order
+	// already succeeded above, so any failure here (bad file, disk issue,
+	// etc.) can never break the actual submission. $name/$email ARE passed
+	// through (Pete's own follow-up: "we'll still need to know who it is...
+	// to contact if there's something that's not allowable, or to flag them
+	// as unwelcome donator") but rrt_label_donate_to_community_library()
+	// (rrt-label-configurator.php) stores them as PRIVATE admin-only
+	// postmeta only — never public, never returned by
+	// rrt_label_community_art(). Itself quietly no-ops on any error.
 	foreach ( $layers as $layer ) {
 		if ( 'logo' === $layer['type'] && ! empty( $layer['donate'] ) && empty( $layer['art_key'] ) ) {
-			rrt_label_donate_to_community_library( $layer['tmp_path'] );
+			rrt_label_donate_to_community_library( $layer['tmp_path'], $name, $email );
 		}
 	}
 

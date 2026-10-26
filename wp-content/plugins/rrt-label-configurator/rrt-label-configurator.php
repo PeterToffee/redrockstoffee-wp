@@ -603,15 +603,18 @@ function rrt_label_community_art() {
  * who deletes it.
  *
  * Pete, 2026-10-26: "keep art donators as anonymous as possible, unless
- * the user wants to be known, then let's give them a signup link for
- * theunframer.com" — deliberately takes no name/email at all. Anonymous
- * donation is the only path this function handles; anyone who wants credit
- * is pointed at TheUnframer's own real, already-deployed creator-signup
- * flow (/creator-apply/ -> a reviewed Curated-Pro(TM) account with a real
- * portfolio area there) instead of this plugin half-building a second
- * identity/attribution system of its own.
+ * the user wants to be known" — anonymous to OTHER CUSTOMERS, never shown
+ * anywhere public (rrt_label_community_art() never returns these fields).
+ * Pete's own follow-up correction: "seeing that no user will get the
+ * backend info of the donator, we'll still need to know who it is and to
+ * contact if there's something that's not allowable, or to flag them as
+ * unwelcome donator" — so name/email ARE kept, strictly as private,
+ * admin-only postmeta (visible only in wp-admin -> Media), for exactly
+ * that moderation purpose. Anyone who wants real public credit instead is
+ * pointed at TheUnframer's own KindShare flow (/share/) rather than this
+ * plugin half-building a second identity/attribution system of its own.
  */
-function rrt_label_donate_to_community_library( $tmp_path ) {
+function rrt_label_donate_to_community_library( $tmp_path, $donor_name, $donor_email ) {
 	if ( ! $tmp_path || ! file_exists( $tmp_path ) ) {
 		return;
 	}
@@ -661,6 +664,10 @@ function rrt_label_donate_to_community_library( $tmp_path ) {
 	wp_update_attachment_metadata( $attachment_id, $metadata );
 
 	update_post_meta( $attachment_id, '_rrt_community_art', '1' );
+	// Private moderation contact only — never returned by
+	// rrt_label_community_art() or shown to any other customer.
+	update_post_meta( $attachment_id, '_rrt_donor_name', sanitize_text_field( $donor_name ) );
+	update_post_meta( $attachment_id, '_rrt_donor_email', sanitize_email( $donor_email ) );
 }
 
 /**

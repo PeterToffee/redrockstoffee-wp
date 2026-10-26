@@ -339,16 +339,22 @@
 										<span>Donate this image to our Community Art Library so other customers can use it too (no tip needed) — submitted anonymously. By checking this box, I confirm I own this image or have permission to share it. <a href="<?php echo esc_url( home_url( '/community-standards/' ) ); ?>" target="_blank" rel="noopener" style="color:#991e21; font-weight:600;">See our Community Standards &rarr;</a></span>
 									</label>
 									<!-- Pete, 2026-10-26: "keep art donators as anonymous as
-									     possible, unless the user wants to be known, then let's
-									     give them a signup link for theunframer.com" — donations
-									     here stay fully anonymous (no name/email ever stored
-									     against the file, see rrt_label_donate_to_community_library()
-									     in rrt-label-configurator.php); anyone who DOES want credit
-									     is pointed at TheUnframer's own real creator system instead
-									     of building a second, half-finished identity/attribution
-									     system here. Only shown once the donate box above is
-									     checked (toggled in label-configurator.js). -->
-									<p id="donate-credit-row" style="display:none; font-size:0.65rem; color:#555; font-family:'Poppins',sans-serif; line-height:1.35; margin:0 0 0.4rem;">Want credit for your work instead? <a href="https://theunframer.com/creator-apply/" target="_blank" rel="noopener" style="color:#991e21; font-weight:600;">Become a Curated-Pro&trade; creator on TheUnframer &rarr;</a></p>
+									     possible, unless the user wants to be known" — donations
+									     here never show the donor's name to any OTHER customer
+									     (name/email are kept privately, admin-only, for
+									     moderation/contact purposes only — see the follow-up note
+									     on rrt_label_donate_to_community_library() in
+									     rrt-label-configurator.php). Anyone who DOES want real
+									     public credit is pointed at TheUnframer's own KindShare
+									     flow instead of building a second, half-finished identity/
+									     attribution system here. Pete, 2026-10-26 (follow-up):
+									     "steer them to KindShare initially, not the Curated-Pro" —
+									     KindShare (/share/) is the lighter, instant-signup track;
+									     Curated-Pro (/creator-apply/) is the heavier, reviewed
+									     track, left for a later ask if Pete wants a 2nd tier here.
+									     Only shown once the donate box above is checked (toggled
+									     in label-configurator.js). -->
+									<p id="donate-credit-row" style="display:none; font-size:0.65rem; color:#555; font-family:'Poppins',sans-serif; line-height:1.35; margin:0 0 0.4rem;">Want credit for your work instead? <a href="https://theunframer.com/share/" target="_blank" rel="noopener" style="color:#991e21; font-weight:600;">Share it on TheUnframer's KindShare &rarr;</a></p>
 									<p class="hint" style="display:none;">Drag logo on preview to position</p>
 								</div><!-- /tab-panel-logo -->
 
