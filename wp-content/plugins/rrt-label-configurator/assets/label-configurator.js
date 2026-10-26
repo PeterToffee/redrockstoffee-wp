@@ -70,6 +70,7 @@
 		size: document.getElementById( 'rrt-lc-size' ),
 		stage: document.getElementById( 'rrt-lc-stage' ),
 		stageInner: document.getElementById( 'rrt-lc-stage-inner' ),
+		instructions: document.getElementById( 'rrt-lc-instructions' ),
 		bg: document.getElementById( 'rrt-lc-bg' ),
 		zone: document.getElementById( 'rrt-lc-zone' ),
 
@@ -164,6 +165,12 @@
 		}
 		state.sizeKey = sizeKey;
 
+		// Pete, 2026-10-25: "8 oz is now too small, hard to work with...
+		// keep what we had before... for 4 oz" — the shrink-to-fit
+		// treatment (.rrt-lc-stage--narrow in label-configurator.css)
+		// only applies to the size that actually needs it.
+		els.stage.classList.toggle( 'rrt-lc-stage--narrow', '4oz' === sizeKey );
+
 		var minQty = MIN_QTY[ sizeKey ] || 1;
 		els.quantity.min = minQty;
 		if ( ! els.quantity.value || parseInt( els.quantity.value, 10 ) < minQty ) {
@@ -208,8 +215,55 @@
 		// aspect-ratio or the mobile 50vh cap — see label-configurator.css).
 		requestAnimationFrame( function () {
 			var maxScroll = els.stage.scrollHeight - els.stage.clientHeight;
-			els.stage.scrollTop = ( size.initial_scroll_pct / 100 ) * maxScroll;
+			// Pete, 2026-10-25: "when we open the window, can we have it
+			// be at the bottom, seeing the logo and auto slide up to show
+			// the dotted box" -> "make the slide slower" — instant jump to
+			// the bottom first, a brief pause so the logo registers, then
+			// a custom-timed scroll animation (not CSS scroll-behavior:
+			// smooth, whose duration isn't reliably controllable) up to
+			// size.initial_scroll_pct's resting position. The completion
+			// callback is also what times the instructions banner flash
+			// below — exact, not a guessed delay.
+			els.stage.scrollTop = maxScroll;
+			setTimeout( function () {
+				var target = ( size.initial_scroll_pct / 100 ) * maxScroll;
+				animateScrollTop( els.stage, maxScroll, target, 1600, flashInstructionsBanner );
+			}, 500 );
 		} );
+	}
+
+	// Simple eased scroll-position tween — gives an explicit, tunable
+	// duration (unlike CSS scroll-behavior:smooth) and a real completion
+	// callback to hang the banner flash off of.
+	function animateScrollTop( el, from, to, duration, onComplete ) {
+		var startTime = null;
+		function step( timestamp ) {
+			if ( startTime === null ) {
+				startTime = timestamp;
+			}
+			var t = Math.min( 1, ( timestamp - startTime ) / duration );
+			var eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow( -2 * t + 2, 3 ) / 2; // ease-in-out cubic
+			el.scrollTop = from + ( to - from ) * eased;
+			if ( t < 1 ) {
+				requestAnimationFrame( step );
+			} else if ( onComplete ) {
+				onComplete();
+			}
+		}
+		requestAnimationFrame( step );
+	}
+
+	// Pete, 2026-10-25: "when it gets to the top... make the lettering
+	// banner above pop/flash brightish to get attention" — remove-then-
+	// re-add (with a forced reflow in between) so the CSS animation can
+	// replay every time this fires, not just the first.
+	function flashInstructionsBanner() {
+		if ( ! els.instructions ) {
+			return;
+		}
+		els.instructions.classList.remove( 'rrt-lc-flash' );
+		void els.instructions.offsetWidth; // forces a reflow so removing+re-adding the class actually restarts the animation
+		els.instructions.classList.add( 'rrt-lc-flash' );
 	}
 
 	function positionEl( el, pos ) {
@@ -234,7 +288,7 @@
 	// zone) and "front" (the fixed mountain-logo artwork) are ever
 	// visible from this angle, so those are the only two crop windows
 	// computed here.
-	var BOX_PX_PER_INCH = 46; // Pete, 2026-10-25: "bigger, it's quite small" (was 34) — tune freely, doesn't touch print sizing anywhere
+	var BOX_PX_PER_INCH = 76; // Pete, 2026-10-25: "a little larger" again (was 34, then 46, then 58, then 66) — tune freely, doesn't touch print sizing anywhere
 
 	// Pete, 2026-10-25: "remove the - and + on either end and make it
 	// easier to work on the swing/arc, a grab/smoosh to slide it" —
@@ -1497,6 +1551,19 @@
 						text: group.text,
 						font: group.font,
 						font_size: group.fontSize,
+						// Pete, 2026-10-25: "confirm all elements... have
+						// no bugs" — this was never sent at all, so the
+						// print file always wrapped at a fixed width
+						// instead of whatever the TEXT WIDTH slider
+						// actually showed the customer (see renderTextGroup()'s
+						// maxWidth line and rrt_label_draw_text() server-side).
+						side_margin: group.sideMargin,
+						// Same audit: Bold/Italic toggle fully live in the
+						// preview (renderTextGroup()'s fontWeight/fontStyle
+						// lines) but never sent to the server at all before
+						// this — printed text silently ignored both.
+						bold: !! group.bold,
+						italic: !! group.italic,
 						// So the server-side composite (what Pete actually
 						// reviews/approves) matches the color the customer
 						// saw, instead of GD's old hardcoded near-black text.

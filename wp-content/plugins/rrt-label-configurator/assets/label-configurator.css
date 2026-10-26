@@ -136,15 +136,13 @@
 @media ( max-width: 991px ) {
 	/* Pete, 2026-10-21: "make the window about the same size as the
 	   canvas preview window on the unframer configurator, it fits well
-	   on mobile" — matches .preview-image's own max-height: 50vh rule at
-	   this same breakpoint in TheUnframer's assets/css/upload-
-	   configurator.css, as a safety ceiling on top of the aspect-ratio
-	   sizing in loadSize() (which already shrinks naturally on a narrower
-	   screen, but a tall/narrow phone could still render it too tall
-	   without this cap). */
-	.rrt-lc-stage {
-		max-height: 50vh;
-	}
+	   on mobile" — originally a mobile-only max-height:50vh safety
+	   ceiling here. 2026-10-25: superseded by a general (not
+	   breakpoint-limited) max-height:45vh on .rrt-lc-stage itself further
+	   down this file (the "4oz window too tall" fix) — that rule, being
+	   later in the cascade, already wins at every width including this
+	   one, so the old mobile-only duplicate was removed rather than left
+	   as dead/confusing code. */
 
 	.rrt-lc-card--size {
 		order: 1;
@@ -160,6 +158,49 @@
 
 	.rrt-lc-card--contact {
 		order: 4;
+	}
+
+	/* Pete, 2026-10-25: "are our buttons too small?... what's going to
+	   happen on mobile?" — several controls were sized tight specifically
+	   to fit on one row on desktop (18-22px step buttons, a 0.42rem-font
+	   tab button), well under the ~44px touch target Apple/Google both
+	   recommend. Bumped up here, mobile-only — desktop stays exactly as
+	   compact as before; some rows may wrap on narrow screens now, which
+	   is the accepted trade-off for making them reliably tappable.
+	   !important is required since these are inline-styled in the PHP
+	   markup (inc/quote-module-card.part.php) — inline styles always win
+	   over an external stylesheet otherwise; same justified use already
+	   established for .font-drum-rotator elsewhere in this file. */
+	.slider-step-btn {
+		width: 38px !important;
+		height: 38px !important;
+		font-size: 1.1rem !important;
+	}
+
+	.rrt-pill-tab {
+		font-size: 0.75rem !important;
+		padding: 0.6rem 0.4rem !important;
+	}
+
+	#quote-add-btn,
+	#quote-remove-btn,
+	#logo-add-btn,
+	#logo-remove-btn,
+	#logo-upload-btn,
+	#art-picker-btn {
+		font-size: 0.85rem !important;
+		padding: 0.5rem 0.75rem !important;
+	}
+
+	.art-picker-item {
+		width: 58px !important;
+		height: 58px !important;
+	}
+
+	/* the 4-column grid needs to widen to actually fit the bigger icons
+	   above — otherwise they'd overflow their own grid columns. */
+	#art-picker-panel {
+		width: 290px !important;
 	}
 }
 
@@ -384,7 +425,18 @@
 	position: relative;
 	overflow-x: hidden;
 	overflow-y: auto;
+	/* Pete, 2026-10-25: "on the 4 oz, the window is too tall..." ->
+	   "the 4 oz box isn't showing all the dotted area" (fixed with
+	   width:auto + align-self:center, letting the box shrink both
+	   dimensions to fit max-height instead of just cropping) -> "8 oz is
+	   now too small, hard to work with... keep what we had before... for
+	   4 oz" — that fix affected BOTH sizes since it lived on the shared
+	   base rule; 8oz needs its old full-width behavior back. Moved the
+	   shrink-to-fit treatment to .rrt-lc-stage--narrow, added by JS
+	   (loadSize() in label-configurator.js) only when 4oz is selected —
+	   8oz stays plain width:100% as it always was. */
 	width: 100%;
+	max-height: 55vh;
 	border: 1px solid #e3ddd2;
 	border-radius: 8px;
 	background: #fff;
@@ -398,6 +450,24 @@
 
 .rrt-lc-stage.rrt-lc-panning {
 	cursor: grabbing;
+}
+
+/* 4oz-only: narrower template image makes the same fixed vertical
+   content render at a much taller aspect ratio than 8oz, so it's the
+   one that actually needs to shrink both dimensions (not just get
+   height-cropped) to show the full dotted zone within max-height. */
+.rrt-lc-stage.rrt-lc-stage--narrow {
+	width: auto;
+	max-width: 100%;
+	align-self: center;
+	/* Pete, 2026-10-25: "rework the 4 oz, so it's wider" — 4oz's aspect
+	   ratio (narrow template image, same fixed vertical content as 8oz)
+	   is around 0.66 (taller than wide) vs 8oz's ~1.03 (near square), so
+	   the shared 55vh cap above simply doesn't give it enough vertical
+	   room to reach a comparable width — it was hitting that ceiling
+	   much sooner. A taller cap just for this size lets it render wider
+	   before the height constraint kicks in. */
+	max-height: 75vh;
 }
 
 /* Pete, 2026-10-19: "scroll outside on the side that loads with the same
@@ -426,16 +496,33 @@
 	z-index: 5;
 	background: #991e21;
 	color: #fff;
-	font-family: 'Bangers', cursive;
-	font-weight: 400;
-	font-size: 0.875rem;
-	letter-spacing: 0.03em;
+	/* Pete, 2026-10-25: "way too [hard to] read, change font to a more
+	   normal font" — Bangers (a bold comic-book display face) swapped
+	   for the site's own normal body font. */
+	font-family: var( --rrt-body-font );
+	font-weight: 600;
+	font-size: 1.05rem; /* Pete, 2026-10-25: "larger/taller if possible" — was 0.875rem */
+	letter-spacing: 0.01em;
 	text-align: center;
-	padding: 0.35rem 0.5rem;
+	padding: 0.5rem 0.5rem;
 	pointer-events: none;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+/* Pete, 2026-10-25: "when it gets to the top... make the lettering
+   banner above pop/flash brightish to get attention" — timed from
+   label-configurator.js to land right as the auto-slide-up scroll
+   animation finishes (see loadSize()). Class added + removed by JS
+   each time so it can replay on every size switch, not just once. */
+@keyframes rrt-lc-banner-flash {
+	0%, 100% { filter: brightness( 1 ); }
+	25%, 75% { filter: brightness( 1.7 ); }
+	50% { filter: brightness( 2.1 ); }
+}
+.rrt-lc-instructions.rrt-lc-flash {
+	animation: rrt-lc-banner-flash 0.9s ease-in-out 2;
 }
 
 .rrt-lc-bg {
@@ -665,7 +752,7 @@
 	border-radius: 12px;
 	padding: 1.25rem;
 	width: 100%;
-	max-width: 600px; /* Pete, 2026-10-25: widened to match the bigger box (BOX_PX_PER_INCH bump in label-configurator.js) */
+	max-width: 680px; /* Pete, 2026-10-25: widened again to match another BOX_PX_PER_INCH bump (46 -> 58) */
 	max-height: 90vh;
 	overflow-y: auto;
 	box-shadow: 0 12px 40px rgba( 0, 0, 0, 0.3 );
@@ -763,9 +850,9 @@
 	   face — a cheap stand-in for ambient occlusion that reads as real
 	   dimension/form instead of flat pasted-on faces. */
 	/* Pete, 2026-10-25: "take the edges/color back to halfway between
-	   what it was" — halfway between none (the original 1px outline
-	   only) and the first pass (16px blur, 0.3 opacity). */
-	box-shadow: inset 0 0 0 1px rgba( 0, 0, 0, 0.06 ), inset 0 0 8px rgba( 60, 60, 60, 0.15 );
+	   what it was" (16px/0.3 -> 8px/0.15) -> "box edges seem a little
+	   too grey again" — pulled back further. */
+	box-shadow: inset 0 0 0 1px rgba( 0, 0, 0, 0.06 ), inset 0 0 5px rgba( 60, 60, 60, 0.09 );
 	overflow: hidden;
 }
 

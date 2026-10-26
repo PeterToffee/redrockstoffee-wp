@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.34.5' );
+define( 'RRT_LABEL_VERSION', '3.42.1' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -568,7 +568,12 @@ function rrt_label_zone_px( $size_key ) {
  */
 function rrt_label_crop_margins_in() {
 	return array(
-		'top' => 0, // toward the Nutrition Facts end — see 2026-10-25 note above
+		// Pete, 2026-10-25: "need a px or two at the top between the red
+		// banner lettering and the dotted line" — dropping the margin to
+		// 0 (above) put the zone flush against the sticky instructions
+		// banner with no breathing room at all. A small reintroduced gap
+		// (not the old 0.75in — just enough to visually separate them).
+		'top' => 0.05, // toward the Nutrition Facts end
 	);
 }
 
@@ -641,11 +646,13 @@ function rrt_label_display_geometry( $size_key ) {
 	$visible_bottom_in   = 1.5;
 	$visible_crop_height = ( $px['zone_y'] - $crop['crop_y'] ) + $px['zone_height'] + round( $visible_bottom_in * $dpi );
 
-	// Start at the TOP (showing the zone immediately, not scrolled down
-	// toward the logo) — now that the visible box above already reaches
-	// into the logo on its own, there's no need to pre-scroll there.
-	// Scrolling further down (toward the full logo/footer/Nutrition
-	// Facts) is still possible, just not where it starts.
+	// Pete, 2026-10-25: "when we open the window, can we have it be at
+	// the bottom, seeing the logo and auto slide up to show the dotted
+	// box" — this value is now where the stage SETTLES after that
+	// animated slide-up (0 = all the way up, zone fully visible), not
+	// literally where it starts. The actual "start at the bottom" jump +
+	// smooth animated scroll back up to this value live in loadSize()
+	// in label-configurator.js.
 	$initial_scroll_pct = 0;
 
 	return array(
@@ -874,7 +881,7 @@ function rrt_label_configurator_shortcode( $atts ) {
 					     visible window regardless of how far the inner content is
 					     scrolled; pointer-events:none so it never blocks grab-to-pan
 					     or dragging a logo/text layer underneath it. -->
-					<div class="rrt-lc-instructions" id="rrt-lc-instructions">Put your logo/message/greeting INSIDE dotted-line box</div>
+					<div class="rrt-lc-instructions" id="rrt-lc-instructions">Logo/Message Inside Dotted Line</div>
 					<div class="rrt-lc-stage-inner" id="rrt-lc-stage-inner">
 						<img class="rrt-lc-bg" id="rrt-lc-bg" alt="">
 						<div class="rrt-lc-zone" id="rrt-lc-zone">
@@ -909,7 +916,7 @@ function rrt_label_configurator_shortcode( $atts ) {
 				 * label-configurator.js.
 				 */
 				?>
-				<button type="button" id="rrt-lc-box-preview-btn" class="rrt-lc-btn-primary rrt-lc-box-preview-btn">Let me see what we have</button>
+				<button type="button" id="rrt-lc-box-preview-btn" class="rrt-lc-btn-primary rrt-lc-box-preview-btn">See your Label on the box</button>
 
 			</div>
 

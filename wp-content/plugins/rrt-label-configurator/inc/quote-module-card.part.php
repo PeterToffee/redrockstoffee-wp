@@ -252,9 +252,20 @@
 										     scroll (max-height + overflow-y:auto) instead of just growing
 										     tall enough to run off-screen; widened to 4 columns to use the
 										     space better. -->
-										<div id="art-picker-panel" style="display:none; position:fixed; z-index:9999; background:#fff; border:1.5px solid #991e21; border-radius:8px; padding:0.35rem; box-shadow:0 4px 14px rgba(0,0,0,.25); grid-template-columns:repeat(4, 1fr); gap:0.3rem; width:176px; max-height:260px; overflow-y:auto;">
+										<?php
+										/**
+										 * Pete, 2026-10-25: "would be better
+										 * if it was biggerer, with sliders
+										 * as it is [unchanged], but the
+										 * icons larger too" — panel and
+										 * item buttons both scaled up
+										 * (36px -> 50px icons, panel width/
+										 * height grown to match).
+										 */
+										?>
+										<div id="art-picker-panel" style="display:none; position:fixed; z-index:9999; background:#fff; border:1.5px solid #991e21; border-radius:8px; padding:0.5rem; box-shadow:0 4px 14px rgba(0,0,0,.25); grid-template-columns:repeat(4, 1fr); gap:0.45rem; width:240px; max-height:340px; overflow-y:auto;">
 												<?php foreach ( rrt_label_art_library() as $art_key => $art ) : ?>
-													<button type="button" class="art-picker-item" data-art-key="<?php echo esc_attr( $art_key ); ?>" title="<?php echo esc_attr( $art['label'] ); ?>" style="border:1px solid #e3ddd2; border-radius:6px; padding:2px; background:#fff; cursor:pointer; width:36px; height:36px;">
+													<button type="button" class="art-picker-item" data-art-key="<?php echo esc_attr( $art_key ); ?>" title="<?php echo esc_attr( $art['label'] ); ?>" style="border:1px solid #e3ddd2; border-radius:6px; padding:3px; background:#fff; cursor:pointer; width:50px; height:50px;">
 														<img src="<?php echo esc_url( RRT_LABEL_URL . $art['file'] ); ?>" alt="<?php echo esc_attr( $art['label'] ); ?>" style="width:100%; height:100%; object-fit:contain; display:block; pointer-events:none;">
 													</button>
 												<?php endforeach; ?>
@@ -264,7 +275,21 @@
 										<button id="logo-add-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.45rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">+ Add</button>
 										<button id="logo-remove-btn" type="button" title="Remove" style="font-size:0.65rem; padding:0.2rem 0.4rem; background:#e53e3e; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">×</button>
 										<button class="slider-step-btn" data-for="logo-size-slider" data-dir="-1" style="width:22px;height:22px;flex-shrink:0;">−</button>
-										<input type="range" id="logo-size-slider" class="style-slider" min="5" max="80" value="20" step="5" style="width:44px; flex-shrink:0;">
+										<?php
+									/**
+									 * Pete, 2026-10-25: "art, or my files
+									 * don't go quite as large as I'd
+									 * like" — max raised from 80 to 150
+									 * (% of zone width). No other cap
+									 * exists anywhere in the chain: GD's
+									 * dest_w = (scale/100)*zone_width in
+									 * rrt_label_draw_logo() has no
+									 * hardcoded ceiling, so this slider
+									 * was the only thing actually limiting
+									 * how big a logo/art piece could get.
+									 */
+									?>
+									<input type="range" id="logo-size-slider" class="style-slider" min="5" max="150" value="20" step="5" style="width:44px; flex-shrink:0;">
 										<button class="slider-step-btn" data-for="logo-size-slider" data-dir="1" style="width:22px;height:22px;flex-shrink:0;">+</button>
 									</div>
 									<span id="logo-filename" style="font-size:0.6rem; color:#888; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; display:block; margin-bottom:0.25rem;"></span>

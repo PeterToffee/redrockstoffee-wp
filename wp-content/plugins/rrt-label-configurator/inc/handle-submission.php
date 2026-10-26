@@ -148,6 +148,20 @@ function rrt_label_handle_submit() {
 				// group.shadowIntensity / outlineShadow() in
 				// label-configurator.js.
 				'shadow_intensity' => max( 0, min( 100, (float) ( $raw['shadow_intensity'] ?? 60 ) ) ),
+				// Pete, 2026-10-25: "confirm all elements... have no
+				// bugs" — was never read from $raw at all; the TEXT WIDTH
+				// slider's value silently never reached the print file
+				// (see rrt_label_draw_text()'s own fix for the other
+				// half of this). Default 2 matches the client's own
+				// defaultQuote() default (label-configurator.js).
+				'side_margin' => max( 0, min( 50, (float) ( $raw['side_margin'] ?? 2 ) ) ),
+				// Bold implemented below (rrt_label_draw_text()'s faux-bold
+				// double-strike). Italic captured here too but NOT yet
+				// applied server-side — see that function's own note on
+				// why (imageaffine() needed for a real shear, availability
+				// unconfirmed on the live host).
+				'bold'   => ! empty( $raw['bold'] ),
+				'italic' => ! empty( $raw['italic'] ),
 			);
 		}
 	}
@@ -282,7 +296,7 @@ function rrt_label_composite( $size_key, $layers, $order_id_text = '' ) {
 		if ( 'logo' === $layer['type'] && $layer['scale'] > 0 ) {
 			rrt_label_draw_logo( $canvas, $px, $layer['tmp_path'], $layer['pos'], $layer['scale'] );
 		} elseif ( 'text' === $layer['type'] && $layer['font_size'] > 0 ) {
-			rrt_label_draw_text( $canvas, $px, $layer['text'], $layer['pos'], $layer['font'], $layer['font_size'], $layer['color'], $layer['outline'], $layer['shadow'], $layer['shadow_intensity'] );
+			rrt_label_draw_text( $canvas, $px, $layer['text'], $layer['pos'], $layer['font'], $layer['font_size'], $layer['color'], $layer['outline'], $layer['shadow'], $layer['shadow_intensity'], $layer['side_margin'] ?? 2, $layer['bold'] ?? false );
 		}
 	}
 
@@ -411,7 +425,7 @@ function rrt_label_composite_layers( $size_key, $layers ) {
 			rrt_label_draw_logo( $layer_canvas, $px, $layer['tmp_path'], $layer['pos'], $layer['scale'] );
 			$suffix = $layer['art_key'] ?? 'logo';
 		} else {
-			rrt_label_draw_text( $layer_canvas, $px, $layer['text'], $layer['pos'], $layer['font'], $layer['font_size'], $layer['color'], $layer['outline'], $layer['shadow'], $layer['shadow_intensity'] );
+			rrt_label_draw_text( $layer_canvas, $px, $layer['text'], $layer['pos'], $layer['font'], $layer['font_size'], $layer['color'], $layer['outline'], $layer['shadow'], $layer['shadow_intensity'], $layer['side_margin'] ?? 2, $layer['bold'] ?? false );
 			$suffix = 'text';
 		}
 
@@ -602,7 +616,7 @@ function rrt_label_gd_color( $canvas, $hex, $alpha = 0 ) {
 	);
 }
 
-function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, $text_font_size, $text_color_hex = '#1a1a1a', $outline_hex = '#ffffff', $shadow_enabled = false, $shadow_intensity = 60 ) {
+function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, $text_font_size, $text_color_hex = '#1a1a1a', $outline_hex = '#ffffff', $shadow_enabled = false, $shadow_intensity = 60, $side_margin = 2, $bold = false ) {
 	$fonts    = rrt_label_fonts();
 	$font_key = isset( $fonts[ $text_font ] ) ? $text_font : array_key_first( $fonts );
 	$ttf_path = RRT_LABEL_PATH . $fonts[ $font_key ]['ttf_file'];
@@ -610,8 +624,19 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
 		return;
 	}
 
-	$font_size_px     = ( $text_font_size / 100 ) * $px['zone_width'];
-	$max_width        = $px['zone_width'] * 0.92;
+	$font_size_px = ( $text_font_size / 100 ) * $px['zone_width'];
+	/**
+	 * Pete, 2026-10-25: "confirm all elements... have no bugs" — this was
+	 * a hardcoded 0.92 (92%), completely ignoring the customer's TEXT
+	 * WIDTH slider. Client-side this is `Math.max(20, 100 - 2*sideMargin)%`
+	 * (renderTextGroup() in label-configurator.js) — matched here exactly,
+	 * so the print file wraps the same words onto the same lines the
+	 * customer actually approved, not a different fixed width (which, at
+	 * the slider's own DEFAULT of 2, is 96%, not 92% — this diverged even
+	 * when nobody touched the slider).
+	 */
+	$max_width_pct    = max( 20, 100 - 2 * (float) $side_margin );
+	$max_width        = $px['zone_width'] * ( $max_width_pct / 100 );
 	$text_color_clean = rrt_label_sanitize_hex_color( $text_color_hex, '#1a1a1a' );
 	$text_color       = rrt_label_gd_color( $canvas, $text_color_clean );
 	// "shadow intensity adjustment slider" — same continuous 0-100 dial
@@ -647,9 +672,26 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
 	$line_height  = $font_size_px * 1.25;
 	$block_height = count( $lines ) * $line_height;
 
+	/**
+	 * Pete, 2026-10-25: "lettering placement... in the preview, box
+	 * seems good, BUT when it gets to the file, a shift of the art up,
+	 * or the lettering down." Confirmed real bug: renderTextGroup() in
+	 * label-configurator.js anchors text at its BOTTOM edge (`bottom:
+	 * (100-pos.y)%`, growing upward as it wraps — see that function's
+	 * own comment, "Y is anchored by the box's BOTTOM edge, not
+	 * centered"), but this previously used the SAME center-anchor
+	 * formula as the logo (center_y, then top = center_y -
+	 * block_height/2) for text too. That silently pushed every printed
+	 * text block DOWN by half its own height versus what the customer
+	 * approved on screen — worse the more lines/the bigger the font.
+	 * The logo itself was never wrong (it genuinely is center-anchored
+	 * on both sides, client and server agree) — the growing gap just
+	 * read as "the art moved up." Fixed to match: pos.y is the block's
+	 * BOTTOM edge, not its center.
+	 */
 	$center_x = $px['zone_x'] + ( $text_pos['x'] / 100 ) * $px['zone_width'];
-	$center_y = $px['zone_y'] + ( $text_pos['y'] / 100 ) * $px['zone_height'];
-	$top      = $center_y - ( $block_height / 2 );
+	$bottom_y = $px['zone_y'] + ( $text_pos['y'] / 100 ) * $px['zone_height'];
+	$top      = $bottom_y - $block_height;
 
 	// GD's imagettftext() has no native stroke/shadow — poor-man's outline
 	// by drawing the line 8 times at a 1px ring of offsets in the outline
@@ -674,7 +716,23 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
 				imagettftext( $canvas, $font_size_px, 0, $x + $offset[0], $baseline_y + $offset[1], $outline, $ttf_path, $line_text );
 			}
 		}
+		/**
+		 * Pete, 2026-10-25: "confirm all elements... have no bugs" — Bold
+		 * was fully live client-side (fontWeight:700, a real different
+		 * glyph weight from the variable/weighted web font) but never
+		 * sent to or applied by the server at all. None of these 15 fonts
+		 * have a separate bold .ttf (see rrt_label_fonts() — one file
+		 * each), so a true weight-matched bold isn't available here;
+		 * faux-bold (stamping the same glyphs a second time, 1px to the
+		 * right) is the standard approximation GD itself has no built-in
+		 * alternative to — same "stamp it more than once" idea already
+		 * used for the outline/shadow effect just above, just a single
+		 * extra pass instead of a full ring.
+		 */
 		imagettftext( $canvas, $font_size_px, 0, $x, $baseline_y, $text_color, $ttf_path, $line_text );
+		if ( $bold ) {
+			imagettftext( $canvas, $font_size_px, 0, $x + 1, $baseline_y, $text_color, $ttf_path, $line_text );
+		}
 	}
 }
 
