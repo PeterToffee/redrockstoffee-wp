@@ -121,6 +121,7 @@
 		logoFilename: document.getElementById( 'logo-filename' ),
 		donateRow: document.getElementById( 'donate-row' ),
 		donateCheckbox: document.getElementById( 'logo-donate-checkbox' ),
+		donateCreditRow: document.getElementById( 'donate-credit-row' ),
 
 		name: document.getElementById( 'rrt-lc-name' ),
 		email: document.getElementById( 'rrt-lc-email' ),
@@ -1103,10 +1104,12 @@
 		if ( ! logo || logo.artKey ) {
 			els.donateRow.style.display = 'none';
 			els.donateCheckbox.checked = false;
+			els.donateCreditRow.style.display = 'none';
 			return;
 		}
 		els.donateRow.style.display = 'flex';
 		els.donateCheckbox.checked = !! logo.donate;
+		els.donateCreditRow.style.display = logo.donate ? 'block' : 'none';
 	}
 
 	els.donateCheckbox.addEventListener( 'change', function () {
@@ -1115,6 +1118,11 @@
 			return;
 		}
 		logo.donate = els.donateCheckbox.checked;
+		// Pete, 2026-10-26: "keep art donators as anonymous as possible,
+		// unless the user wants to be known" — the TheUnframer credit link
+		// only makes sense once they've actually opted into donating in the
+		// first place.
+		els.donateCreditRow.style.display = logo.donate ? 'block' : 'none';
 	} );
 
 	// Pete, 2026-10-17: "a library of holiday/birthday/celebration art
