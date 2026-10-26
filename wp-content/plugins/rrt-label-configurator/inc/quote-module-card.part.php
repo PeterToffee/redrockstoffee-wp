@@ -275,35 +275,61 @@
 										 */
 										?>
 										<div id="art-picker-panel" style="display:none; position:fixed; z-index:9999; background:#fff; border:1.5px solid #991e21; border-radius:8px; padding:0.5rem; box-shadow:0 4px 14px rgba(0,0,0,.25); grid-template-columns:repeat(4, 1fr); gap:0.45rem; width:240px; max-height:340px; overflow-y:auto;">
-												<?php foreach ( rrt_label_art_library() as $art_key => $art ) : ?>
-													<button type="button" class="art-picker-item" data-art-key="<?php echo esc_attr( $art_key ); ?>" title="<?php echo esc_attr( $art['label'] ); ?>" style="border:1px solid #e3ddd2; border-radius:6px; padding:3px; background:#fff; cursor:pointer; width:50px; height:50px;">
-														<img src="<?php echo esc_url( RRT_LABEL_URL . $art['file'] ); ?>" alt="<?php echo esc_attr( $art['label'] ); ?>" style="width:100%; height:100%; object-fit:contain; display:block; pointer-events:none;">
-													</button>
-												<?php endforeach; ?>
 												<?php
 												/**
-												 * Pete, 2026-10-26: "donate their image for others to
-												 * use... so it immediately goes to our library" —
-												 * customer-donated art (rrt_label_community_art(),
-												 * real Media Library attachments), merged into this
-												 * same grid with a small section divider. Only
-												 * rendered once at least one donated piece exists, so
-												 * a fresh site never shows an empty "Community"
-												 * heading. Same .art-picker-item markup/classes as the
-												 * curated art above, so all existing click/drag/resize
-												 * handling in label-configurator.js just works
-												 * unchanged — it only ever looks at data-art-key.
+												 * Pete, 2026-10-26: "after two rows of the library, add a
+												 * dark line divider/background with words 'Community
+												 * Art'... have a line of community, then the stock 2
+												 * lines, then 'Community Art' again, one line, then 2
+												 * lines of stock" — community pieces get INTERLEAVED
+												 * throughout the curated grid (2 rows curated, 1 row
+												 * community, repeating) instead of one single divider
+												 * dumping every donated piece at the very end. 4 columns
+												 * (this panel's own grid-template-columns above) -> a
+												 * "row" is 4 items, so $rrt_stock_chunk/$rrt_community_chunk
+												 * below are 8/4. A small local closure renders one
+												 * .art-picker-item button so both sources (curated =
+												 * RRT_LABEL_URL-relative file, community = already a
+												 * full Media Library URL, see rrt_label_community_art())
+												 * share identical markup without duplicating it per loop.
 												 */
-												$rrt_community_art = rrt_label_community_art();
-												if ( ! empty( $rrt_community_art ) ) :
+												$rrt_render_art_btn = function ( $art_key, $art, $url ) {
 													?>
-													<div style="grid-column:1/-1; font-size:0.55rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#991e21; border-top:1px solid #e3ddd2; padding-top:0.35rem; margin-top:0.1rem;">Community</div>
-													<?php foreach ( $rrt_community_art as $art_key => $art ) : ?>
-														<button type="button" class="art-picker-item" data-art-key="<?php echo esc_attr( $art_key ); ?>" title="<?php echo esc_attr( $art['label'] ); ?>" style="border:1px solid #e3ddd2; border-radius:6px; padding:3px; background:#fff; cursor:pointer; width:50px; height:50px;">
-															<img src="<?php echo esc_url( $art['file'] ); ?>" alt="<?php echo esc_attr( $art['label'] ); ?>" style="width:100%; height:100%; object-fit:contain; display:block; pointer-events:none;">
-														</button>
-													<?php endforeach; ?>
-												<?php endif; ?>
+													<button type="button" class="art-picker-item" data-art-key="<?php echo esc_attr( $art_key ); ?>" title="<?php echo esc_attr( $art['label'] ); ?>" style="border:1px solid #e3ddd2; border-radius:6px; padding:3px; background:#fff; cursor:pointer; width:50px; height:50px;">
+														<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( $art['label'] ); ?>" style="width:100%; height:100%; object-fit:contain; display:block; pointer-events:none;">
+													</button>
+													<?php
+												};
+
+												$rrt_stock     = rrt_label_art_library();
+												$rrt_community = rrt_label_community_art();
+
+												$rrt_stock_keys      = array_keys( $rrt_stock );
+												$rrt_community_keys  = array_keys( $rrt_community );
+												$rrt_stock_total     = count( $rrt_stock_keys );
+												$rrt_community_total = count( $rrt_community_keys );
+
+												$rrt_stock_chunk     = 8; // 2 rows at 4 columns
+												$rrt_community_chunk = 4; // 1 row
+
+												$si = 0;
+												$ci = 0;
+												while ( $si < $rrt_stock_total || $ci < $rrt_community_total ) {
+													for ( $n = 0; $n < $rrt_stock_chunk && $si < $rrt_stock_total; $n++, $si++ ) {
+														$key = $rrt_stock_keys[ $si ];
+														$rrt_render_art_btn( $key, $rrt_stock[ $key ], RRT_LABEL_URL . $rrt_stock[ $key ]['file'] );
+													}
+													if ( $ci < $rrt_community_total ) {
+														?>
+														<div style="grid-column:1/-1; background:#2a2a2a; color:#fff; text-align:center; padding:0.3rem 0; border-radius:4px; margin:0.3rem 0; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Community Art</div>
+														<?php
+														for ( $n = 0; $n < $rrt_community_chunk && $ci < $rrt_community_total; $n++, $ci++ ) {
+															$key = $rrt_community_keys[ $ci ];
+															$rrt_render_art_btn( $key, $rrt_community[ $key ], $rrt_community[ $key ]['file'] );
+														}
+													}
+												}
+												?>
 											</div>
 										</div>
 										<div id="logo-selector-btns" style="display:flex; gap:0.3rem; flex-wrap:nowrap;"></div>
