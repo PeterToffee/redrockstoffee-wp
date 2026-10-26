@@ -274,7 +274,14 @@
 										 * height grown to match).
 										 */
 										?>
-										<div id="art-picker-panel" style="display:none; position:fixed; z-index:9999; background:#fff; border:1.5px solid #991e21; border-radius:8px; padding:0.5rem; box-shadow:0 4px 14px rgba(0,0,0,.25); grid-template-columns:repeat(4, 1fr); gap:0.45rem; width:240px; max-height:340px; overflow-y:auto;">
+										<!-- Pete, 2026-10-26: "be able to use the up/down arrows on
+									     desktop" — tabindex makes this scrollable div focusable, so
+									     once JS focuses it on open, the browser's own native
+									     keyboard-scroll behavior (Up/Down/PageUp/PageDown/Home/End)
+									     just works with zero custom scroll-amount JS. outline:none
+									     since this is a borderless custom popover, not a form
+									     control — it already has its own visible border. -->
+									<div id="art-picker-panel" tabindex="-1" style="display:none; position:fixed; z-index:9999; background:#fff; border:1.5px solid #991e21; border-radius:8px; padding:0.5rem; box-shadow:0 4px 14px rgba(0,0,0,.25); grid-template-columns:repeat(4, 1fr); gap:0.45rem; width:240px; max-height:340px; overflow-y:auto; outline:none;">
 												<?php
 												/**
 												 * Pete, 2026-10-26: "after two rows of the library, add a

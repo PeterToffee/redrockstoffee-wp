@@ -1207,6 +1207,11 @@
 		} else {
 			positionArtPanel();
 			els.artPickerPanel.style.display = 'grid';
+			// Pete, 2026-10-26: "be able to use the up/down arrows on
+			// desktop" — focusing the (now-visible, tabindex="-1") panel
+			// lets the browser's own native keyboard-scroll behavior
+			// handle Up/Down/PageUp/PageDown/Home/End with no custom code.
+			els.artPickerPanel.focus();
 		}
 	} );
 
