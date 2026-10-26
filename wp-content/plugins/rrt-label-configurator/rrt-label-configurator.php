@@ -29,11 +29,60 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.42.1' );
+define( 'RRT_LABEL_VERSION', '3.43.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
 require_once RRT_LABEL_PATH . 'inc/handle-submission.php';
+
+/**
+ * Pete, 2026-10-25: "where are we putting this... how do we coordinate
+ * with the products page?" — activating the min-qty enforcement built
+ * 2026-10-18, and adding a CTA link on the two matching Original Almond
+ * product pages (not every product), pointing to the real /co-branding/
+ * page where the configurator now lives. Product IDs are the ONLY two
+ * confirmed by Pete this session — `Original Almond Toffee 8 oz. Box`
+ * (ID 12) and `4 oz. Original Almond Toffee x 2` (ID 5161). Priority 25
+ * on woocommerce_single_product_summary lands it between the excerpt
+ * (20) and WooCommerce's own add-to-cart button (30) — visible, not
+ * buried below the purchase action.
+ *
+ * Both this block and inc/woocommerce-min-qty.php's own internal guard
+ * check class_exists('WooCommerce') — that check is only reliable once
+ * every plugin has had a chance to load, so both are deferred to the
+ * plugins_loaded hook rather than running at this file's top level
+ * (where WooCommerce's class isn't guaranteed to exist yet, depending
+ * on plugin load order — confirmed this session: without this, the
+ * check silently failed and neither feature ever registered).
+ */
+add_action(
+	'plugins_loaded',
+	function () {
+		require_once RRT_LABEL_PATH . 'inc/woocommerce-min-qty.php';
+
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return;
+		}
+		add_action(
+			'woocommerce_single_product_summary',
+			function () {
+				global $product;
+				if ( ! $product ) {
+					return;
+				}
+				$rrt_cta_product_ids = array( 12, 5161 );
+				if ( ! in_array( $product->get_id(), $rrt_cta_product_ids, true ) ) {
+					return;
+				}
+				printf(
+					'<p style="margin: 1em 0; padding: 0.75em 1em; background: #fdf3e7; border: 1px solid #991e21; border-radius: 8px; font-weight: 600;"><a href="%1$s" style="color: #991e21; text-decoration: none;">Want this with your own custom label? Design one &rarr;</a></p>',
+					esc_url( home_url( '/co-branding/' ) )
+				);
+			},
+			25
+		);
+	}
+);
 
 /**
  * One place to adjust each label size's template image and its blank
