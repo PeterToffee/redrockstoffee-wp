@@ -4,8 +4,16 @@
 						<p id="text-guide-long" style="margin:0 0 0.5rem;font-size:0.8rem;font-weight:600;color:#991e21;font-family:'Poppins',sans-serif;letter-spacing:0.01em;line-height:1.35;">Start with your background elements — each new layer lands on top. Have fun!</p>
 						<p id="text-guide-short" style="display:none;margin:0 0 0.4rem;font-size:0.72rem;font-weight:600;color:#991e21;font-family:'Poppins',sans-serif;letter-spacing:0.01em;line-height:1.3;">Building layers? Start with background elements first.</p>
 							<div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:nowrap; width:100%;">
-								<button type="button" id="tab-btn-logo" class="rrt-pill-tab" data-tab="logo" style="flex:1; min-width:0;">Art-Logo</button>
-								<button type="button" id="tab-btn-quote" class="rrt-pill-tab" data-tab="quote" style="flex:1; min-width:0;">Add Text</button>
+								<!-- Pete, 2026-10-26: "change button ART-LOGO to 'ADD LOGO -
+								     ART LIBRARY' and make it wider, shorten Add Text button,
+								     and change both buttons to be 2 lines (taller), lettering
+								     same size" — explicit <br> forces the 2-line break on both
+								     (no font-size change, no auto-shrink-to-fit logic exists
+								     here to fight), and the flex ratio (1.6 vs 0.9) widens the
+								     logo pill at the text pill's expense instead of both
+								     staying equal. -->
+								<button type="button" id="tab-btn-logo" class="rrt-pill-tab" data-tab="logo" style="flex:1.6; min-width:0;">ADD LOGO<br>ART LIBRARY</button>
+								<button type="button" id="tab-btn-quote" class="rrt-pill-tab" data-tab="quote" style="flex:0.9; min-width:0;">ADD<br>TEXT</button>
 							</div>
 							</div>
 
