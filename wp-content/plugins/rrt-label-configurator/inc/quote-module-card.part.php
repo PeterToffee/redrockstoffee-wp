@@ -321,7 +321,7 @@
 													}
 													if ( $ci < $rrt_community_total ) {
 														?>
-														<div style="grid-column:1/-1; background:#2a2a2a; color:#fff; text-align:center; padding:0.3rem 0; border-radius:4px; margin:0.3rem 0; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Community Art</div>
+														<div style="grid-column:1/-1; background:#991e21; color:#fff; text-align:center; padding:0.35rem 0; border-radius:4px; margin:0.3rem 0; font-size:0.85rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Community Art</div>
 														<?php
 														for ( $n = 0; $n < $rrt_community_chunk && $ci < $rrt_community_total; $n++, $ci++ ) {
 															$key = $rrt_community_keys[ $ci ];
