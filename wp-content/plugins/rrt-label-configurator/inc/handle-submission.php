@@ -114,18 +114,40 @@ function rrt_label_handle_submit() {
 				++$logo_i;
 				continue;
 			}
+			$logo_scale = (float) ( $raw['scale'] ?? 0 );
+			// Pete, 2026-10-26: "I don't want to take someone's money and
+			// print a really sh*t label from a garbage file" — warn, don't
+			// block (confirmed via AskUserQuestion), so Pete sees it in his
+			// own review email (rrt_label_email_submission()) even if the
+			// customer ignored the on-page warning. Uses the CUSTOMER'S
+			// ACTUAL chosen size, not just the raw file's resolution — a
+			// huge photo dragged to a huge size can still look like garbage.
+			// 200 DPI = a real-world "acceptable, not garbage" print floor,
+			// looser than this plugin's own 300 DPI generation target.
+			$low_quality = false;
+			if ( $logo_scale > 0 ) {
+				$logo_info = getimagesize( $logo_tmp_paths[ $logo_i ] );
+				if ( $logo_info ) {
+					$rendered_width_in = $sizes[ $size_key ]['zone']['width_in'] * ( $logo_scale / 100 );
+					if ( $rendered_width_in > 0 ) {
+						$effective_dpi = $logo_info[0] / $rendered_width_in;
+						$low_quality   = $effective_dpi < 200;
+					}
+				}
+			}
 			$layers[] = array(
-				'type'       => 'logo',
-				'pos'        => $pos,
-				'scale'      => (float) ( $raw['scale'] ?? 0 ),
-				'tmp_path'   => $logo_tmp_paths[ $logo_i ],
+				'type'        => 'logo',
+				'pos'         => $pos,
+				'scale'       => $logo_scale,
+				'tmp_path'    => $logo_tmp_paths[ $logo_i ],
 				// Pete, 2026-10-26: "donate their image for others to use...
 				// immediately goes to our library" — only meaningful for a
 				// real upload (never set for an art_key layer, handled in
 				// the branch above). Actually copied into the Media Library
 				// near the end of rrt_label_handle_submit(), after the real
 				// order's composite/email already succeeded.
-				'donate'     => ! empty( $raw['donate'] ),
+				'donate'      => ! empty( $raw['donate'] ),
+				'low_quality' => $low_quality,
 			);
 			++$logo_i;
 		} elseif ( 'text' === $raw['type'] ) {
@@ -801,6 +823,22 @@ function rrt_label_email_submission( $fields, $composite_path, $layer_paths = ar
 	$body .= 'Quantity requested: ' . $fields['quantity'] . "\n";
 	$body .= 'Labels to print (qty + 5% buffer): ' . $fields['labels_needed'] . "\n";
 	$body .= 'Logos: ' . $logo_count . "\n";
+	// Pete, 2026-10-26: "I don't want to take someone's money and print a
+	// really sh*t label from a garbage file" — warn-not-block (confirmed),
+	// so this is the backstop: even if the customer ignored the on-page
+	// warning, Pete sees it here before he actually prints anything. Only
+	// ever set on a real-upload logo layer, never an art_key one (see
+	// $low_quality in rrt_label_handle_submit()'s logo-layer loop).
+	$logo_n = 0;
+	foreach ( $fields['layers'] as $layer ) {
+		if ( 'logo' !== $layer['type'] ) {
+			continue;
+		}
+		++$logo_n;
+		if ( ! empty( $layer['low_quality'] ) ) {
+			$body .= "\xE2\x9A\xA0 Logo {$logo_n} may be low-resolution for the size it was placed at — check before printing.\n";
+		}
+	}
 	foreach ( $text_lines as $i => $line ) {
 		$body .= 'Text ' . ( $i + 1 ) . ': ' . $line . "\n";
 	}

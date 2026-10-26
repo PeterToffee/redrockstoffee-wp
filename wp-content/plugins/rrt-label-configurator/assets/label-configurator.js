@@ -122,6 +122,7 @@
 		donateRow: document.getElementById( 'donate-row' ),
 		donateCheckbox: document.getElementById( 'logo-donate-checkbox' ),
 		donateCreditRow: document.getElementById( 'donate-credit-row' ),
+		logoQualityWarning: document.getElementById( 'logo-quality-warning' ),
 
 		name: document.getElementById( 'rrt-lc-name' ),
 		email: document.getElementById( 'rrt-lc-email' ),
@@ -1112,6 +1113,25 @@
 		els.donateCreditRow.style.display = logo.donate ? 'block' : 'none';
 	}
 
+	// Pete, 2026-10-26: "I don't want to take someone's money and print a
+	// really sh*t label from a garbage file" — warn, don't block (confirmed
+	// via AskUserQuestion). Uses the CUSTOMER'S ACTUAL chosen size, not just
+	// the raw file's resolution — a huge photo dragged to a huge size can
+	// still look like garbage, and a small photo left small is still fine.
+	// 200 DPI = a real-world "acceptable, not garbage" print floor, looser
+	// than this plugin's own 300 DPI generation target. Never shown for an
+	// ART-library pick (already guaranteed high-res, see
+	// rrt_label_donate_to_community_library()'s own 1800px floor).
+	function checkLogoQuality( logo ) {
+		if ( ! logo || logo.artKey || ! logo.naturalWidth ) {
+			els.logoQualityWarning.style.display = 'none';
+			return;
+		}
+		var renderedWidthIn = activeSize().zone_width_in * ( logo.scale / 100 );
+		var dpi = renderedWidthIn > 0 ? logo.naturalWidth / renderedWidthIn : Infinity;
+		els.logoQualityWarning.style.display = dpi < 200 ? 'block' : 'none';
+	}
+
 	els.donateCheckbox.addEventListener( 'change', function () {
 		var logo = activeLogo();
 		if ( ! logo ) {
@@ -1158,6 +1178,7 @@
 		renderLogoSelectorPills();
 		els.logoFilename.textContent = logoDisplayName( logo );
 		syncDonateRow( logo );
+		checkLogoQuality( logo );
 		renderLogo( logo );
 	}
 
@@ -1291,7 +1312,24 @@
 			logo.el.src = evt.target.result;
 			els.logoFilename.textContent = file.name;
 			syncDonateRow( logo );
+			checkLogoQuality( logo );
 			renderLogo( logo );
+
+			// Pete, 2026-10-26: "I don't want to take someone's money and
+			// print a really sh*t label from a garbage file" — a throwaway
+			// Image() (not logo.el, which has its own layout/CSS sizing) is
+			// the simplest way to read the file's real native pixel
+			// dimensions; checkLogoQuality() needs these, not the file's
+			// byte size (file size is a poor proxy for print quality).
+			var qualityProbe = new Image();
+			qualityProbe.onload = function () {
+				logo.naturalWidth = qualityProbe.naturalWidth;
+				logo.naturalHeight = qualityProbe.naturalHeight;
+				if ( activeLogo() === logo ) {
+					checkLogoQuality( logo );
+				}
+			};
+			qualityProbe.src = evt.target.result;
 		};
 		reader.readAsDataURL( file );
 	} );
@@ -1313,6 +1351,7 @@
 			els.logoSizeSlider.value = next.scale;
 		}
 		syncDonateRow( next );
+		checkLogoQuality( next );
 	} );
 
 	els.logoSizeSlider.addEventListener( 'input', function () {
@@ -1321,6 +1360,7 @@
 			return;
 		}
 		logo.scale = parseFloat( els.logoSizeSlider.value );
+		checkLogoQuality( logo );
 		renderLogo( logo );
 	} );
 
@@ -1339,6 +1379,7 @@
 				els.logoFilename.textContent = logoDisplayName( logo );
 				els.logoSizeSlider.value = logo.scale;
 				syncDonateRow( logo );
+				checkLogoQuality( logo );
 			} );
 			els.logoSelectorBtns.appendChild( pill );
 		} );

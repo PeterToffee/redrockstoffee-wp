@@ -369,6 +369,15 @@
 										<button class="slider-step-btn" data-for="logo-size-slider" data-dir="1" style="width:22px;height:22px;flex-shrink:0;">+</button>
 									</div>
 									<span id="logo-filename" style="font-size:0.6rem; color:#888; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; display:block; margin-bottom:0.25rem;"></span>
+									<!-- Pete, 2026-10-26: "I don't want to take someone's money
+									     and print a really sh*t label from a garbage file" —
+									     warn, don't block (confirmed via AskUserQuestion). Checked
+									     live (checkLogoQuality() in label-configurator.js) against
+									     the CUSTOMER'S ACTUAL chosen size, not just the raw file's
+									     resolution — a huge photo dragged to a huge size can still
+									     look like garbage. Never shown for an ART-library pick
+									     (already guaranteed high-res). -->
+									<p id="logo-quality-warning" style="display:none; font-size:0.68rem; color:#991e21; font-weight:600; font-family:'Poppins',sans-serif; line-height:1.35; margin:0 0 0.3rem; background:#fdf3e7; border:1px solid #991e21; border-radius:6px; padding:0.35rem 0.5rem;">This image may print blurry at this size. Try a higher-resolution image of your own, or pick a piece from the ART LIBRARY instead.</p>
 									<!-- Pete, 2026-10-26: "donate their image for others to use... a
 									     very stripped down copyright image thing" — only shown for a
 									     real upload (JS hides it whenever the active logo is an ART-
@@ -377,7 +386,7 @@
 									     spirit as every other per-layer toggle in this file. -->
 									<label id="donate-row" style="display:none; align-items:flex-start; gap:0.35rem; font-size:0.65rem; color:#555; font-family:'Poppins',sans-serif; line-height:1.35; margin:0.15rem 0 0.1rem; cursor:pointer;">
 										<input type="checkbox" id="logo-donate-checkbox" style="margin-top:0.15rem; flex-shrink:0;">
-										<span>Donate this image to our Community Art Library so other customers can use it too (no tip needed) — submitted anonymously. By checking this box, I confirm I own this image or have permission to share it. <a href="<?php echo esc_url( home_url( '/community-standards/' ) ); ?>" target="_blank" rel="noopener" style="color:#991e21; font-weight:600;">See our Community Standards &rarr;</a></span>
+										<span>Donate this image to our Community Art Library so others can use it.. By checking this box, I confirm I own this image or have permission to share it. <a href="<?php echo esc_url( home_url( '/community-standards/' ) ); ?>" target="_blank" rel="noopener" style="color:#991e21; font-weight:600;">See our Community Standards &rarr;</a></span>
 									</label>
 									<!-- Pete, 2026-10-26: "keep art donators as anonymous as
 									     possible, unless the user wants to be known" — donations

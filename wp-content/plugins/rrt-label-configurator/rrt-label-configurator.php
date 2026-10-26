@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.45.0' );
+define( 'RRT_LABEL_VERSION', '3.46.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -634,6 +634,21 @@ function rrt_label_donate_to_community_library( $tmp_path, $donor_name, $donor_e
 		return;
 	}
 	$mime = $logo_info['mime'];
+
+	// Pete, 2026-10-26: "set some sort of threshold for added files, if
+	// they are too small, we can't use them, they'll look like crap" —
+	// "discard if we want" for the donation library specifically (a
+	// separate, stricter warn-not-block rule applies to a customer's own
+	// upload on a real order — see rrt_label_handle_submit()). Reuses the
+	// exact 1800px standard already established for the curated clip-art
+	// library (rrt_label_art_library()'s own header comment: "covers 600
+	// DPI even at the biggest possible placement... double the 300 DPI
+	// floor, with real margin") — one consistent quality bar, not a second
+	// invented number. Silent no-op, same as every other failure path
+	// here — no UI, no explanation, it just never becomes a library item.
+	if ( min( $logo_info[0], $logo_info[1] ) < 1800 ) {
+		return;
+	}
 
 	$upload_dir = wp_upload_dir();
 	if ( ! empty( $upload_dir['error'] ) ) {
