@@ -970,6 +970,22 @@ function rrt_label_configurator_shortcode( $atts ) {
 			'url'   => RRT_LABEL_URL . $a['file'],
 		);
 	}
+	// Pete, 2026-10-26: "Community Library Art items aren't being brought
+	// into the canvas... when selected" — root cause: addArtLogo() in
+	// label-configurator.js looks up the clicked data-art-key in
+	// config.art, but this object was only ever built from the curated
+	// library above, never from rrt_label_community_art(). Clicking a
+	// community thumbnail (data-art-key="community:{id}", see the
+	// #art-picker-panel loop below) found nothing and silently did
+	// nothing. Community items already use a full Media Library URL in
+	// 'file' (no RRT_LABEL_URL prefix needed, unlike the curated ones
+	// above).
+	foreach ( rrt_label_community_art() as $key => $a ) {
+		$js_art[ $key ] = array(
+			'label' => $a['label'],
+			'url'   => $a['file'],
+		);
+	}
 
 	wp_add_inline_script(
 		'rrt-label-configurator',
