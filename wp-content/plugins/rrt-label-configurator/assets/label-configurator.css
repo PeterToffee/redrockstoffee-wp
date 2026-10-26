@@ -192,16 +192,29 @@
 		padding: 0.5rem 0.75rem !important;
 	}
 
-	.art-picker-item {
-		width: 58px !important;
-		height: 58px !important;
-	}
+}
 
-	/* the 4-column grid needs to widen to actually fit the bigger icons
-	   above — otherwise they'd overflow their own grid columns. */
-	#art-picker-panel {
-		width: 290px !important;
-	}
+/* Pete, 2026-10-26 (asked more than once): "thumbs larger, window needs
+   to be wider/same width as the column and deeper too, and easier to
+   scroll" — replaces the old fixed-px thumbnail size (50px, bumped to
+   58px on mobile only) with a responsive one that fills whatever width
+   the panel actually has. positionArtPanel() (label-configurator.js) now
+   sets #art-picker-panel's width to match #quote-module-card's own
+   rendered width (the real column width) instead of a fixed 240px/290px,
+   so thumbnails scale up automatically with the column — no more
+   guessing another fixed px number that turns out "still not big
+   enough." !important needed since both are inline-styled in the PHP
+   markup (inc/quote-module-card.part.php), same justified pattern
+   already used elsewhere in this file. */
+.art-picker-item {
+	width: 100% !important;
+	height: auto !important;
+	aspect-ratio: 1 / 1;
+}
+
+#art-picker-panel {
+	max-height: 60vh !important;
+	-webkit-overflow-scrolling: touch;
 }
 
 /* NOTE: .config-card itself has NO styling in the real source either —

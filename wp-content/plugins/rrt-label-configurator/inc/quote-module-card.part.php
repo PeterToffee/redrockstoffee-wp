@@ -257,7 +257,7 @@
 										     position:fixed, positioned under the button at open-time — the
 										     standard way a popover escapes a clipped/scrolling ancestor. -->
 										<div id="art-picker" style="position:relative; flex-shrink:0; display:inline-flex;">
-											<button id="art-picker-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.55rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">ART</button>
+											<button id="art-picker-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.55rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">ART LIBRARY</button>
 											<!-- Pete, 2026-10-17: "are there more we can add?" -> "more" — the
 										     library grew from 6 to 27 pieces, so the panel now needs to
 										     scroll (max-height + overflow-y:auto) instead of just growing

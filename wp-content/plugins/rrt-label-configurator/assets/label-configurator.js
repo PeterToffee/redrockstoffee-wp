@@ -1179,10 +1179,24 @@
 	// under the button fresh every time it opens.
 	document.body.appendChild( els.artPickerPanel );
 
+	// Pete, 2026-10-26 (asked more than once): "thumbs larger, window
+	// needs to be wider/same width as the column and deeper too" — the
+	// panel used to be a fixed 240px (290px on mobile), just wide enough
+	// to start at the button. Now it spans the full width of
+	// #quote-module-card (the real "column" this button lives in,
+	// confirmed via configurator-base.css: .config-card has no width
+	// rule of its own, so it's always exactly as wide as .configurator-main,
+	// the flex column with align-items:stretch that IS the column), so
+	// .art-picker-item's CSS (width:100% of its grid cell,
+	// label-configurator.css) renders proportionally larger thumbnails
+	// without yet another guessed fixed px size.
 	function positionArtPanel() {
-		var rect = els.artPickerBtn.getBoundingClientRect();
-		els.artPickerPanel.style.left = rect.left + 'px';
-		els.artPickerPanel.style.top = ( rect.bottom + 4 ) + 'px';
+		var btnRect = els.artPickerBtn.getBoundingClientRect();
+		var card = document.getElementById( 'quote-module-card' );
+		var colRect = card ? card.getBoundingClientRect() : btnRect;
+		els.artPickerPanel.style.left = colRect.left + 'px';
+		els.artPickerPanel.style.width = colRect.width + 'px';
+		els.artPickerPanel.style.top = ( btnRect.bottom + 4 ) + 'px';
 	}
 
 	els.artPickerBtn.addEventListener( 'click', function ( evt ) {
