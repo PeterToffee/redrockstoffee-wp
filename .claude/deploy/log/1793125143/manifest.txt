@@ -1,0 +1,4 @@
+# deploy 1793125143  2026-10-27 12:19  commit c680830b
+# path|category|before_md5|after_md5|server_backup
+inc/one-time-migrate-community-art.php|NEW|-|9023be3ebec3e3ec20996ba93c45f43f|-
+rrt-label-configurator.php|DIFF|e65a00bb249127a2cf91934034388067|baa3553517d09c6a1dec2accd8f58b0e|deploy-backups/1793125143/backup/rrt-label-configurator.php

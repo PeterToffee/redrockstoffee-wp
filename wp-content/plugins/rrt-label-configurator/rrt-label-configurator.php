@@ -35,11 +35,6 @@ define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
 require_once RRT_LABEL_PATH . 'inc/handle-submission.php';
 
-// Pete, 2026-10-27: ONE-TIME MIGRATION, remove this line + the required
-// file once the live Community Art library is confirmed populated — see
-// that file's own header comment for why this exists.
-require_once RRT_LABEL_PATH . 'inc/one-time-migrate-community-art.php';
-
 /**
  * Pete, 2026-10-25: "where are we putting this... how do we coordinate
  * with the products page?" — activating the min-qty enforcement built
