@@ -12,7 +12,7 @@
 								     here to fight), and the flex ratio (1.6 vs 0.9) widens the
 								     logo pill at the text pill's expense instead of both
 								     staying equal. -->
-								<button type="button" id="tab-btn-logo" class="rrt-pill-tab" data-tab="logo" style="flex:1.6; min-width:0;">-ADD LOGO-<br>ART LIBRARY</button>
+								<button type="button" id="tab-btn-logo" class="rrt-pill-tab" data-tab="logo" style="flex:1.6; min-width:0;">Add - Your Logo/Image<br>Our Art/Icon Library</button>
 								<button type="button" id="tab-btn-quote" class="rrt-pill-tab" data-tab="quote" style="flex:0.9; min-width:0;">ADD<br>TEXT</button>
 							</div>
 							</div>
@@ -265,7 +265,7 @@
 										     position:fixed, positioned under the button at open-time — the
 										     standard way a popover escapes a clipped/scrolling ancestor. -->
 										<div id="art-picker" style="position:relative; flex-shrink:0; display:inline-flex;">
-											<button id="art-picker-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.55rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">ART LIBRARY</button>
+											<button id="art-picker-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.55rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">Our Art/Icon Library</button>
 											<!-- Pete, 2026-10-17: "are there more we can add?" -> "more" — the
 										     library grew from 6 to 27 pieces, so the panel now needs to
 										     scroll (max-height + overflow-y:auto) instead of just growing
@@ -377,7 +377,7 @@
 									     resolution — a huge photo dragged to a huge size can still
 									     look like garbage. Never shown for an ART-library pick
 									     (already guaranteed high-res). -->
-									<p id="logo-quality-warning" style="display:none; font-size:0.68rem; color:#991e21; font-weight:600; font-family:'Poppins',sans-serif; line-height:1.35; margin:0 0 0.3rem; background:#fdf3e7; border:1px solid #991e21; border-radius:6px; padding:0.35rem 0.5rem;">This image may print blurry at this size. Try a higher-resolution image of your own, or pick a piece from the ART LIBRARY instead.</p>
+									<p id="logo-quality-warning" style="display:none; font-size:0.68rem; color:#991e21; font-weight:600; font-family:'Poppins',sans-serif; line-height:1.35; margin:0 0 0.3rem; background:#fdf3e7; border:1px solid #991e21; border-radius:6px; padding:0.35rem 0.5rem;">This image may print blurry at this size. Try a higher-resolution image of your own, or pick a piece from Our Art/Icon Library instead.</p>
 									<!-- Pete, 2026-10-26: "donate their image for others to use... a
 									     very stripped down copyright image thing" — only shown for a
 									     real upload (JS hides it whenever the active logo is an ART-
