@@ -11,9 +11,11 @@
 								     (no font-size change, no auto-shrink-to-fit logic exists
 								     here to fight), and the flex ratio (1.6 vs 0.9) widens the
 								     logo pill at the text pill's expense instead of both
-								     staying equal. -->
-								<button type="button" id="tab-btn-logo" class="rrt-pill-tab" data-tab="logo" style="flex:1.6; min-width:0;">Add - Your Logo/Image<br>Our Art/Icon Library</button>
-								<button type="button" id="tab-btn-quote" class="rrt-pill-tab" data-tab="quote" style="flex:0.9; min-width:0;">ADD<br>TEXT</button>
+								     staying equal; Pete, 2026-10-27: "lettering is hitting the
+								     outside edges... make Add Text a touch less wide and Art
+								     Library a touch wider" — nudged again to 1.9 vs 0.6. -->
+								<button type="button" id="tab-btn-logo" class="rrt-pill-tab" data-tab="logo" style="flex:1.9; min-width:0;">Add - Your Logo/Image<br>Our Art/Icon Library</button>
+								<button type="button" id="tab-btn-quote" class="rrt-pill-tab" data-tab="quote" style="flex:0.6; min-width:0;">ADD<br>TEXT</button>
 							</div>
 							</div>
 
