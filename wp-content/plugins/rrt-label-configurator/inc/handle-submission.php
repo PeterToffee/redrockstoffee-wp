@@ -299,7 +299,7 @@ function rrt_label_handle_submit() {
 	// fails or just never gets tested at all. Either way, the files on
 	// disk (now in $order_dir, alongside order-info.txt below) are the
 	// real, always-true answer regardless of whether mail works.
-	rrt_label_email_submission( $fields, $composite_path, $layer_paths, $sheet_path );
+	rrt_label_email_submission( $fields, $composite_path, $layer_paths, $sheet_path, $original_paths );
 
 	// Same details as the email body, saved to disk too so the folder is
 	// self-contained — every part of the order "side by side," per Pete's
@@ -902,7 +902,7 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
  * now ("this file will be attached to any customer emails" — the order
  * confirmation page version is explicitly deferred, pending WooCommerce).
  */
-function rrt_label_email_submission( $fields, $composite_path, $layer_paths = array(), $sheet_path = null ) {
+function rrt_label_email_submission( $fields, $composite_path, $layer_paths = array(), $sheet_path = null, $original_paths = array() ) {
 	$to      = get_option( 'admin_email' );
 	$subject = sprintf( '[Co-Branding Label] New design from %s', $fields['name'] );
 
@@ -965,12 +965,17 @@ function rrt_label_email_submission( $fields, $composite_path, $layer_paths = ar
 			$attachments[] = $layer_path;
 		}
 	}
-	foreach ( $fields['layers'] as $layer ) {
-		// ART logos aren't a customer upload at all — nothing to "redo the
-		// composite by hand" with, it's this plugin's own bundled asset,
-		// already visible baked into the composite — so skip attaching it.
-		if ( 'logo' === $layer['type'] && empty( $layer['art_key'] ) && ! empty( $layer['tmp_path'] ) && file_exists( $layer['tmp_path'] ) ) {
-			$attachments[] = $layer['tmp_path'];
+	// Pete, 2026-10-27: "here are the files" — one came through named
+	// literally "phpgTLcxA", no extension at all. $layer['tmp_path'] for a
+	// real upload is PHP's own raw upload tmp file, which has no real
+	// filename of its own; PHPMailer just uses that path's basename as the
+	// attachment's filename. $original_paths (rrt_label_save_originals(),
+	// called before this function) already copied the same files into the
+	// order folder under proper names (original-logo-1.jpg, etc.) — attach
+	// those instead so the filename in the inbox actually means something.
+	foreach ( $original_paths as $original_path ) {
+		if ( file_exists( $original_path ) ) {
+			$attachments[] = $original_path;
 		}
 	}
 
