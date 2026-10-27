@@ -79,6 +79,19 @@ MAN="$LOG/manifest.txt"
 echo "Deploy id: $TS   (rollback: .claude/deploy/rollback.sh $TS --go)"
 
 # remote folders for brand-new files
+# Pete, 2026-10-27: this plugin's FIRST-EVER deploy uploaded "112 file(s)"
+# with no error reported, yet 4-verify.sh found nothing live at all - every
+# single `put` had actually failed with "No such file or directory". Root
+# cause: the loop below only ever creates SUBdirectories UNDER
+# $REMOTE_TARGET (it explicitly skips d="." - a file sitting directly in
+# the plugin root, like rrt-label-configurator.php itself) - it never
+# creates $REMOTE_TARGET itself. TheUnframer's original version of this
+# script never needed to, because its target is an established theme
+# folder that always already exists; this plugin's target folder did not
+# exist yet on a true first deploy. Harmless to repeat on every later
+# deploy (an mkdir of an already-existing folder just errors, same as the
+# deploy-backups mkdirs below - this whole block's output is discarded).
+echo "mkdir \"$REMOTE_TARGET\"" | sftp_run >/dev/null 2>&1
 while IFS='|' read -r rank cat f; do
   [ -f "$LIVEDIR/$f" ] && continue; d=$(dirname "$f"); acc=""
   [ "$d" = "." ] && continue

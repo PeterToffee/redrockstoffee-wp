@@ -1,0 +1,31 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-mx-flag.svg" "html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-mx-flag.svg"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-mx-flag.svg to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-mx-flag.svg
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-mx-flag.svg": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.svg" "html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.svg"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.svg to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.svg
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-us-flag.svg": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/abril.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/abril.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/abril.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/abril.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/abril.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/arial.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/arial.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/arial.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/arial.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/arial.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/bangers.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/bangers.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/bangers.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/bangers.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/bangers.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/comic.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/comic.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/comic.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/comic.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/comic.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/dancingscript-variable.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/dancingscript-variable.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/dancingscript-variable.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/dancingscript-variable.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/dancingscript-variable.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/fredoka.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/fredoka.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/fredoka.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/fredoka.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/fredoka.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/greatvibes.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/greatvibes.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/greatvibes.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/greatvibes.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/greatvibes.ttf": No such file or directory

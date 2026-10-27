@@ -1,0 +1,31 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/lobster.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/lobster.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/lobster.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/lobster.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/lobster.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/luckiest.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/luckiest.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/luckiest.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/luckiest.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/luckiest.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/montserrat-bold.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/montserrat-bold.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/montserrat-bold.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/montserrat-bold.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/montserrat-bold.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/opensans-variable.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/opensans-variable.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/opensans-variable.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/opensans-variable.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/opensans-variable.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/oswald-variable.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/oswald-variable.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/oswald-variable.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/oswald-variable.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/oswald-variable.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/pacifico.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/pacifico.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/pacifico.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/pacifico.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/pacifico.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/playfair-italic.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/playfair-italic.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/playfair-italic.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/playfair-italic.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/playfair-italic.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/satisfy.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/satisfy.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/satisfy.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/satisfy.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/satisfy.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/sniglet.ttf" "html/wp-content/plugins/rrt-label-configurator/assets/fonts/sniglet.ttf"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/fonts/sniglet.ttf to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/sniglet.ttf
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/fonts/sniglet.ttf": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/templates/4oz-template-tinted.jpg" "html/wp-content/plugins/rrt-label-configurator/assets/templates/4oz-template-tinted.jpg"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/templates/4oz-template-tinted.jpg to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/templates/4oz-template-tinted.jpg
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/templates/4oz-template-tinted.jpg": No such file or directory

@@ -1,0 +1,4 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> mkdir "deploy-backups"
+sftp> mkdir "deploy-backups/1793114314"
+sftp> mkdir "deploy-backups/1793114314/backup"

@@ -1,6 +1,6 @@
 # One line per check. Format: METHOD path|expected-status|must-contain (;-separated, - for none)|must-not-contain (;-separated, - for none)
 # Add a line for any page/feature you never want to silently break.
-GET /co-branding/|200|rrt-label-configurator;donate-row;ART LIBRARY|Fatal error;Parse error
+GET /co-branding/|200|rrt-label-configurator;donate-row;Our Art/Icon Library|Fatal error;Parse error
 GET /community-standards/|200|Community Art Library|Fatal error;Parse error
 POST /wp-admin/admin-ajax.php?action=rrt_label_fresh_nonce|200|success|-
 GET /product/8oz-box-of-toffee/|200|Want this with your own custom label|-

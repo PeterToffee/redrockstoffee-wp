@@ -1,0 +1,5 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> mkdir "deploy-backups"
+remote mkdir "/home/client_21778bd1e8_366786/deploy-backups": Failure
+sftp> mkdir "deploy-backups/1793114571"
+sftp> mkdir "deploy-backups/1793114571/backup"

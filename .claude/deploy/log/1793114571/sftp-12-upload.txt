@@ -1,0 +1,5 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/inc/woocommerce-min-qty.php" "html/wp-content/plugins/rrt-label-configurator/inc/woocommerce-min-qty.php"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/inc/woocommerce-min-qty.php to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/inc/woocommerce-min-qty.php
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php" "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php

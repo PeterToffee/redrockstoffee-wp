@@ -1,0 +1,31 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-eagle.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-eagle.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-eagle.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-eagle.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-eagle.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-egg.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-egg.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-egg.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-egg.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-egg.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-fireworks.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fireworks.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-fireworks.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fireworks.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fireworks.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-fish.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fish.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-fish.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fish.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fish.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-fishingpole.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fishingpole.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-fishingpole.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fishingpole.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-fishingpole.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-football.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-football.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-football.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-football.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-football.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-ghost.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-ghost.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-ghost.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-ghost.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-ghost.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-gift.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-gift.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-gift.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-gift.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-gift.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-heart.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-heart.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-heart.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-heart.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-heart.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-hikingboot.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-hikingboot.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-hikingboot.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-hikingboot.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-hikingboot.png": No such file or directory

@@ -1,0 +1,31 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-balloons.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-balloons.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-balloons.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-balloons.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-balloons.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-bell.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-bell.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-bell.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-bell.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-bell.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-birthday-cake.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-birthday-cake.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-birthday-cake.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-birthday-cake.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-birthday-cake.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-bouquet.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-bouquet.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-bouquet.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-bouquet.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-bouquet.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-christmas-tree.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-christmas-tree.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-christmas-tree.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-christmas-tree.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-christmas-tree.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-confettiball.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-confettiball.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-confettiball.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-confettiball.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-confettiball.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-cowboy.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-cowboy.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-cowboy.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-cowboy.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-cowboy.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-cupcake.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-cupcake.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-cupcake.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-cupcake.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-cupcake.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-dog.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-dog.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-dog.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-dog.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-dog.png": No such file or directory
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-donkey.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/noto-donkey.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/noto-donkey.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-donkey.png
+dest open "/home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/noto-donkey.png": No such file or directory
