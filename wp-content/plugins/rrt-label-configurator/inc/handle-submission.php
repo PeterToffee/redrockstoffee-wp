@@ -27,6 +27,35 @@ function rrt_label_fresh_nonce() {
 	);
 }
 
+/**
+ * Pete, 2026-10-27: "have those saved in a manner so they are grouped with
+ * all the parts, easily identifiable and side by side in a folder" — one
+ * folder per order (timestamped + the customer's name, so it sorts and
+ * reads at a glance in a file browser), holding every part of that one
+ * order together: the flat label, the separate layers, the print sheet,
+ * the customer's original upload(s), and a plain-text order-info.txt.
+ * Lives under wp-content/uploads so it survives independent of any single
+ * request, unlike PHP's own upload tmp files.
+ */
+function rrt_label_order_folder( $name ) {
+	$upload_dir = wp_upload_dir();
+	$orders_dir = trailingslashit( $upload_dir['basedir'] ) . 'rrt-label-orders';
+	$name_part  = sanitize_file_name( $name ? $name : 'customer' );
+	$folder     = trailingslashit( $orders_dir ) . gmdate( 'Y-m-d-His' ) . '-' . $name_part;
+	wp_mkdir_p( $folder );
+
+	// Same blank-index convention WordPress core itself uses throughout
+	// wp-content/uploads — doesn't stop a direct, known URL from working
+	// (nothing here is secret-by-URL), just stops a bare directory listing
+	// from handing out every customer's name/order folder at once.
+	$index_file = trailingslashit( $orders_dir ) . 'index.php';
+	if ( ! file_exists( $index_file ) ) {
+		file_put_contents( $index_file, "<?php\n// Silence is golden.\n" );
+	}
+
+	return $folder;
+}
+
 add_action( 'wp_ajax_rrt_label_submit', 'rrt_label_handle_submit' );
 add_action( 'wp_ajax_nopriv_rrt_label_submit', 'rrt_label_handle_submit' );
 function rrt_label_handle_submit() {
@@ -46,6 +75,8 @@ function rrt_label_handle_submit() {
 	if ( empty( $name ) || empty( $email ) || ! is_email( $email ) ) {
 		wp_send_json_error( array( 'message' => 'Please fill in your name and a valid email.' ) );
 	}
+
+	$order_dir = rrt_label_order_folder( $name );
 
 	// Pete, 2026-10-19: "quantity plus 5% in the file name" — this is a
 	// stand-in for a real WooCommerce order quantity (that integration is
@@ -203,7 +234,7 @@ function rrt_label_handle_submit() {
 	// rrt_label_draw_order_id()) — name + quantity, the two things he'd
 	// actually look for while sorting a stack of freshly cut labels.
 	$order_id_text  = sprintf( "%s \xC2\xB7 Qty %d", $name, $quantity );
-	$composite_path = rrt_label_composite( $size_key, $layers, $order_id_text );
+	$composite_path = rrt_label_composite( $size_key, $layers, $order_dir, $order_id_text );
 
 	if ( is_wp_error( $composite_path ) ) {
 		wp_send_json_error( array( 'message' => $composite_path->get_error_message() ) );
@@ -222,7 +253,7 @@ function rrt_label_handle_submit() {
 	// composite. GD has no native concept of layers and this server has
 	// no Imagick extension (confirmed — can't write a true PSD), so this
 	// is the achievable version of "layered" without a new dependency.
-	$layer_paths = rrt_label_composite_layers( $size_key, $layers );
+	$layer_paths = rrt_label_composite_layers( $size_key, $layers, $order_dir );
 	if ( is_wp_error( $layer_paths ) ) {
 		$layer_paths = array(); // not fatal — the flat composite alone still gets emailed.
 	}
@@ -235,34 +266,45 @@ function rrt_label_handle_submit() {
 	// cover the order (the filename's qty already includes the 5% buffer,
 	// so he doesn't have to do that math by hand each time).
 	$labels_needed = (int) ceil( $quantity * 1.05 );
-	$sheet_path    = rrt_label_composite_sheet( $size_key, $composite_path, $name, $labels_needed );
+	$sheet_path    = rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $labels_needed );
 	if ( is_wp_error( $sheet_path ) ) {
 		$sheet_path = null; // not fatal — the flat composite alone still gets emailed.
 	}
+
+	// Pete, 2026-10-27: "have those saved in a manner so they are grouped
+	// with all the parts, easily identifiable and side by side in a
+	// folder" — the customer's ORIGINAL raw upload only ever exists as
+	// PHP's own upload tmp file, which PHP deletes at the end of this
+	// request, so it has to be copied into $order_dir now or it's gone
+	// for good once the email is sent. Same getimagesize()-based mime
+	// detection as rrt_label_donate_to_community_library() (tmp_path has
+	// no real file extension of its own to go by).
+	$original_paths = rrt_label_save_originals( $order_dir, $layers );
+
+	$fields = array(
+		'size'          => $sizes[ $size_key ]['label'],
+		'name'          => $name,
+		'email'         => $email,
+		'phone'         => $phone,
+		'message'       => $message,
+		'layers'        => $layers,
+		'quantity'      => $quantity,
+		'labels_needed' => $labels_needed,
+	);
 
 	// Email is attempted (useful once this is live on GoDaddy, where real
 	// mail delivery works), but Pete, 2026-10-18: "don't need mail, it can
 	// go to a file, just give me the folder/filename" — on local XAMPP
 	// there's no mail server behind `wp_mail()`, so it either silently
 	// fails or just never gets tested at all. Either way, the files on
-	// disk are the real, always-true answer, so the success message below
-	// reports the exact folder + filenames directly instead of relying on
-	// an email arriving.
-	rrt_label_email_submission(
-		array(
-			'size'          => $sizes[ $size_key ]['label'],
-			'name'          => $name,
-			'email'         => $email,
-			'phone'         => $phone,
-			'message'       => $message,
-			'layers'        => $layers,
-			'quantity'      => $quantity,
-			'labels_needed' => $labels_needed,
-		),
-		$composite_path,
-		$layer_paths,
-		$sheet_path
-	);
+	// disk (now in $order_dir, alongside order-info.txt below) are the
+	// real, always-true answer regardless of whether mail works.
+	rrt_label_email_submission( $fields, $composite_path, $layer_paths, $sheet_path );
+
+	// Same details as the email body, saved to disk too so the folder is
+	// self-contained — every part of the order "side by side," per Pete's
+	// own ask, without needing to go dig the matching email back out.
+	rrt_label_write_order_info( $order_dir, $fields );
 
 	// Pete, 2026-10-26: "donate their image for others to use... immediately
 	// goes to our library" — purely additive, runs AFTER the real order
@@ -280,17 +322,90 @@ function rrt_label_handle_submit() {
 		}
 	}
 
-	$all_paths = array_merge( array( $composite_path ), $layer_paths, $sheet_path ? array( $sheet_path ) : array() );
-	$folder    = wp_normalize_path( dirname( $composite_path ) );
+	$all_paths = array_merge( array( $composite_path ), $layer_paths, $original_paths, $sheet_path ? array( $sheet_path ) : array() );
+	$folder    = wp_normalize_path( $order_dir );
 	$filenames = array_map( 'basename', $all_paths );
 
 	wp_send_json_success(
 		array(
-			'message'   => "Saved! Folder: {$folder}\nFiles: " . implode( ', ', $filenames ),
+			// Pete, 2026-10-27: this used to echo the server's own folder
+			// path straight into the customer-facing status message (a
+			// leftover from local testing, before real mail delivery was
+			// live) — fixed to a generic confirmation; the real folder/
+			// filenames still ride along in the JSON for anyone (Pete,
+			// browser devtools) who actually needs them.
+			'message'   => "Thanks, {$name}! Your label design has been submitted — we'll be in touch.",
 			'folder'    => $folder,
 			'filenames' => $filenames,
 		)
 	);
+}
+
+/**
+ * Copies each customer's ORIGINAL raw uploaded logo file into the order
+ * folder too — PHP deletes its own upload tmp file at the end of the
+ * request, so without this the source image would only ever exist as an
+ * email attachment, never saved anywhere alongside the rest of the
+ * order's parts. Skips art_key layers (this plugin's own bundled art, not
+ * a customer upload — nothing original to save).
+ */
+function rrt_label_save_originals( $order_dir, $layers ) {
+	$paths = array();
+	$n     = 0;
+	foreach ( $layers as $layer ) {
+		if ( 'logo' !== $layer['type'] || ! empty( $layer['art_key'] ) || empty( $layer['tmp_path'] ) || ! file_exists( $layer['tmp_path'] ) ) {
+			continue;
+		}
+		// Same getimagesize()-based mime detection as
+		// rrt_label_donate_to_community_library() — $tmp_path is PHP's raw
+		// upload tmp file (e.g. "phpA1B2.tmp") with no real extension.
+		$info = getimagesize( $layer['tmp_path'] );
+		$ext  = isset( $info['mime'] ) ? array_search( $info['mime'], array( 'png' => 'image/png', 'jpg' => 'image/jpeg' ), true ) : false;
+		if ( ! $ext ) {
+			continue;
+		}
+		++$n;
+		$dest = sprintf( '%s/original-logo-%d.%s', $order_dir, $n, $ext );
+		if ( copy( $layer['tmp_path'], $dest ) ) {
+			$paths[] = $dest;
+		}
+	}
+	return $paths;
+}
+
+/**
+ * Writes a plain-text summary of the order into the same per-order
+ * folder as the image files — the same details as the review email
+ * (rrt_label_email_submission()), but saved to disk too so the folder is
+ * self-contained and "easily identifiable" without needing the matching
+ * email alongside it.
+ */
+function rrt_label_write_order_info( $order_dir, $fields ) {
+	$body  = 'Box size: ' . $fields['size'] . "\n";
+	$body .= 'Name: ' . $fields['name'] . "\n";
+	$body .= 'Email: ' . $fields['email'] . "\n";
+	$body .= 'Phone: ' . $fields['phone'] . "\n";
+	$body .= 'Quantity requested: ' . $fields['quantity'] . "\n";
+	$body .= 'Labels to print (qty + 5% buffer): ' . $fields['labels_needed'] . "\n";
+
+	$logo_n = 0;
+	$text_n = 0;
+	foreach ( $fields['layers'] as $layer ) {
+		if ( 'logo' === $layer['type'] ) {
+			++$logo_n;
+			if ( ! empty( $layer['low_quality'] ) ) {
+				$body .= "\xE2\x9A\xA0 Logo {$logo_n} may be low-resolution for the size it was placed at — check before printing.\n";
+			}
+		} else {
+			++$text_n;
+			$body .= 'Text ' . $text_n . ': ' . $layer['text'] . "\n";
+		}
+	}
+	if ( $fields['message'] ) {
+		$body .= "\nMessage:\n" . $fields['message'] . "\n";
+	}
+
+	file_put_contents( $order_dir . '/order-info.txt', $body );
 }
 
 /**
@@ -319,8 +434,13 @@ function rrt_label_handle_submit() {
  * — see rrt_label_draw_order_id() — BEFORE this file gets tiled into the
  * print sheet (rrt_label_composite_sheet() just copies this same saved
  * PNG N times), so every copy on the printed sheet already carries it.
+ *
+ * Saves into $order_dir (one folder per order — see
+ * rrt_label_order_folder()) rather than a shared temp folder, so this
+ * file sits "grouped with all the parts, side by side" alongside the
+ * layers, print sheet, and original upload(s) from the same order.
  */
-function rrt_label_composite( $size_key, $layers, $order_id_text = '' ) {
+function rrt_label_composite( $size_key, $layers, $order_dir, $order_id_text = '' ) {
 	$px = rrt_label_zone_px( $size_key );
 	if ( ! $px ) {
 		return new WP_Error( 'rrt_bad_size', 'Unknown box size.' );
@@ -347,12 +467,7 @@ function rrt_label_composite( $size_key, $layers, $order_id_text = '' ) {
 
 	rrt_label_draw_order_id( $canvas, $size_key, $order_id_text );
 
-	$upload_dir = wp_upload_dir();
-	$tmp_dir    = trailingslashit( $upload_dir['basedir'] ) . 'rrt-label-temp';
-	if ( ! file_exists( $tmp_dir ) ) {
-		wp_mkdir_p( $tmp_dir );
-	}
-	$out_path = $tmp_dir . '/label-' . $size_key . '-' . wp_generate_password( 8, false ) . '-flat.png';
+	$out_path = $order_dir . '/label-flat.png';
 	imagepng( $canvas, $out_path, 6 ); // 6 = a reasonable PNG compression level; always lossless regardless of level.
 	imagedestroy( $canvas );
 	rrt_label_set_png_dpi( $out_path, 300 );
@@ -412,8 +527,10 @@ function rrt_label_draw_order_id( $canvas, $size_key, $id_text ) {
  * file, but each piece stays independently adjustable. Returns an
  * ordered array of file paths (index 0 = the bare template, the rest in
  * the same add-order as the customer's layers) or a WP_Error.
+ *
+ * Saves into $order_dir (see rrt_label_composite()'s own note on this).
  */
-function rrt_label_composite_layers( $size_key, $layers ) {
+function rrt_label_composite_layers( $size_key, $layers, $order_dir ) {
 	$px = rrt_label_zone_px( $size_key );
 	if ( ! $px ) {
 		return new WP_Error( 'rrt_bad_size', 'Unknown box size.' );
@@ -432,18 +549,12 @@ function rrt_label_composite_layers( $size_key, $layers ) {
 	$width  = imagesx( $template_img );
 	$height = imagesy( $template_img );
 
-	$upload_dir = wp_upload_dir();
-	$tmp_dir    = trailingslashit( $upload_dir['basedir'] ) . 'rrt-label-temp';
-	if ( ! file_exists( $tmp_dir ) ) {
-		wp_mkdir_p( $tmp_dir );
-	}
-	$batch_id = wp_generate_password( 8, false );
-	$paths    = array();
+	$paths = array();
 
 	// Layer 0: the bare template itself, so the full stack is self-
 	// contained (Pete doesn't have to separately dig up the master
 	// template file to reconstruct the design).
-	$base_path = $tmp_dir . "/label-{$size_key}-{$batch_id}-00-template.png";
+	$base_path = $order_dir . '/layer-00-template.png';
 	imagepng( $template_img, $base_path, 6 );
 	imagedestroy( $template_img );
 	rrt_label_set_png_dpi( $base_path, 300 );
@@ -474,7 +585,7 @@ function rrt_label_composite_layers( $size_key, $layers ) {
 			$suffix = 'text';
 		}
 
-		$layer_path = sprintf( '%s/label-%s-%s-%02d-%s.png', $tmp_dir, $size_key, $batch_id, $i, sanitize_key( $suffix ) );
+		$layer_path = sprintf( '%s/layer-%02d-%s.png', $order_dir, $i, sanitize_key( $suffix ) );
 		imagepng( $layer_canvas, $layer_path, 6 );
 		imagedestroy( $layer_canvas );
 		rrt_label_set_png_dpi( $layer_path, 300 );
@@ -495,8 +606,12 @@ function rrt_label_composite_layers( $size_key, $layers ) {
  * flat composite has no transparency (drawn onto an opaque JPEG-sourced
  * canvas), so a plain imagecopy per slot is enough — no alpha blending
  * needed here.
+ *
+ * Saves into $order_dir (see rrt_label_composite()'s own note on this) —
+ * the customer's name is already baked into that folder's own name, so
+ * the filename itself only needs the quantity now.
  */
-function rrt_label_composite_sheet( $size_key, $composite_path, $customer_name, $labels_needed ) {
+function rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $labels_needed ) {
 	$sheet_cfg = rrt_label_sheet_config( $size_key );
 	if ( ! $sheet_cfg ) {
 		return new WP_Error( 'rrt_no_sheet_layout', 'No print-sheet layout defined for this box size.' );
@@ -531,21 +646,7 @@ function rrt_label_composite_sheet( $size_key, $composite_path, $customer_name, 
 	}
 	imagedestroy( $single );
 
-	$upload_dir = wp_upload_dir();
-	$tmp_dir    = trailingslashit( $upload_dir['basedir'] ) . 'rrt-label-temp';
-	if ( ! file_exists( $tmp_dir ) ) {
-		wp_mkdir_p( $tmp_dir );
-	}
-
-	$name_part = sanitize_file_name( $customer_name ? $customer_name : 'customer' );
-	$out_path  = sprintf(
-		'%s/sheet-%s-%s-qty%d-%s.png',
-		$tmp_dir,
-		$size_key,
-		$name_part,
-		$labels_needed,
-		wp_generate_password( 6, false )
-	);
+	$out_path = sprintf( '%s/print-sheet-qty%d.png', $order_dir, $labels_needed );
 
 	imagepng( $sheet, $out_path, 6 );
 	imagedestroy( $sheet );
