@@ -1,0 +1,9 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> rename "html/wp-content/plugins/rrt-label-configurator/inc/handle-submission.php" "html/wp-content/plugins/rrt-label-configurator/inc/handle-submission.php.old"
+sftp> rename "html/wp-content/plugins/rrt-label-configurator/inc/handle-submission.php.new" "html/wp-content/plugins/rrt-label-configurator/inc/handle-submission.php"
+sftp> rm "html/wp-content/plugins/rrt-label-configurator/inc/handle-submission.php.old"
+Removing /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/inc/handle-submission.php.old
+sftp> rename "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php" "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.old"
+sftp> rename "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.new" "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php"
+sftp> rm "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.old"
+Removing /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.old

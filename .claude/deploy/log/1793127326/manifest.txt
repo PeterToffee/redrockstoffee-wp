@@ -1,0 +1,4 @@
+# deploy 1793127326  2026-10-27 12:55  commit dda85098
+# path|category|before_md5|after_md5|server_backup
+inc/handle-submission.php|DIFF|0c4d1944c3548111bfad29feaa0efa5c|c0660266eb5f5b54ffab966c33cca96f|deploy-backups/1793127326/backup/inc/handle-submission.php
+rrt-label-configurator.php|DIFF|baa3553517d09c6a1dec2accd8f58b0e|de52e7a408cfb118e27fa3798510ddeb|deploy-backups/1793127326/backup/rrt-label-configurator.php
