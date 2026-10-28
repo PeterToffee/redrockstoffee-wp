@@ -1,0 +1,9 @@
+# deploy 1793221259  2026-10-28 15:00  commit 84c741e1
+# path|category|before_md5|after_md5|server_backup
+assets/templates/4oz-template-tinted.jpg|DIFF|-|28564e41fda153fa6530794ba3bc9dc2|-
+assets/templates/4oz-template.jpg|DIFF|-|5611450151aa7227bea379a0e5591353|-
+assets/templates/8oz-template-tinted.jpg|DIFF|-|36808576b653fe233385f30bf08a1873|-
+assets/templates/8oz-template.jpg|DIFF|-|30e7ebc98a729d60aba4e44e70a124e5|-
+assets/label-configurator.js|DIFF|d02d16066f8b4059a783bc1ca222fc58|4fdd43f3b640b6ea9bf987873b148f0a|deploy-backups/1793221259/backup/assets/label-configurator.js
+inc/handle-submission.php|DIFF|312f3c939b2593c6f299549010a7e770|1dcd544f5ba85a834ae1e66bfeb2f95a|deploy-backups/1793221259/backup/inc/handle-submission.php
+rrt-label-configurator.php|DIFF|15bef6823e0468af146bfc69fc7156d9|44526a556125459ca316fbb405790053|deploy-backups/1793221259/backup/rrt-label-configurator.php
