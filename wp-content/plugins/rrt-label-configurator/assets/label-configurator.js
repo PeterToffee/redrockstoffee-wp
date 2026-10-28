@@ -54,6 +54,13 @@
 		pacifico: "'Pacifico', cursive",
 	};
 
+	// Pete, 2026-10-28: the calibrated label-paper tint — see
+	// resolveTextColor() below for why WHITE TYPE's on-screen fill uses
+	// this instead of true white. Keep in sync with tint-template.php's
+	// own target color by eye; there's no shared source for it since one
+	// is a PHP build script and the other is this browser-side preview.
+	var RRT_LABEL_TINT_HEX = '#fcf6cd';
+
 	// The 5 fixed text-color swatches (toffee-appropriate: brand red, gold,
 	// brown, cream, slate) — see inc/quote-module-card.part.php for why
 	// .color-row/.color-swatch themselves are the real site's own
@@ -190,7 +197,12 @@
 		// in rrt-label-configurator.php.
 		els.stage.style.aspectRatio = size.crop_width + ' / ' + size.visible_crop_height;
 		els.stageInner.style.aspectRatio = size.crop_width + ' / ' + size.crop_height;
-		els.bg.src = size.template_url;
+		// Pete, 2026-10-28: "that yellow isn't carried in the file" — the
+		// editing stage was showing the plain white template while only the
+		// 3D box mockup used the color-matched tint. Same tinted JPEG, same
+		// pixel dimensions as the plain file (the tint script only recolors,
+		// never resizes), so the zone/crop math below is unaffected.
+		els.bg.src = size.template_tinted_url;
 		els.bg.style.width = size.bg_width_pct + '%';
 		els.bg.style.transform = 'translate(-' + size.bg_translate_x + '%, -' + size.bg_translate_y + '%)';
 
@@ -1592,14 +1604,25 @@
 	// WHITE TYPE. Fix: always use the dark outline recipe — it's visible
 	// against this light backdrop in every case, including a harmless,
 	// subtle self-outline when the text itself is already dark.
-	function resolveTextColor( group ) {
+	// Pete, 2026-10-28: "white lettering... it'll need to be filled with the
+	// same label tint" — on the actual physical label, WHITE TYPE isn't
+	// white ink; it's just unprinted paper, so it prints as whatever color
+	// the paper actually is (confirmed earlier: the real label stock is a
+	// light yellow). The PRINT path must keep sending pure white though —
+	// GD draws that onto the PLAIN (untinted) template, where white is
+	// still the correct "leave this blank" marker. Only the on-screen
+	// preview (now showing the tinted background) should swap WHITE TYPE's
+	// fill for the same tint color, so it reads as blank paper instead of
+	// a stray white patch. forPrint keeps these two in sync for every
+	// other case — only WHITE TYPE diverges.
+	function resolveTextColor( group, forPrint ) {
 		if ( group.textColor ) {
 			return { color: group.textColor, outline: '#000000' };
 		}
 		if ( 'black' === group.shadowColor ) {
 			return { color: '#1a1a1a', outline: '#000000' };
 		}
-		return { color: '#ffffff', outline: '#000000' };
+		return { color: forPrint ? '#ffffff' : RRT_LABEL_TINT_HEX, outline: '#000000' };
 	}
 
 	// Pete, 2026-10-17: "black type shadow really needs to be backed way
@@ -1690,7 +1713,11 @@
 			} );
 			state.textGroups.forEach( function ( group ) {
 				if ( group.text.trim() ) {
-					var resolvedColor = resolveTextColor( group );
+					// forPrint=true: WHITE TYPE must stay pure white here —
+					// see resolveTextColor()'s own note on why the print
+					// path and the on-screen preview deliberately diverge
+					// only for that one case.
+					var resolvedColor = resolveTextColor( group, true );
 					layersMeta.push( {
 						type: 'text',
 						pos: group.pos,

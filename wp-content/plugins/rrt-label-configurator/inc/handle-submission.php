@@ -308,7 +308,7 @@ function rrt_label_handle_submit() {
 	// fails or just never gets tested at all. Either way, the files on
 	// disk (now in $order_dir, alongside order-info.txt below) are the
 	// real, always-true answer regardless of whether mail works.
-	rrt_label_email_submission( $fields, $composite_path, $layer_paths, $sheet_path, $original_paths );
+	rrt_label_email_submission( $fields, $composite_path, $layer_paths, $sheet_path, $original_paths, $order_dir, $proof_path );
 
 	// Same details as the email body, saved to disk too so the folder is
 	// self-contained — every part of the order "side by side," per Pete's
@@ -1051,21 +1051,32 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
  *
  * Pete, 2026-10-18: "flat and layered... with the full file at 300 dpi
  * ready to print" — $layer_paths (from rrt_label_composite_layers(), may
- * be an empty array if that step failed) are attached alongside the flat
- * composite: the bare template plus one transparent PNG per customer
- * layer, all print-resolution, same full 11" size/position as the flat
- * file, so the whole design can be reconstructed as real separate layers
- * in Photoshop/GIMP.
+ * be an empty array if that step failed): the bare template plus one
+ * transparent PNG per customer layer, all print-resolution, same full
+ * 11" size/position as the flat file, so the whole design can be
+ * reconstructed as real separate layers in Photoshop/GIMP.
  *
  * Pete, 2026-10-19: $sheet_path (from rrt_label_composite_sheet(), may be
  * null if that step failed) is the actual print-ready sheet — the flat
- * label doubled/tripled side by side per rrt_label_sheet_config() — also
- * attached here since this is the only working delivery channel right
- * now ("this file will be attached to any customer emails" — the order
- * confirmation page version is explicitly deferred, pending WooCommerce).
+ * label doubled/tripled side by side per rrt_label_sheet_config().
+ *
+ * Pete, 2026-10-28: all of the above used to go out as real MIME
+ * attachments. A real order (flat + sheet + 4 layers + original upload,
+ * ~8.8MB raw) hit GoDaddy's mail relay's size cap and got a hard HTTP 413
+ * back — silently, since the result of wp_mail() was never checked.
+ * Cassie's earlier orders were smaller and happened to sneak under the
+ * cap, which is why they "came through like a dream" while this one
+ * vanished. Pete: "what if we send links to the files instead" / "that's
+ * what we have on theunframer.com" / "full files, everything" — so every
+ * file still goes out (nothing trimmed), just as a link into the order's
+ * own uploads folder (already public, like any other WP upload) instead
+ * of as a MIME attachment. No size ceiling either way now.
  */
-function rrt_label_email_submission( $fields, $composite_path, $layer_paths = array(), $sheet_path = null, $original_paths = array() ) {
-	$to      = get_option( 'admin_email' );
+function rrt_label_email_submission( $fields, $composite_path, $layer_paths = array(), $sheet_path = null, $original_paths = array(), $order_dir = '', $proof_path = null ) {
+	// Pete, 2026-10-28: admin_email (pete@redrockstoffee.com) wasn't getting
+	// checked — submissions were landing with no one seeing them. Send to
+	// both so a missed inbox on one side doesn't mean a missed order.
+	$to      = array_unique( array_filter( array( get_option( 'admin_email' ), 'pete@roadrex.com' ) ) );
 	$subject = sprintf( '[Co-Branding Label] New design from %s', $fields['name'] );
 
 	$logo_count = 0;
@@ -1078,14 +1089,49 @@ function rrt_label_email_submission( $fields, $composite_path, $layer_paths = ar
 		}
 	}
 
-	$body  = "A new co-branding label design was submitted:\n\n";
-	$body .= 'Box size: ' . $fields['size'] . "\n";
-	$body .= 'Name: ' . $fields['name'] . "\n";
-	$body .= 'Email: ' . $fields['email'] . "\n";
-	$body .= 'Phone: ' . $fields['phone'] . "\n";
-	$body .= 'Quantity requested: ' . $fields['quantity'] . "\n";
-	$body .= 'Labels to print (qty + 5% buffer): ' . $fields['labels_needed'] . "\n";
-	$body .= 'Logos: ' . $logo_count . "\n";
+	$upload_dir = wp_upload_dir();
+	$order_url  = trailingslashit( $upload_dir['baseurl'] ) . 'rrt-label-orders/' . rawurlencode( basename( $order_dir ) );
+
+	$files = array();
+	if ( $composite_path && file_exists( $composite_path ) ) {
+		$files['Flat label (300 DPI, ready to print)'] = $composite_path;
+	}
+	if ( $sheet_path && file_exists( $sheet_path ) ) {
+		$files[ sprintf( 'Print-ready sheet (%d labels tiled)', $fields['labels_needed'] ) ] = $sheet_path;
+	}
+	if ( $proof_path && file_exists( $proof_path ) ) {
+		$files['Customer-facing proof (logo/text in context)'] = $proof_path;
+	}
+	foreach ( $layer_paths as $layer_path ) {
+		if ( file_exists( $layer_path ) ) {
+			$files[ 'Layer: ' . basename( $layer_path ) ] = $layer_path;
+		}
+	}
+	// Pete, 2026-10-27: "here are the files" — one came through named
+	// literally "phpgTLcxA", no extension at all. $layer['tmp_path'] for a
+	// real upload is PHP's own raw upload tmp file, which has no real
+	// filename of its own. $original_paths (rrt_label_save_originals(),
+	// called before this function) already copied the same files into the
+	// order folder under proper names (original-logo-1.jpg, etc.) — link
+	// those instead so the filename actually means something.
+	foreach ( $original_paths as $original_path ) {
+		if ( file_exists( $original_path ) ) {
+			$files[ 'Original upload: ' . basename( $original_path ) ] = $original_path;
+		}
+	}
+
+	$body  = '<html><body style="font-family: Arial, sans-serif; line-height: 1.6;">';
+	$body .= '<h2 style="margin-bottom:4px;">New co-branding label design</h2>';
+	$body .= '<table style="border-collapse: collapse; width: 100%; max-width: 600px;">';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Box size</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['size'] ) . '</td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Name</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['name'] ) . '</td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Email</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><a href="mailto:' . esc_attr( $fields['email'] ) . '">' . esc_html( $fields['email'] ) . '</a></td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Phone</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['phone'] ) . '</td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Quantity requested</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['quantity'] ) . '</td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Labels to print (+5%)</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['labels_needed'] ) . '</td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Logos</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $logo_count ) . '</td></tr>';
+	$body .= '</table>';
+
 	// Pete, 2026-10-26: "I don't want to take someone's money and print a
 	// really sh*t label from a garbage file" — warn-not-block (confirmed),
 	// so this is the backstop: even if the customer ignored the on-page
@@ -1099,47 +1145,36 @@ function rrt_label_email_submission( $fields, $composite_path, $layer_paths = ar
 		}
 		++$logo_n;
 		if ( ! empty( $layer['low_quality'] ) ) {
-			$body .= "\xE2\x9A\xA0 Logo {$logo_n} may be low-resolution for the size it was placed at — check before printing.\n";
+			$body .= '<p style="color:#b00020; font-weight:bold;">&#9888; Logo ' . esc_html( $logo_n ) . ' may be low-resolution for the size it was placed at — check before printing.</p>';
 		}
 	}
-	foreach ( $text_lines as $i => $line ) {
-		$body .= 'Text ' . ( $i + 1 ) . ': ' . $line . "\n";
+
+	if ( $text_lines ) {
+		$body .= '<h3 style="margin-bottom:4px;">Text</h3><ul>';
+		foreach ( $text_lines as $i => $line ) {
+			$body .= '<li>Text ' . ( $i + 1 ) . ': ' . esc_html( $line ) . '</li>';
+		}
+		$body .= '</ul>';
 	}
 	if ( $fields['message'] ) {
-		$body .= "\nMessage:\n" . $fields['message'] . "\n";
-	}
-	$body .= "\nAttached:\n";
-	$body .= "- The flat, full 11\" label (PNG, real 300 DPI tag) — ready to print exactly as the customer designed it.\n";
-	if ( $layer_paths ) {
-		$body .= "- The same design as separate layers (bare template + one file per logo/text piece, numbered in stacking order) — open them all in Photoshop/GIMP as individual layers if you need to adjust any one piece by hand.\n";
-	}
-	$body .= "- The original uploaded logo file(s), if any, in case you want to work from the source image directly.\n";
-	if ( $sheet_path ) {
-		$body .= "- The print-ready sheet (multiple labels tiled side by side) — reprint this same file as many times as it takes to cover {$fields['labels_needed']} labels.";
+		$body .= '<h3 style="margin-bottom:4px;">Message</h3><p>' . nl2br( esc_html( $fields['message'] ) ) . '</p>';
 	}
 
-	$attachments = array( $composite_path );
-	if ( $sheet_path && file_exists( $sheet_path ) ) {
-		$attachments[] = $sheet_path;
-	}
-	foreach ( $layer_paths as $layer_path ) {
-		if ( file_exists( $layer_path ) ) {
-			$attachments[] = $layer_path;
+	$body .= '<h3 style="margin-bottom:4px;">Files</h3>';
+	if ( $files ) {
+		$body .= '<table style="border-collapse: collapse; width: 100%; max-width: 600px;">';
+		foreach ( $files as $label => $path ) {
+			$file_url = trailingslashit( $order_url ) . rawurlencode( basename( $path ) );
+			$body    .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #eee;">' . esc_html( $label ) . '</td><td style="padding:6px 8px; border-bottom:1px solid #eee;"><a href="' . esc_url( $file_url ) . '" style="display:inline-block; padding:6px 14px; background:#3d4348; color:#fff; text-decoration:none; border-radius:4px;">Download</a></td></tr>';
 		}
-	}
-	// Pete, 2026-10-27: "here are the files" — one came through named
-	// literally "phpgTLcxA", no extension at all. $layer['tmp_path'] for a
-	// real upload is PHP's own raw upload tmp file, which has no real
-	// filename of its own; PHPMailer just uses that path's basename as the
-	// attachment's filename. $original_paths (rrt_label_save_originals(),
-	// called before this function) already copied the same files into the
-	// order folder under proper names (original-logo-1.jpg, etc.) — attach
-	// those instead so the filename in the inbox actually means something.
-	foreach ( $original_paths as $original_path ) {
-		if ( file_exists( $original_path ) ) {
-			$attachments[] = $original_path;
-		}
+		$body .= '</table>';
+	} else {
+		$body .= '<p>No files were generated for this order — check the order folder on the server.</p>';
 	}
 
-	wp_mail( $to, $subject, $body, array(), $attachments );
+	$body .= '</body></html>';
+
+	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+
+	wp_mail( $to, $subject, $body, $headers );
 }
