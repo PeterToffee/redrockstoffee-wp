@@ -1,0 +1,6 @@
+# deploy 1793156475  2026-10-27 21:01  commit 6741bbec
+# path|category|before_md5|after_md5|server_backup
+assets/label-configurator.js|DIFF|24a0eec7b069b7b35af6a4a5f709c054|d02d16066f8b4059a783bc1ca222fc58|deploy-backups/1793156475/backup/assets/label-configurator.js
+inc/handle-submission.php|DIFF|c0660266eb5f5b54ffab966c33cca96f|312f3c939b2593c6f299549010a7e770|deploy-backups/1793156475/backup/inc/handle-submission.php
+inc/quote-module-card.part.php|DIFF|0b74f8439181c4b1ca127888f6d7a0f1|aa372c37990864b33032a22dc80d0fd0|deploy-backups/1793156475/backup/inc/quote-module-card.part.php
+rrt-label-configurator.php|DIFF|de52e7a408cfb118e27fa3798510ddeb|15bef6823e0468af146bfc69fc7156d9|deploy-backups/1793156475/backup/rrt-label-configurator.php
