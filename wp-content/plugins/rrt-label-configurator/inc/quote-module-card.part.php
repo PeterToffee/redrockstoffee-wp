@@ -248,8 +248,8 @@
 									     to just "×" to make room, and added the same nowrap+scroll safety
 									     net as the other rows in this card so a tight fit scrolls instead
 									     of wrapping to a 2nd line. -->
-									<div id="logo-selector-row" style="display:flex; align-items:center; gap:0.3rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; margin-bottom:0.25rem;">
-										<button id="logo-upload-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.55rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">YOUR FILE</button>
+									<div id="logo-selector-row" style="display:flex; align-items:flex-end; gap:0.2rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; margin-bottom:0.25rem;">
+										<button id="logo-upload-btn" type="button" style="font-size:0.6rem; padding:0.45rem 0.35rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">YOUR FILE</button>
 										<!-- Pete, 2026-10-17 (follow-up): "can't look at art" / "circle with
 										     arrows, page goes up and down" — two real bugs, now fixed. (1) The
 										     panel had BOTH display:none and display:grid in the same style
@@ -267,7 +267,7 @@
 										     position:fixed, positioned under the button at open-time — the
 										     standard way a popover escapes a clipped/scrolling ancestor. -->
 										<div id="art-picker" style="position:relative; flex-shrink:0; display:inline-flex;">
-											<button id="art-picker-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.55rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">Our Art/Icon Library</button>
+											<button id="art-picker-btn" type="button" style="font-size:0.6rem; padding:0.45rem 0.3rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">Our Art Library</button>
 											<!-- Pete, 2026-10-17: "are there more we can add?" -> "more" — the
 										     library grew from 6 to 27 pieces, so the panel now needs to
 										     scroll (max-height + overflow-y:auto) instead of just growing
@@ -350,25 +350,63 @@
 											</div>
 										</div>
 										<div id="logo-selector-btns" style="display:flex; gap:0.3rem; flex-wrap:nowrap;"></div>
-										<button id="logo-add-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.45rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">+ Add</button>
-										<button id="logo-remove-btn" type="button" title="Remove" style="font-size:0.65rem; padding:0.2rem 0.4rem; background:#e53e3e; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">×</button>
-										<button class="slider-step-btn" data-for="logo-size-slider" data-dir="-1" style="width:22px;height:22px;flex-shrink:0;">−</button>
+										<button id="logo-add-btn" type="button" style="font-size:0.6rem; padding:0.45rem 0.3rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">+ Add</button>
+										<button id="logo-remove-btn" type="button" title="Remove" style="font-size:1.1rem; line-height:1; padding:0.4rem 0.4rem; background:#e53e3e; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">×</button>
 										<?php
 									/**
-									 * Pete, 2026-10-25: "art, or my files
-									 * don't go quite as large as I'd
-									 * like" — max raised from 80 to 150
-									 * (% of zone width). No other cap
-									 * exists anywhere in the chain: GD's
-									 * dest_w = (scale/100)*zone_width in
-									 * rrt_label_draw_logo() has no
-									 * hardcoded ceiling, so this slider
-									 * was the only thing actually limiting
-									 * how big a logo/art piece could get.
+									 * Pete, 2026-10-27: "we need some sort of title for it (SIZE),
+									 * customer today, who sent the very small high res didn't
+									 * realize she could make it larger" — a labeled "Art Size" wrap,
+									 * same .slider-header/.slider-name pattern as Font/Text Width
+									 * above, so the control reads as adjustable instead of blending
+									 * into the row of plain buttons. flex:1 (not flex-shrink:0 like
+									 * its siblings) so it claims whatever width the shorter "Our Art
+									 * Library" label + tighter padding freed up — the input has no
+									 * inline width anymore either, so .slider-with-btns .style-slider
+									 * (configurator-components.css) fills that space for real instead
+									 * of being stuck at a fixed 44px. Siblings' padding bumped
+									 * 0.2rem->0.45rem top/bottom too (Pete: "make the... buttons on
+									 * that line a little taller... give room for SIZE above slider")
+									 * so the row's two-line label+slider stack doesn't tower over
+									 * squat single-line buttons next to it.
 									 */
 									?>
-									<input type="range" id="logo-size-slider" class="style-slider" min="5" max="150" value="20" step="5" style="width:44px; flex-shrink:0;">
-										<button class="slider-step-btn" data-for="logo-size-slider" data-dir="1" style="width:22px;height:22px;flex-shrink:0;">+</button>
+									<div id="logo-size-wrap" style="flex:1 1 auto; min-width:70px;">
+										<!-- Pete, 2026-10-27: "center 'ART SIZE' over slider" — .slider-header
+										     is shared with Shadow/Font/Text Width (space-between, for when a
+										     second item like .slider-current sits opposite the label), so the
+										     centering override lives here, scoped to this one instance, rather
+										     than changed on the shared class. min-width:0 on both the row and
+										     the input itself is the real overflow fix underneath: a flex
+										     item's default min-width is its content's intrinsic size, and
+										     <input type="range"> has a real browser-default intrinsic width
+										     (~129px) that silently wins over flex-shrink/width:100% unless
+										     min-width is explicitly zeroed — without this the slider refused
+										     to actually shrink to fit and the row kept overflowing even though
+										     the math on paper said it should fit. -->
+										<div class="slider-header" style="justify-content:center;">
+											<span class="slider-name">Art Size</span>
+										</div>
+										<div class="slider-with-btns" style="min-width:0;">
+											<button class="slider-step-btn" data-for="logo-size-slider" data-dir="-1" style="width:22px;height:22px;flex-shrink:0;">−</button>
+											<?php
+										/**
+										 * Pete, 2026-10-25: "art, or my files
+										 * don't go quite as large as I'd
+										 * like" — max raised from 80 to 150
+										 * (% of zone width). No other cap
+										 * exists anywhere in the chain: GD's
+										 * dest_w = (scale/100)*zone_width in
+										 * rrt_label_draw_logo() has no
+										 * hardcoded ceiling, so this slider
+										 * was the only thing actually limiting
+										 * how big a logo/art piece could get.
+										 */
+										?>
+										<input type="range" id="logo-size-slider" class="style-slider" min="5" max="150" value="20" step="5" style="min-width:0;">
+											<button class="slider-step-btn" data-for="logo-size-slider" data-dir="1" style="width:22px;height:22px;flex-shrink:0;">+</button>
+										</div>
+									</div>
 									</div>
 									<span id="logo-filename" style="font-size:0.6rem; color:#888; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; display:block; margin-bottom:0.25rem;"></span>
 									<!-- Pete, 2026-10-26: "I don't want to take someone's money
@@ -379,7 +417,7 @@
 									     resolution — a huge photo dragged to a huge size can still
 									     look like garbage. Never shown for an ART-library pick
 									     (already guaranteed high-res). -->
-									<p id="logo-quality-warning" style="display:none; font-size:0.68rem; color:#991e21; font-weight:600; font-family:'Poppins',sans-serif; line-height:1.35; margin:0 0 0.3rem; background:#fdf3e7; border:1px solid #991e21; border-radius:6px; padding:0.35rem 0.5rem;">This image may print blurry at this size. Try a higher-resolution image of your own, or pick a piece from Our Art/Icon Library instead.</p>
+									<p id="logo-quality-warning" style="display:none; font-size:0.68rem; color:#991e21; font-weight:600; font-family:'Poppins',sans-serif; line-height:1.35; margin:0 0 0.3rem; background:#fdf3e7; border:1px solid #991e21; border-radius:6px; padding:0.35rem 0.5rem;">This image may print blurry at this size. Try a higher-resolution image of your own, or pick a piece from Our Art Library instead.</p>
 									<!-- Pete, 2026-10-26: "donate their image for others to use... a
 									     very stripped down copyright image thing" — only shown for a
 									     real upload (JS hides it whenever the active logo is an ART-

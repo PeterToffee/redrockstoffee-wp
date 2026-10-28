@@ -792,6 +792,41 @@
 		group.el.style.transform = 'translateX(-50%)';
 	}
 
+	// Pete, 2026-10-27: "when I add text and make it larger on desktop, I
+	// can't drag it to the edge of the dotted box on the bottom" / "when
+	// the text is smaller, so is the gap" — confirmed by directly
+	// measuring the real glyph ink against the box's own edges (a Range
+	// over the text node vs. the element's getBoundingClientRect): a
+	// proportional gap really is there, and it grows with font size. NOT
+	// CSS padding (that's already zeroed for the only text style this
+	// plugin actually uses, .style-dropshadow) — it's line-height's own
+	// built-in "leading", the blank space `line-height: 1.35` (base rule
+	// in configurator-components.css) adds above/below a line's actual
+	// letters, which is inherent to how line boxes work and isn't a CSS
+	// property that can just be zeroed without breaking text's vertical
+	// rhythm generally. Instead of fighting it, this measures the real
+	// gap directly off the rendered glyphs each time and uses it to widen
+	// how far the box is allowed to travel — so the VISIBLE lettering,
+	// not the invisible leading past it, is what actually reaches the
+	// dashed line. Works for single- and multi-line text alike (the Range
+	// spans every wrapped line).
+	function textGlyphGapPct( el, zoneRect ) {
+		if ( ! el.firstChild ) {
+			return { top: 0, bottom: 0 };
+		}
+		var range = document.createRange();
+		range.selectNodeContents( el );
+		var glyphRect = range.getBoundingClientRect();
+		var elRect = el.getBoundingClientRect();
+		if ( ! glyphRect.height ) {
+			return { top: 0, bottom: 0 };
+		}
+		return {
+			top: ( Math.max( 0, glyphRect.top - elRect.top ) / zoneRect.height ) * 100,
+			bottom: ( Math.max( 0, elRect.bottom - glyphRect.bottom ) / zoneRect.height ) * 100,
+		};
+	}
+
 	// Hard wall, same as the drag clamp, but triggered by size changes
 	// that aren't a drag at all — typing more text, a bigger font, or a
 	// wider TEXT WIDTH setting all grow the box, and since it's
@@ -812,6 +847,7 @@
 			var elRect = group.el.getBoundingClientRect();
 			var halfWPct = ( elRect.width / zoneRect.width ) * 50;
 			var heightPct = ( elRect.height / zoneRect.height ) * 100;
+			var glyphGap = textGlyphGapPct( group.el, zoneRect );
 			// When the box itself is wider/taller than the zone (e.g. a
 			// big font wrapped to 2 lines), halfWPct can exceed 50 and
 			// heightPct can exceed 100 — there's no position left that
@@ -823,9 +859,9 @@
 			// sensible edge (centered / flush-bottom) instead.
 			var minX = Math.min( halfWPct, 50 );
 			var maxX = Math.max( 100 - halfWPct, 50 );
-			var minY = Math.min( heightPct, 100 );
+			var minY = Math.min( heightPct, 100 ) - glyphGap.top;
 			group.pos.x = clamp( group.pos.x, minX, maxX );
-			group.pos.y = clamp( group.pos.y, minY, 100 );
+			group.pos.y = clamp( group.pos.y, minY, 100 + glyphGap.bottom );
 		}
 
 		group.el.style.left = group.pos.x + '%';
@@ -1402,6 +1438,10 @@
 			el.classList.add( 'rrt-dragging' );
 			var zoneRect = els.zone.getBoundingClientRect();
 			var elRect = el.getBoundingClientRect();
+			// 'text' only — logo has no glyph leading to correct for. See
+			// textGlyphGapPct()'s comment (near clampGroupToZone()) for why
+			// this exists at all: line-height's leading, not padding.
+			var glyphGap = 'text' === kind ? textGlyphGapPct( el, zoneRect ) : { top: 0, bottom: 0 };
 			state.dragging = {
 				item: item,
 				el: el,
@@ -1415,6 +1455,8 @@
 				// actual edges, not just its anchor point.
 				halfWPct: ( elRect.width / zoneRect.width ) * 50,
 				halfHPct: ( elRect.height / zoneRect.height ) * 50,
+				glyphGapTop: glyphGap.top,
+				glyphGapBottom: glyphGap.bottom,
 			};
 		} );
 		el.addEventListener( 'pointermove', onDragMove );
@@ -1456,8 +1498,13 @@
 		var dragMaxX = isArt ? 100 : Math.max( 100 - d.halfWPct, 50 );
 		d.item.pos.x = clamp( rawX, dragMinX, dragMaxX );
 		if ( 'text' === d.kind ) {
-			var dragMinY = Math.min( d.halfHPct * 2, 100 );
-			d.item.pos.y = clamp( rawY, dragMinY, 100 );
+			// glyphGapTop/glyphGapBottom (captured at drag-start) widen both
+			// ends so the actual lettering — inset from the box's own edges
+			// by line-height's built-in leading — is what reaches the
+			// dashed line, not the invisible leading past it. See
+			// textGlyphGapPct()'s comment near clampGroupToZone().
+			var dragMinY = Math.min( d.halfHPct * 2, 100 ) - d.glyphGapTop;
+			d.item.pos.y = clamp( rawY, dragMinY, 100 + d.glyphGapBottom );
 			d.el.style.left = d.item.pos.x + '%';
 			d.el.style.bottom = ( 100 - d.item.pos.y ) + '%';
 			updateCenterBtn();
