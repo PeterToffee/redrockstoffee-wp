@@ -281,6 +281,15 @@ function rrt_label_handle_submit() {
 	// no real file extension of its own to go by).
 	$original_paths = rrt_label_save_originals( $order_dir, $layers );
 
+	// Pete, 2026-10-27: customer-facing proof of their logo/text placement
+	// in context on the real label — not fatal if it fails (GD edge cases
+	// on an unusual size config), the admin email/order folder still have
+	// everything they need either way.
+	$proof_path = rrt_label_composite_proof( $size_key, $composite_path, $order_dir );
+	if ( is_wp_error( $proof_path ) ) {
+		$proof_path = null;
+	}
+
 	$fields = array(
 		'size'          => $sizes[ $size_key ]['label'],
 		'name'          => $name,
@@ -322,7 +331,7 @@ function rrt_label_handle_submit() {
 		}
 	}
 
-	$all_paths = array_merge( array( $composite_path ), $layer_paths, $original_paths, $sheet_path ? array( $sheet_path ) : array() );
+	$all_paths = array_merge( array( $composite_path ), $layer_paths, $original_paths, $sheet_path ? array( $sheet_path ) : array(), $proof_path ? array( $proof_path ) : array() );
 	$folder    = wp_normalize_path( $order_dir );
 	$filenames = array_map( 'basename', $all_paths );
 
@@ -653,6 +662,159 @@ function rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $lab
 	rrt_label_set_png_dpi( $out_path, 300 );
 
 	return $out_path;
+}
+
+/**
+ * Pete, 2026-10-27: "save a file off that includes the portion of the
+ * label that is outside the canvas in the preview window and all inside
+ * the scroller... so they know the outside of the label" — a customer-
+ * facing proof, not a print file: crops the flat composite to exactly
+ * the same window the on-screen preview's scroller shows (zone + the
+ * mountain-logo/footer context below it — see rrt_label_crop_px(), the
+ * same geometry the live configurator itself uses), so the customer sees
+ * their logo/text in context on the real label artwork, not an isolated
+ * rectangle.
+ *
+ * "outside border on either side with a torn look top and bottom... a
+ * dotted line where our dotted line, centered on the label/box top" — a
+ * decorative cream paper-strip trim on both sides (torn/jagged top and
+ * bottom edges, like a strip hand-torn off a larger sheet) plus the same
+ * dotted zone-boundary rectangle the live preview draws around the
+ * customer's own draggable area, translated into this crop's coordinates
+ * — so "here's the dotted line you placed things in" reads the same way
+ * it did on screen. A caption band underneath states what the dotted
+ * line means, since this image leaves the configurator's own on-screen
+ * instructions behind.
+ */
+function rrt_label_composite_proof( $size_key, $composite_path, $order_dir ) {
+	$px   = rrt_label_zone_px( $size_key );
+	$crop = rrt_label_crop_px( $size_key );
+	if ( ! $px || ! $crop ) {
+		return new WP_Error( 'rrt_bad_size', 'Unknown box size.' );
+	}
+
+	$source = imagecreatefrompng( $composite_path );
+	if ( ! $source ) {
+		return new WP_Error( 'rrt_bad_composite', 'Could not open the composited label.' );
+	}
+
+	$border    = 60; // px either side - the torn-paper trim width.
+	$caption_h = 110;
+	$inner_w   = $crop['crop_width'];
+	$inner_h   = $crop['crop_height'];
+	$canvas_w  = $inner_w + ( $border * 2 );
+	$canvas_h  = $inner_h + $caption_h;
+
+	$canvas = imagecreatetruecolor( $canvas_w, $canvas_h );
+	$white  = imagecolorallocate( $canvas, 255, 255, 255 );
+	imagefilledrectangle( $canvas, 0, 0, $canvas_w - 1, $canvas_h - 1, $white );
+
+	// The crop window itself, pasted flush against the torn trim.
+	imagecopy( $canvas, $source, $border, 0, $crop['crop_x'], $crop['crop_y'], $inner_w, $inner_h );
+	imagedestroy( $source );
+
+	// Torn cream-paper strips on both sides, full crop height.
+	$paper = imagecolorallocate( $canvas, 0xfd, 0xf3, 0xe7 ); // same cream used elsewhere in this plugin's UI
+	$edge  = imagecolorallocate( $canvas, 0xd9, 0xc7, 0xa8 ); // a shade darker, for the torn edge's own line
+	rrt_label_draw_torn_strip( $canvas, 0, $border, $inner_h, $paper, $edge );
+	rrt_label_draw_torn_strip( $canvas, $border + $inner_w, $canvas_w, $inner_h, $paper, $edge );
+
+	// The dotted zone-boundary rectangle, translated from full-template
+	// pixel space into this crop's own coordinates (crop_x is always 0,
+	// so only the y-offset and the added left border matter).
+	$zone_x = $border + ( $px['zone_x'] - $crop['crop_x'] );
+	$zone_y = $px['zone_y'] - $crop['crop_y'];
+	$red    = imagecolorallocate( $canvas, 0x99, 0x1e, 0x21 );
+	rrt_label_draw_dotted_rect( $canvas, $zone_x, $zone_y, $zone_x + $px['zone_width'], $zone_y + $px['zone_height'], $red, 3, 10 );
+
+	// Caption band.
+	$ttf_path = RRT_LABEL_PATH . 'assets/fonts/opensans-variable.ttf';
+	if ( file_exists( $ttf_path ) ) {
+		$dark  = imagecolorallocate( $canvas, 0x33, 0x33, 0x33 );
+		$lines = array(
+			'The dotted line is centered on the top of the box —',
+			'it is for your confirmation of your logo/text placement.',
+		);
+		$font_size = 20;
+		foreach ( $lines as $i => $line ) {
+			$bbox       = imagettfbbox( $font_size, 0, $ttf_path, $line );
+			$line_width = $bbox[2] - $bbox[0];
+			$x          = (int) round( ( $canvas_w - $line_width ) / 2 );
+			$y          = $inner_h + 45 + ( $i * 32 );
+			imagettftext( $canvas, $font_size, 0, $x, $y, $dark, $ttf_path, $line );
+		}
+	}
+
+	$out_path = $order_dir . '/proof.png';
+	imagepng( $canvas, $out_path, 6 );
+	imagedestroy( $canvas );
+
+	return $out_path;
+}
+
+/**
+ * One vertical "torn paper strip" from x0 to x1, spanning 0..height, with
+ * a jagged (not straight) top and bottom edge — a strip that reads as
+ * hand-torn off a larger sheet rather than cleanly cut. The jagged edge
+ * is drawn once and reused upside-down for the bottom so the two torn
+ * edges don't look mechanically identical.
+ */
+function rrt_label_draw_torn_strip( $canvas, $x0, $x1, $height, $fill_color, $edge_color ) {
+	$step  = 14;
+	$jag   = 7;
+	$top   = array();
+	$x     = $x0;
+	while ( $x <= $x1 ) {
+		$top[] = array( $x, mt_rand( 0, $jag ) );
+		$x    += $step;
+	}
+	$bottom = array();
+	foreach ( $top as $p ) {
+		$bottom[] = array( $p[0], $height - mt_rand( 0, $jag ) );
+	}
+
+	$poly = array();
+	foreach ( $top as $p ) {
+		$poly[] = $p[0];
+		$poly[] = $p[1];
+	}
+	$poly[] = $x1;
+	$poly[] = $height;
+	for ( $i = count( $bottom ) - 1; $i >= 0; $i-- ) {
+		$poly[] = $bottom[ $i ][0];
+		$poly[] = $bottom[ $i ][1];
+	}
+	$poly[] = $x0;
+	$poly[] = 0;
+
+	imagefilledpolygon( $canvas, $poly, (int) ( count( $poly ) / 2 ), $fill_color );
+
+	$top_line = array();
+	foreach ( $top as $p ) {
+		$top_line[] = $p[0]; $top_line[] = $p[1];
+	}
+	imagesetthickness( $canvas, 2 );
+	for ( $i = 0; $i < count( $top ) - 1; $i++ ) {
+		imageline( $canvas, $top[ $i ][0], $top[ $i ][1], $top[ $i + 1 ][0], $top[ $i + 1 ][1], $edge_color );
+		imageline( $canvas, $bottom[ $i ][0], $bottom[ $i ][1], $bottom[ $i + 1 ][0], $bottom[ $i + 1 ][1], $edge_color );
+	}
+	imagesetthickness( $canvas, 1 );
+}
+
+/**
+ * A dashed-line rectangle (GD has no native dashed-rect primitive) — used
+ * to mirror the live configurator's own dotted zone-boundary outline onto
+ * the exported proof image.
+ */
+function rrt_label_draw_dotted_rect( $canvas, $x0, $y0, $x1, $y1, $color, $thickness, $dash_len ) {
+	imagesetthickness( $canvas, $thickness );
+	$style = array_merge( array_fill( 0, $dash_len, $color ), array_fill( 0, $dash_len, IMG_COLOR_TRANSPARENT ) );
+	imagesetstyle( $canvas, $style );
+	imageline( $canvas, $x0, $y0, $x1, $y0, IMG_COLOR_STYLED );
+	imageline( $canvas, $x0, $y1, $x1, $y1, IMG_COLOR_STYLED );
+	imageline( $canvas, $x0, $y0, $x0, $y1, IMG_COLOR_STYLED );
+	imageline( $canvas, $x1, $y0, $x1, $y1, IMG_COLOR_STYLED );
+	imagesetthickness( $canvas, 1 );
 }
 
 /**
