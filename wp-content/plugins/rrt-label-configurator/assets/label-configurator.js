@@ -138,6 +138,7 @@
 		message: document.getElementById( 'rrt-lc-message' ),
 		submit: document.getElementById( 'rrt-lc-submit' ),
 		status: document.getElementById( 'rrt-lc-status' ),
+		spinner: document.getElementById( 'rrt-lc-spinner' ),
 	};
 
 	var state = {
@@ -1681,11 +1682,13 @@
 
 		els.submit.disabled = true;
 		setStatus( 'Submitting your design…' );
+		els.spinner.classList.add( 'is-visible' );
 
 		fetchFreshNonce().then( function ( nonce ) {
 			if ( ! nonce ) {
 				setStatus( 'Something went wrong refreshing the form. Please reload the page and try again.', 'error' );
 				els.submit.disabled = false;
+				els.spinner.classList.remove( 'is-visible' );
 				return;
 			}
 
@@ -1758,6 +1761,7 @@
 				} )
 				.then( function ( json ) {
 					els.submit.disabled = false;
+					els.spinner.classList.remove( 'is-visible' );
 					if ( json.success ) {
 						setStatus( json.data.message, 'success' );
 					} else {
@@ -1766,6 +1770,7 @@
 				} )
 				.catch( function () {
 					els.submit.disabled = false;
+					els.spinner.classList.remove( 'is-visible' );
 					setStatus( 'Something went wrong. Please try again.', 'error' );
 				} );
 		} );

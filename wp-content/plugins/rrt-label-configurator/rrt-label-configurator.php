@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.49.0' );
+define( 'RRT_LABEL_VERSION', '3.50.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -1067,6 +1067,7 @@ function rrt_label_configurator_shortcode( $atts ) {
 					</div>
 
 					<button type="button" id="rrt-lc-submit" class="rrt-lc-btn-primary">Submit my label design</button>
+					<img id="rrt-lc-spinner" class="rrt-lc-spinner" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' ); ?>" alt="" aria-hidden="true">
 					<p id="rrt-lc-status" class="rrt-lc-status" role="status"></p>
 				</div>
 
@@ -1169,7 +1170,7 @@ function rrt_label_configurator_shortcode( $atts ) {
 							</div>
 						</div>
 						<div class="rrt-lc-box-modal-actions">
-							<button type="button" id="rrt-lc-box-love-btn" class="rrt-lc-btn-primary">Love it!</button>
+							<button type="button" id="rrt-lc-box-love-btn" class="rrt-lc-btn-primary"><span class="rrt-lc-love-icon-wrap"><img class="rrt-lc-love-icon" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' ); ?>" width="26" height="15" decoding="sync" alt=""></span>Harry, I love it!</button>
 							<button type="button" id="rrt-lc-box-back-btn" class="rrt-lc-btn-secondary">Back to the drawing board</button>
 						</div>
 					</div>

@@ -630,6 +630,53 @@
 	white-space: pre-line;
 }
 
+/* Pete, 2026-10-29: "Harry, I love it!" — Harry icon next to the box-mockup
+   love button, same mascot as the spinner below. */
+#rrt-lc-box-love-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	overflow: visible;
+}
+.rrt-lc-love-icon-wrap {
+	display: inline-flex;
+	flex: none;
+	padding: 5px;
+	overflow: visible;
+	will-change: filter;
+	filter: drop-shadow( 0 0 2px #fff ) drop-shadow( 0 0 3px #fff ) drop-shadow( 0 0 5px #fff );
+}
+.rrt-lc-love-icon {
+	display: block;
+	width: 26px;
+	height: auto;
+}
+
+/* Pete, 2026-10-28: "a spinning Harry icon, just like the file uploader on
+   theunframer.com" — same mascot/animation, ported from
+   TheUnframer-WP's .harry-spinner + @keyframes harry-spin-inline. No
+   filter:invert(1) here (TheUnframer's lives on a dark dropzone; this
+   panel's background is light, so Harry's own black line art already
+   reads fine as-is). */
+.rrt-lc-spinner {
+	display: none;
+	width: 48px;
+	height: auto;
+	margin: 10px auto 0;
+	opacity: 0.85;
+}
+
+.rrt-lc-spinner.is-visible {
+	display: block;
+	animation: rrt-lc-harry-spin 1.3s linear infinite;
+}
+
+@keyframes rrt-lc-harry-spin {
+	from { transform: rotate( 0deg ); }
+	to   { transform: rotate( 360deg ); }
+}
+
 .rrt-lc-status.is-error {
 	color: #a1222f;
 }
@@ -780,6 +827,9 @@
 .rrt-lc-box-modal-actions .rrt-lc-btn-secondary {
 	flex: 1 1 0;
 	width: auto;
+	min-width: 0;
+	padding: 10px 12px;
+	font-size: 0.85rem;
 }
 
 .rrt-lc-btn-secondary {
