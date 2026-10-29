@@ -1,0 +1,11 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/images/home-starburst-shape.png" "html/wp-content/plugins/rrt-label-configurator/assets/images/home-starburst-shape.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/images/home-starburst-shape.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/images/home-starburst-shape.png
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/home-starburst.css" "html/wp-content/plugins/rrt-label-configurator/assets/home-starburst.css"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/home-starburst.css to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/home-starburst.css
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/inc/home-starburst.php" "html/wp-content/plugins/rrt-label-configurator/inc/home-starburst.php"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/inc/home-starburst.php to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/inc/home-starburst.php
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/live/rrt-label-configurator.php" "deploy-backups/1793314445/backup/rrt-label-configurator.php"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/live/rrt-label-configurator.php to /home/client_21778bd1e8_366786/deploy-backups/1793314445/backup/rrt-label-configurator.php
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php" "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.new"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.new

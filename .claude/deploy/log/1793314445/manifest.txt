@@ -1,0 +1,6 @@
+# deploy 1793314445  2026-10-29 16:54  commit ee4fc779
+# path|category|before_md5|after_md5|server_backup
+assets/images/home-starburst-shape.png|ASSET-NEW|-|dbbab97a6514d0c98407c6b992b8084d|-
+assets/home-starburst.css|NEW|-|0bfcf38d0d422ddf3e91ed7c5924cf80|-
+inc/home-starburst.php|NEW|-|50c820822f7389416a6564364c8ea736|-
+rrt-label-configurator.php|DIFF|45568e7e3e742deef3119c975953c21e|5dbdcbbe235546347bbeb6115b2589cc|deploy-backups/1793314445/backup/rrt-label-configurator.php

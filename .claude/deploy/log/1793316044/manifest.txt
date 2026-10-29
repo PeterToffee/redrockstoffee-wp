@@ -1,0 +1,4 @@
+# deploy 1793316044  2026-10-29 17:20  commit faf17376
+# path|category|before_md5|after_md5|server_backup
+assets/label-configurator.css|DIFF|3340945962cabe2df8e88dc21543625b|c02db030460ef8fde66263b73742ee3d|deploy-backups/1793316044/backup/assets/label-configurator.css
+rrt-label-configurator.php|DIFF|5dbdcbbe235546347bbeb6115b2589cc|3b5566394fc8653ad9febb86cd71b8c7|deploy-backups/1793316044/backup/rrt-label-configurator.php
