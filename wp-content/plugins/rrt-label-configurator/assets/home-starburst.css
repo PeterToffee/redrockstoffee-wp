@@ -1,0 +1,50 @@
+/* Pete, 2026-10-29: starburst badge above "Born in Steamboat Springs" on the
+   home page hero, linking to /co-branding/. Wording comes from the
+   "Starburst Badge" meta box on the home page's edit screen (see
+   inc/home-starburst.php) — this file is layout/typography only. */
+
+.rrt-starburst {
+	position: relative;
+	display: inline-block;
+	width: 180px;
+	max-width: 50vw;
+	text-decoration: none;
+	transform: rotate( -6deg );
+	transition: transform 0.2s ease;
+}
+
+.rrt-starburst:hover,
+.rrt-starburst:focus {
+	transform: rotate( -6deg ) scale( 1.05 );
+}
+
+.rrt-starburst-shape {
+	display: block;
+	width: 100%;
+	height: auto;
+	filter: drop-shadow( 0 6px 14px rgba( 0, 0, 0, 0.35 ) );
+}
+
+.rrt-starburst-text {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate( -50%, -50% );
+	width: 58%;
+	text-align: center;
+	font-family: 'Luckiest Guy', cursive;
+	font-size: 1.15rem;
+	line-height: 1.15;
+	color: #fff;
+	text-shadow:
+		-2px -2px 0 #7a181b, 2px -2px 0 #7a181b,
+		-2px  2px 0 #7a181b, 2px  2px 0 #7a181b,
+		 0   -2px 0 #7a181b, 0    2px 0 #7a181b,
+		-2px  0   0 #7a181b, 2px  0   0 #7a181b;
+}
+
+@media ( max-width: 480px ) {
+	.rrt-starburst-text {
+		font-size: 0.9rem;
+	}
+}

@@ -29,11 +29,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.50.0' );
+define( 'RRT_LABEL_VERSION', '3.51.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
 require_once RRT_LABEL_PATH . 'inc/handle-submission.php';
+require_once RRT_LABEL_PATH . 'inc/home-starburst.php';
 
 /**
  * Pete, 2026-10-25: "where are we putting this... how do we coordinate
