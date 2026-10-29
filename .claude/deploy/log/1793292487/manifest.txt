@@ -1,0 +1,6 @@
+# deploy 1793292487  2026-10-29 10:48  commit 23180972
+# path|category|before_md5|after_md5|server_backup
+assets/images/harry-logo.png|ASSET-NEW|-|a67ec126d97d66217192e91202a2d482|-
+assets/label-configurator.css|DIFF|834eaa2fec9caccbcb25b4355cdd861f|3340945962cabe2df8e88dc21543625b|deploy-backups/1793292487/backup/assets/label-configurator.css
+assets/label-configurator.js|DIFF|4fdd43f3b640b6ea9bf987873b148f0a|e3c049b30ab77fbad1633103cd11ff00|deploy-backups/1793292487/backup/assets/label-configurator.js
+rrt-label-configurator.php|DIFF|44526a556125459ca316fbb405790053|45568e7e3e742deef3119c975953c21e|deploy-backups/1793292487/backup/rrt-label-configurator.php

@@ -15,3 +15,10 @@
 - inc/handle-submission.php  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (20 checks, 0 warnings). Server backups: *.bak.1793221259. Rollback: .claude/deploy/rollback.sh 1793221259 --go
+
+## 2026-10-29 11:18 - deploy 1793292487 (commit 23180972)
+- assets/images/harry-logo.png  (ASSET-NEW)
+- assets/label-configurator.css  (DIFF)
+- assets/label-configurator.js  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (15 checks, 0 warnings). Server backups: *.bak.1793292487. Rollback: .claude/deploy/rollback.sh 1793292487 --go

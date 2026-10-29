@@ -1,4 +1,5 @@
-7137d816c0d7e4e5ce89b23a4c5c742a  assets/label-configurator.js
+54e33ffb2f25469f8165192f0f8c58f8  assets/label-configurator.css
+39f52afd0d0c2b60ba6ffd1560199873  assets/label-configurator.js
 2ead2000189062495311c4a5437ca04d  inc/handle-submission.php
 090a7ab361207d55311200326e01650c  inc/quote-module-card.part.php
-588fda5730453c0905ab5f5e87d300f7  rrt-label-configurator.php
+0f4100c3ab7af5711e44efeae544ab53  rrt-label-configurator.php
