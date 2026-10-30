@@ -1,5 +1,8 @@
+d3c21f7eaab3cbfa9f20ff3abde338bd  assets/harry-path.css
+57799f40784acb64888c8df9c0265c5f  assets/harry-path.js
 6cea97111cc254a7089373ff3068c3ff  assets/label-configurator.css
 39f52afd0d0c2b60ba6ffd1560199873  assets/label-configurator.js
 2ead2000189062495311c4a5437ca04d  inc/handle-submission.php
+121b770a5fb724b8b9397aa6013c1666  inc/harry-path.php
 090a7ab361207d55311200326e01650c  inc/quote-module-card.part.php
-17591d0c7306a06e888c200477e66ef0  rrt-label-configurator.php
+bf3b1d31fe80174f2dfe504bdaccf099  rrt-label-configurator.php

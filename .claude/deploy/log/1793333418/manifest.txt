@@ -1,0 +1,6 @@
+# deploy 1793333418  2026-10-29 22:10  commit 435ebb1e
+# path|category|before_md5|after_md5|server_backup
+assets/harry-path.css|NEW|-|9cb4b1851f389d584ecaff210dd1bf2d|-
+assets/harry-path.js|NEW|-|b8ef9e9e688f9afb74d225c2e787f4da|-
+inc/harry-path.php|NEW|-|4407a52aa0b8a1a737467613690ff5c8|-
+rrt-label-configurator.php|DIFF|5d5506f556224f2effd1d945ab13e579|a093146e74c4f43bd89d799874c57366|deploy-backups/1793333418/backup/rrt-label-configurator.php
