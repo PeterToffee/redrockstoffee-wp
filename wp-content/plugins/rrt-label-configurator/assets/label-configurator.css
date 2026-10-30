@@ -844,7 +844,9 @@
 	color: var( --rrt-primary );
 }
 .rrt-lc-btn-secondary:hover {
-	background: rgba( 153, 30, 33, 0.06 );
+	background: var( --rrt-primary-dark );
+	border-color: var( --rrt-primary-dark );
+	color: #fff;
 }
 
 /* Pete, 2026-10-25: "remove the - and + on either end... a grab/smoosh
