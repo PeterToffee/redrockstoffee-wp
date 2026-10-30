@@ -1,9 +1,8 @@
 <?php
 /**
- * Plugin Name: RRT Hero Ken Burns Swing
- * Description: Alternates the home hero's Elementor Background Slideshow
- * Ken Burns zoom so it swings toward alternating edges (right, left,
- * right, left...) instead of always zooming from dead center. Purely an
+ * Alternates the home hero's Elementor Background Slideshow Ken Burns
+ * zoom so it swings toward alternating edges (right, left, right,
+ * left...) instead of always zooming from dead center. Purely an
  * overlay on top of Elementor's own output -- no Elementor settings or
  * content are touched, and this does nothing on pages with no
  * Background Slideshow section.
