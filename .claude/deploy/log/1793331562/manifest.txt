@@ -1,0 +1,4 @@
+# deploy 1793331562  2026-10-29 21:39  commit 77dff1e0
+# path|category|before_md5|after_md5|server_backup
+assets/art/twemoji-co-flag.png|ASSET-NEW|-|e8e7d78644222e7162aab0486cf82f6c|-
+rrt-label-configurator.php|DIFF|7856c2e68dabfad471925b234b2f0caa|5d5506f556224f2effd1d945ab13e579|deploy-backups/1793331562/backup/rrt-label-configurator.php

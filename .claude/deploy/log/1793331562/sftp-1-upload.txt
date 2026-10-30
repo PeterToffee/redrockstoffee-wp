@@ -1,0 +1,7 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-co-flag.png" "html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-co-flag.png"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-co-flag.png to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/assets/art/twemoji-co-flag.png
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/live/rrt-label-configurator.php" "deploy-backups/1793331562/backup/rrt-label-configurator.php"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/live/rrt-label-configurator.php to /home/client_21778bd1e8_366786/deploy-backups/1793331562/backup/rrt-label-configurator.php
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php" "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.new"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.new

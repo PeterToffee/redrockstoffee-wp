@@ -2,4 +2,4 @@
 39f52afd0d0c2b60ba6ffd1560199873  assets/label-configurator.js
 2ead2000189062495311c4a5437ca04d  inc/handle-submission.php
 090a7ab361207d55311200326e01650c  inc/quote-module-card.part.php
-c78dfffb91303b31781c3175f3c7b79d  rrt-label-configurator.php
+17591d0c7306a06e888c200477e66ef0  rrt-label-configurator.php

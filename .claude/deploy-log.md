@@ -32,3 +32,8 @@
 - assets/label-configurator.css  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (11 checks, 0 warnings). Server backups: *.bak.1793328858. Rollback: .claude/deploy/rollback.sh 1793328858 --go
+
+## 2026-10-29 21:40 - deploy 1793331562 (commit 77dff1e0)
+- assets/art/twemoji-co-flag.png  (ASSET-NEW)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (11 checks, 0 warnings). Server backups: *.bak.1793331562. Rollback: .claude/deploy/rollback.sh 1793331562 --go
