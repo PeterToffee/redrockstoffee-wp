@@ -3,7 +3,7 @@
  * Harry Transition — path + sprite registry (all hand-editable in WP Admin)
  *
  * Ported from TheUnframer-WP (wp-content/themes/TheUnframer/inc/harry-path.php).
- * The flight engine (assets/js/harry-path.js) and its CSS are copied over
+ * The flight engine (assets/harry-path.js) and its CSS are copied over
  * byte-for-byte — they only ever read window.HARRY_PATHS, no theme-specific
  * dependencies. What's different here is the admin screen: TheUnframer
  * builds it with ACF Pro's Options Page + repeater fields; this site has
