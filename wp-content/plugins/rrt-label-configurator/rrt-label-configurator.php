@@ -528,6 +528,17 @@ function rrt_label_art_library() {
 			'label' => 'Mexican Flag',
 			'file'  => 'assets/art/twemoji-mx-flag.png',
 		),
+		// Colorado's state flag has no Unicode/Twemoji glyph (only national
+		// flags do), so this one is an original rendering, not a Twemoji
+		// download — matched to the same 1800x1800 canvas/margins/corner
+		// radius as the three flags above so it sits in the picker
+		// consistently, but it carries no CC-BY attribution requirement
+		// (a US state flag's design isn't copyrightable; this specific
+		// PNG is our own artwork).
+		'coflag'        => array(
+			'label' => 'Colorado Flag',
+			'file'  => 'assets/art/twemoji-co-flag.png',
+		),
 		'football'      => array(
 			'label' => 'Football',
 			'file'  => 'assets/art/noto-football.png',
