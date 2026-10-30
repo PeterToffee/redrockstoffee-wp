@@ -1317,7 +1317,27 @@
 
 	els.logoFileInput.addEventListener( 'change', function () {
 		var file = els.logoFileInput.files[ 0 ];
-		if ( ! file || ! /^image\/(png|jpe?g)$/.test( file.type ) ) {
+		if ( ! file ) {
+			return;
+		}
+		// 2026-10-30 RED ALERT fix: this used to silently `return` on any file
+		// that wasn't exactly image/png or image/jpeg -- nothing happened, no
+		// message, the picker just closed. A customer (Pete, testing) picked a
+		// photo straight off an iPhone (HEIC by default) and it was dropped
+		// with zero indication anything was wrong; since the submit button
+		// only checks "is there text OR a logo" (not "did every attempted
+		// upload actually succeed"), the order went through with the text but
+		// NO image at all, and nobody knew until the order landed. Every
+		// rejection now tells the customer exactly what happened instead of
+		// silently losing their file.
+		if ( ! /^image\/(png|jpe?g|webp)$/.test( file.type ) ) {
+			var isHeic = /^image\/hei[cf]/.test( file.type ) || /\.(heic|heif)$/i.test( file.name || '' );
+			setStatus(
+				isHeic
+					? 'That looks like an iPhone photo (HEIC) — this form needs a JPG, PNG, or WEBP. On your phone: Settings > Camera > Formats > "Most Compatible" takes JPGs instead, or just use a screenshot/edited copy of the photo.'
+					: 'That file type isn’t supported — please choose a JPG, PNG, or WEBP image.',
+				'error'
+			);
 			return;
 		}
 		var reader = new FileReader();

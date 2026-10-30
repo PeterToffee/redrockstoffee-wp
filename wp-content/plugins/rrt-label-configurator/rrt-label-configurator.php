@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.54.0' );
+define( 'RRT_LABEL_VERSION', '3.55.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -642,7 +642,7 @@ function rrt_label_donate_to_community_library( $tmp_path, $donor_name, $donor_e
 	// getimagesize() reads the actual file content instead, same technique
 	// rrt_label_draw_logo() already uses for these exact same tmp files.
 	$logo_info = getimagesize( $tmp_path );
-	$ext       = isset( $logo_info['mime'] ) ? array_search( $logo_info['mime'], array( 'png' => 'image/png', 'jpg' => 'image/jpeg' ), true ) : false;
+	$ext       = isset( $logo_info['mime'] ) ? array_search( $logo_info['mime'], array( 'png' => 'image/png', 'jpg' => 'image/jpeg', 'webp' => 'image/webp' ), true ) : false;
 	if ( ! $ext ) {
 		return;
 	}

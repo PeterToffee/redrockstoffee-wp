@@ -109,8 +109,17 @@ function rrt_label_handle_submit() {
 
 	$art_library = rrt_label_art_library();
 
-	$layers = array();
-	$logo_i = 0;
+	$layers        = array();
+	$logo_i        = 0;
+	// 2026-10-30 RED ALERT: a customer's logo layer could silently vanish
+	// between the browser and this email with zero trace anywhere — no
+	// warning on the order, no note in order-info.txt, nothing. The client
+	// now rejects unsupported files with a clear message before submit (see
+	// label-configurator.js), but this counter is a safety net for any
+	// OTHER way a logo layer's file could fail to arrive (a future bug, a
+	// request made outside the normal form) — if it ever happens again, Pete
+	// sees it plainly instead of the order just looking complete.
+	$dropped_logo_count = 0;
 	foreach ( $layers_raw as $raw ) {
 		if ( ! is_array( $raw ) || empty( $raw['type'] ) ) {
 			continue;
@@ -143,6 +152,7 @@ function rrt_label_handle_submit() {
 			}
 			if ( ! isset( $logo_tmp_paths[ $logo_i ] ) ) {
 				++$logo_i;
+				++$dropped_logo_count;
 				continue;
 			}
 			$logo_scale = (float) ( $raw['scale'] ?? 0 );
@@ -291,14 +301,15 @@ function rrt_label_handle_submit() {
 	}
 
 	$fields = array(
-		'size'          => $sizes[ $size_key ]['label'],
-		'name'          => $name,
-		'email'         => $email,
-		'phone'         => $phone,
-		'message'       => $message,
-		'layers'        => $layers,
-		'quantity'      => $quantity,
-		'labels_needed' => $labels_needed,
+		'size'                => $sizes[ $size_key ]['label'],
+		'name'                => $name,
+		'email'               => $email,
+		'phone'               => $phone,
+		'message'             => $message,
+		'layers'              => $layers,
+		'quantity'            => $quantity,
+		'labels_needed'       => $labels_needed,
+		'dropped_logo_count'  => $dropped_logo_count,
 	);
 
 	// Email is attempted (useful once this is live on GoDaddy, where real
@@ -369,7 +380,7 @@ function rrt_label_save_originals( $order_dir, $layers ) {
 		// rrt_label_donate_to_community_library() — $tmp_path is PHP's raw
 		// upload tmp file (e.g. "phpA1B2.tmp") with no real extension.
 		$info = getimagesize( $layer['tmp_path'] );
-		$ext  = isset( $info['mime'] ) ? array_search( $info['mime'], array( 'png' => 'image/png', 'jpg' => 'image/jpeg' ), true ) : false;
+		$ext  = isset( $info['mime'] ) ? array_search( $info['mime'], array( 'png' => 'image/png', 'jpg' => 'image/jpeg', 'webp' => 'image/webp' ), true ) : false;
 		if ( ! $ext ) {
 			continue;
 		}
@@ -396,6 +407,10 @@ function rrt_label_write_order_info( $order_dir, $fields ) {
 	$body .= 'Phone: ' . $fields['phone'] . "\n";
 	$body .= 'Quantity requested: ' . $fields['quantity'] . "\n";
 	$body .= 'Labels to print (qty + 5% buffer): ' . $fields['labels_needed'] . "\n";
+
+	if ( ! empty( $fields['dropped_logo_count'] ) ) {
+		$body .= "\n\xE2\x9A\xA0\xE2\x9A\xA0 " . $fields['dropped_logo_count'] . " image(s) the customer tried to add did NOT come through -- this order may be MISSING ARTWORK. Contact the customer before printing.\n\n";
+	}
 
 	$logo_n = 0;
 	$text_n = 0;
@@ -875,6 +890,11 @@ function rrt_label_draw_logo( $canvas, $px, $logo_tmp_path, $logo_pos, $logo_sca
 		case 'image/jpeg':
 			$logo_img = imagecreatefromjpeg( $logo_tmp_path );
 			break;
+		case 'image/webp':
+			if ( function_exists( 'imagecreatefromwebp' ) ) {
+				$logo_img = imagecreatefromwebp( $logo_tmp_path );
+			}
+			break;
 	}
 	if ( ! $logo_img ) {
 		return;
@@ -1076,8 +1096,9 @@ function rrt_label_email_submission( $fields, $composite_path, $layer_paths = ar
 	// Pete, 2026-10-28: admin_email (pete@redrockstoffee.com) wasn't getting
 	// checked — submissions were landing with no one seeing them. Send to
 	// both so a missed inbox on one side doesn't mean a missed order.
-	$to      = array_unique( array_filter( array( get_option( 'admin_email' ), 'pete@roadrex.com' ) ) );
-	$subject = sprintf( '[Co-Branding Label] New design from %s', $fields['name'] );
+	$to            = array_unique( array_filter( array( get_option( 'admin_email' ), 'pete@roadrex.com' ) ) );
+	$missing_image = ! empty( $fields['dropped_logo_count'] );
+	$subject       = ( $missing_image ? '[MISSING IMAGE] ' : '' ) . sprintf( '[Co-Branding Label] New design from %s', $fields['name'] );
 
 	$logo_count = 0;
 	$text_lines = array();
@@ -1121,6 +1142,11 @@ function rrt_label_email_submission( $fields, $composite_path, $layer_paths = ar
 	}
 
 	$body  = '<html><body style="font-family: Arial, sans-serif; line-height: 1.6;">';
+	if ( $missing_image ) {
+		$body .= '<div style="background:#b00020; color:#fff; font-weight:bold; padding:14px 18px; border-radius:6px; margin-bottom:16px;">';
+		$body .= '&#9888; ' . esc_html( $fields['dropped_logo_count'] ) . ' image(s) this customer tried to add did NOT come through. This order is likely MISSING ARTWORK — contact them before printing.';
+		$body .= '</div>';
+	}
 	$body .= '<h2 style="margin-bottom:4px;">New co-branding label design</h2>';
 	$body .= '<table style="border-collapse: collapse; width: 100%; max-width: 600px;">';
 	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Box size</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['size'] ) . '</td></tr>';
