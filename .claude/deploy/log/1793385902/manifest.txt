@@ -1,0 +1,5 @@
+# deploy 1793385902  2026-10-30 12:45  commit 8deb51e1
+# path|category|before_md5|after_md5|server_backup
+assets/label-configurator.js|DIFF|e3c049b30ab77fbad1633103cd11ff00|45c26d15c2cec407fb506d1ba582369a|deploy-backups/1793385902/backup/assets/label-configurator.js
+inc/handle-submission.php|DIFF|1dcd544f5ba85a834ae1e66bfeb2f95a|634c82a0f6e750e6dd9cbafb0d6486b8|deploy-backups/1793385902/backup/inc/handle-submission.php
+rrt-label-configurator.php|DIFF|a093146e74c4f43bd89d799874c57366|2e9cb8f41b001a589ae415fb9c9be890|deploy-backups/1793385902/backup/rrt-label-configurator.php
