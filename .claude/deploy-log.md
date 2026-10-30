@@ -27,3 +27,8 @@
 - assets/label-configurator.css  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (11 checks, 0 warnings). Server backups: *.bak.1793316044. Rollback: .claude/deploy/rollback.sh 1793316044 --go
+
+## 2026-10-29 21:31 - deploy 1793328858 (commit 37b5139f)
+- assets/label-configurator.css  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (11 checks, 0 warnings). Server backups: *.bak.1793328858. Rollback: .claude/deploy/rollback.sh 1793328858 --go
