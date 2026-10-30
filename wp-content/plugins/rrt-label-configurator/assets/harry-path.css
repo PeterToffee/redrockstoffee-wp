@@ -1,0 +1,43 @@
+/**
+ * Harry Transition overlay — the flying layer only.
+ * The path/sprite editor is a separate paste-in tool, not shipped CSS.
+ */
+.harry-fx{
+	position:fixed;
+	inset:0;
+	z-index:99999;
+	pointer-events:none;
+	overflow:hidden;
+	display:none;
+}
+.harry-fx.is-on{display:block}
+
+.harry-fx__shaker{position:absolute;inset:0;will-change:transform}
+
+.harry-fx__wad{
+	position:absolute;
+	left:0;top:0;
+	width:260px;height:150px;
+	will-change:transform;
+	transform-origin:50% 50%;
+}
+.harry-fx__wad img{
+	width:100%;height:100%;
+	object-fit:contain;
+	display:block;
+	user-select:none;
+	-webkit-user-drag:none;
+}
+
+.harry-fx__spec{
+	position:absolute;
+	width:10px;height:10px;
+	border-radius:50%;
+	transform:translate(-50%,-50%) scale(0);
+	will-change:transform,opacity;
+}
+
+@media (prefers-reduced-motion:reduce){
+	/* engine no-ops on its own; this is a belt-and-braces hide */
+	.harry-fx{display:none !important}
+}
