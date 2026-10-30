@@ -50,3 +50,8 @@
 - inc/handle-submission.php  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (12 checks, 0 warnings). Server backups: *.bak.1793385902. Rollback: .claude/deploy/rollback.sh 1793385902 --go
+
+## 2026-10-30 16:29 - deploy 1793399215 (commit 4968cd11)
+- inc/hero-ken-burns.php  (NEW)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (10 checks, 0 warnings). Server backups: *.bak.1793399215. Rollback: .claude/deploy/rollback.sh 1793399215 --go

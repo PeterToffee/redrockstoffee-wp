@@ -1,0 +1,7 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/inc/hero-ken-burns.php" "html/wp-content/plugins/rrt-label-configurator/inc/hero-ken-burns.php"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/inc/hero-ken-burns.php to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/inc/hero-ken-burns.php
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/live/rrt-label-configurator.php" "deploy-backups/1793399215/backup/rrt-label-configurator.php"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/live/rrt-label-configurator.php to /home/client_21778bd1e8_366786/deploy-backups/1793399215/backup/rrt-label-configurator.php
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php" "html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.new"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/rrt-label-configurator.php.new

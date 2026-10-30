@@ -1,0 +1,4 @@
+# deploy 1793399215  2026-10-30 16:26  commit 4968cd11
+# path|category|before_md5|after_md5|server_backup
+inc/hero-ken-burns.php|NEW|-|174c9cba51554b54bf7fc6b234b000e2|-
+rrt-label-configurator.php|DIFF|2e9cb8f41b001a589ae415fb9c9be890|f3d79b24eac36961f20bd8e14ee4c22d|deploy-backups/1793399215/backup/rrt-label-configurator.php
