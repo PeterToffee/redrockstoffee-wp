@@ -112,6 +112,25 @@ add_action(
 	scanExisting();
 	document.addEventListener( 'DOMContentLoaded', scanExisting );
 
+	// Browsers throttle Swiper's autoplay timer heavily on a backgrounded
+	// tab (down to once a minute or less), so the slideshow looks "stopped"
+	// for a long stretch after switching back to the tab, until the
+	// throttled timer eventually catches up on its own. Restarting
+	// autoplay the moment the tab becomes visible again skips that wait.
+	document.addEventListener( 'visibilitychange', function () {
+		if ( document.hidden ) {
+			return;
+		}
+		var containers = document.querySelectorAll( '.elementor-background-slideshow' );
+		for ( var i = 0; i < containers.length; i++ ) {
+			var swiper = jQuery( containers[ i ] ).data( 'swiper' );
+			if ( swiper && swiper.autoplay ) {
+				swiper.autoplay.stop();
+				swiper.autoplay.start();
+			}
+		}
+	} );
+
 	if ( 'MutationObserver' in window ) {
 		new MutationObserver( scanExisting ).observe( document.documentElement, {
 			childList: true,
