@@ -171,7 +171,18 @@ function rrt_label_handle_submit() {
 				if ( $logo_info ) {
 					$rendered_width_in = $sizes[ $size_key ]['zone']['width_in'] * ( $logo_scale / 100 );
 					if ( $rendered_width_in > 0 ) {
-						$effective_dpi = $logo_info[0] / $rendered_width_in;
+						// A 90-degree EXIF rotation (see rrt_label_fix_jpeg_orientation())
+						// swaps which raw dimension ends up as the actual printed
+						// width, so this has to agree or the DPI check reads the
+						// wrong axis for a sideways-shot phone photo.
+						$logo_width = $logo_info[0];
+						if ( 'image/jpeg' === $logo_info['mime'] && function_exists( 'exif_read_data' ) ) {
+							$exif = @exif_read_data( $logo_tmp_paths[ $logo_i ] );
+							if ( $exif && in_array( $exif['Orientation'] ?? 1, array( 6, 8 ), true ) ) {
+								$logo_width = $logo_info[1];
+							}
+						}
+						$effective_dpi = $logo_width / $rendered_width_in;
 						$low_quality   = $effective_dpi < 200;
 					}
 				}
@@ -877,6 +888,37 @@ function rrt_label_set_png_dpi( $png_path, $dpi ) {
 	return (bool) file_put_contents( $png_path, $new_data );
 }
 
+/**
+ * Phones (especially iPhones) often store a photo's real rotation as EXIF
+ * metadata rather than baking it into the pixels. A browser auto-rotates
+ * using that metadata when drawing the preview/proof, but GD reads raw
+ * pixels and ignores EXIF entirely -- without this, a logo photo that
+ * looked correctly upright in the live configurator and the proof email
+ * can come out sideways in the actual printed label. Same pattern already
+ * proven on theunframer.com (see inc/configurator-ajax.php there).
+ */
+function rrt_label_fix_jpeg_orientation( $image, $tmp_path ) {
+	if ( ! function_exists( 'exif_read_data' ) ) {
+		return $image;
+	}
+	$exif = @exif_read_data( $tmp_path );
+	if ( ! $exif || empty( $exif['Orientation'] ) ) {
+		return $image;
+	}
+	switch ( $exif['Orientation'] ) {
+		case 3:
+			$image = imagerotate( $image, 180, 0 );
+			break;
+		case 6:
+			$image = imagerotate( $image, -90, 0 );
+			break;
+		case 8:
+			$image = imagerotate( $image, 90, 0 );
+			break;
+	}
+	return $image;
+}
+
 function rrt_label_draw_logo( $canvas, $px, $logo_tmp_path, $logo_pos, $logo_scale ) {
 	$logo_info = getimagesize( $logo_tmp_path );
 	if ( ! $logo_info ) {
@@ -889,6 +931,9 @@ function rrt_label_draw_logo( $canvas, $px, $logo_tmp_path, $logo_pos, $logo_sca
 			break;
 		case 'image/jpeg':
 			$logo_img = imagecreatefromjpeg( $logo_tmp_path );
+			if ( $logo_img ) {
+				$logo_img = rrt_label_fix_jpeg_orientation( $logo_img, $logo_tmp_path );
+			}
 			break;
 		case 'image/webp':
 			if ( function_exists( 'imagecreatefromwebp' ) ) {
