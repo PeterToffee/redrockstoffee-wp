@@ -1,0 +1,3 @@
+# deploy 1793555268  2026-11-01 10:47  commit 9064a9f6
+# path|category|before_md5|after_md5|server_backup
+inc/hero-ken-burns.php|DIFF|174c9cba51554b54bf7fc6b234b000e2|82e248b3d8169913f9d3624ceda6515b|deploy-backups/1793555268/backup/inc/hero-ken-burns.php

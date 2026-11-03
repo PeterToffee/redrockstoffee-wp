@@ -1,0 +1,3 @@
+# deploy 1793555769  2026-11-01 10:56  commit 7ecd6b4f
+# path|category|before_md5|after_md5|server_backup
+inc/handle-submission.php|DIFF|634c82a0f6e750e6dd9cbafb0d6486b8|a8d1779b50f6e5b2ba4edc9811df4581|deploy-backups/1793555769/backup/inc/handle-submission.php
