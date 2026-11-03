@@ -1,0 +1,4 @@
+# deploy 1793729460  2026-11-03 11:11  commit f016eb12
+# path|category|before_md5|after_md5|server_backup
+inc/accessibility-statement.php|NEW|-|4f6b306863fac7e52148016d69e1cc1d|-
+rrt-label-configurator.php|DIFF|f3d79b24eac36961f20bd8e14ee4c22d|9a907641d25546de2c3a4500d506e769|deploy-backups/1793729460/backup/rrt-label-configurator.php

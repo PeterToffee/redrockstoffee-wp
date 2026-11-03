@@ -63,3 +63,8 @@
 ## 2026-11-02 09:45 - deploy 1793555769 (commit 7ecd6b4f)
 - inc/handle-submission.php  (DIFF)
 - verified: round trip + live pages passed (9 checks, 0 warnings). Server backups: *.bak.1793555769. Rollback: .claude/deploy/rollback.sh 1793555769 --go
+
+## 2026-11-03 11:17 - deploy 1793729460 (commit f016eb12)
+- inc/accessibility-statement.php  (NEW)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (10 checks, 0 warnings). Server backups: *.bak.1793729460. Rollback: .claude/deploy/rollback.sh 1793729460 --go
