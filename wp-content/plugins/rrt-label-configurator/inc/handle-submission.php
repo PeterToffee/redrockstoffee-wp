@@ -56,61 +56,23 @@ function rrt_label_order_folder( $name ) {
 	return $folder;
 }
 
-add_action( 'wp_ajax_rrt_label_submit', 'rrt_label_handle_submit' );
-add_action( 'wp_ajax_nopriv_rrt_label_submit', 'rrt_label_handle_submit' );
-function rrt_label_handle_submit() {
-	check_ajax_referer( 'rrt_label_submit', 'nonce' );
-
-	$size_key = isset( $_POST['size'] ) ? sanitize_text_field( wp_unslash( $_POST['size'] ) ) : '';
-	$sizes    = rrt_label_sizes();
-	if ( ! isset( $sizes[ $size_key ] ) ) {
-		wp_send_json_error( array( 'message' => 'Please choose a box size.' ) );
-	}
-
-	$name    = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
-	$email   = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
-	$phone   = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
-	$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
-
-	if ( empty( $name ) || empty( $email ) || ! is_email( $email ) ) {
-		wp_send_json_error( array( 'message' => 'Please fill in your name and a valid email.' ) );
-	}
-
-	$order_dir = rrt_label_order_folder( $name );
-
-	// Pete, 2026-10-19: "quantity plus 5% in the file name" — this is a
-	// stand-in for a real WooCommerce order quantity (that integration is
-	// explicitly deferred — "we'll coordinate with woocommerce, but not
-	// right now"), just enough to get the print-ready sheet feature
-	// working end to end today. Clamped up to the known per-size minimum
-	// (never silently under-delivers) rather than rejecting the
-	// submission over a quantity mistake.
-	$quantity = isset( $_POST['quantity'] ) ? (int) $_POST['quantity'] : 1;
-	$quantity = max( rrt_label_min_qty_for_size( $size_key ), $quantity );
-
-	// One entry per layer the customer added, in the same order they were
-	// added (= stacking/z-order). Logo layers carry pos+scale; text
-	// layers carry pos+text+font+font_size. The actual uploaded logo
-	// FILES travel separately as logo_files[] (multipart can't nest files
-	// inside JSON), matched up to 'logo' entries in order below.
-	$layers_raw = isset( $_POST['layers'] ) ? json_decode( wp_unslash( $_POST['layers'] ), true ) : null;
-	if ( ! is_array( $layers_raw ) || empty( $layers_raw ) ) {
-		wp_send_json_error( array( 'message' => 'Please add a logo and/or some text to your label.' ) );
-	}
-
-	$logo_tmp_paths = array();
-	if ( ! empty( $_FILES['logo_files']['tmp_name'] ) && is_array( $_FILES['logo_files']['tmp_name'] ) ) {
-		foreach ( $_FILES['logo_files']['tmp_name'] as $tmp_name ) {
-			if ( is_uploaded_file( $tmp_name ) ) {
-				$logo_tmp_paths[] = $tmp_name;
-			}
-		}
-	}
-
+/**
+ * One design's logo/text layers, resolved from the raw client JSON +
+ * this design's own uploaded logo files down to the array
+ * rrt_label_composite()/rrt_label_composite_layers() expect. Extracted
+ * from rrt_label_handle_submit() (Pete, 2026-11-07: "put together an
+ * order for each size... or more than one of one size") so the exact
+ * same per-layer resolving logic (art_key lookup, low-quality DPI check,
+ * sanitizing) runs once per DESIGN in the loop below, instead of being
+ * duplicated inline for each one.
+ *
+ * Returns array( 'layers' => [...], 'dropped_logo_count' => int ).
+ */
+function rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, $size_key ) {
 	$art_library = rrt_label_art_library();
 
-	$layers        = array();
-	$logo_i        = 0;
+	$layers = array();
+	$logo_i = 0;
 	// 2026-10-30 RED ALERT: a customer's logo layer could silently vanish
 	// between the browser and this email with zero trace anywhere — no
 	// warning on the order, no note in order-info.txt, nothing. The client
@@ -247,80 +209,193 @@ function rrt_label_handle_submit() {
 		}
 	}
 
-	if ( empty( $layers ) ) {
+	return array(
+		'layers'             => $layers,
+		'dropped_logo_count' => $dropped_logo_count,
+	);
+}
+
+add_action( 'wp_ajax_rrt_label_submit', 'rrt_label_handle_submit' );
+add_action( 'wp_ajax_nopriv_rrt_label_submit', 'rrt_label_handle_submit' );
+/**
+ * Pete, 2026-11-07: "so far we have two files user stuff gets jammed
+ * into. We need to make allowances so if user wishes to put together an
+ * order for each size, file is saved(held)... until files sent by
+ * 'submit my files design(s)'" — this now processes a LIST of designs
+ * (each with its own flavor/size/quantity/layers/logo files) in one
+ * submission instead of exactly one. Every per-design step (composite,
+ * layers, print sheet, original uploads, proof) is completely unchanged
+ * from the single-design version — it just runs once per design, into
+ * its own subfolder of one shared $order_dir, so nothing from one design
+ * can collide with or overwrite another's (e.g. two held 8oz designs
+ * would otherwise both want "label-flat.png" in the same folder).
+ */
+function rrt_label_handle_submit() {
+	check_ajax_referer( 'rrt_label_submit', 'nonce' );
+
+	$name    = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+	$email   = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+	$phone   = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
+	$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+
+	if ( empty( $name ) || empty( $email ) || ! is_email( $email ) ) {
+		wp_send_json_error( array( 'message' => 'Please fill in your name and a valid email.' ) );
+	}
+
+	// One entry per held/current design: { flavor, size, quantity, layers }.
+	// 'layers' here is the SAME raw per-layer JSON the single-design
+	// version used to send as the top-level 'layers' field — see
+	// label-configurator.js's buildLayersMetaForDraft().
+	$designs_raw = isset( $_POST['designs'] ) ? json_decode( wp_unslash( $_POST['designs'] ), true ) : null;
+	if ( ! is_array( $designs_raw ) || empty( $designs_raw ) ) {
 		wp_send_json_error( array( 'message' => 'Please add a logo and/or some text to your label.' ) );
 	}
 
-	// Pete, 2026-10-20: tiny sort mark baked into the label itself (see
-	// rrt_label_draw_order_id()) — name + quantity, the two things he'd
-	// actually look for while sorting a stack of freshly cut labels.
-	$order_id_text  = sprintf( "%s \xC2\xB7 Qty %d", $name, $quantity );
-	$composite_path = rrt_label_composite( $size_key, $layers, $order_dir, $order_id_text );
+	$flavors         = rrt_label_flavors();
+	$sizes_by_flavor = array(); // cache so rrt_label_sizes() isn't rebuilt per design sharing a flavor.
+	$order_dir       = rrt_label_order_folder( $name );
 
-	if ( is_wp_error( $composite_path ) ) {
-		wp_send_json_error( array( 'message' => $composite_path->get_error_message() ) );
+	$design_results            = array();
+	$dropped_logo_count_total  = 0;
+
+	foreach ( $designs_raw as $design_i => $design_raw ) {
+		if ( ! is_array( $design_raw ) ) {
+			continue;
+		}
+
+		$flavor_key = isset( $design_raw['flavor'] ) ? sanitize_key( $design_raw['flavor'] ) : 'original-almond';
+		if ( ! isset( $flavors[ $flavor_key ] ) || empty( $flavors[ $flavor_key ]['available'] ) ) {
+			$flavor_key = 'original-almond';
+		}
+		if ( ! isset( $sizes_by_flavor[ $flavor_key ] ) ) {
+			$sizes_by_flavor[ $flavor_key ] = rrt_label_sizes( $flavor_key );
+		}
+		$sizes = $sizes_by_flavor[ $flavor_key ];
+
+		$size_key = isset( $design_raw['size'] ) ? sanitize_text_field( wp_unslash( $design_raw['size'] ) ) : '';
+		if ( ! isset( $sizes[ $size_key ] ) ) {
+			continue; // an unrecognized size in one design shouldn't sink the whole order.
+		}
+
+		// Pete, 2026-10-19: "quantity plus 5% in the file name" — this is a
+		// stand-in for a real WooCommerce order quantity (that integration
+		// is explicitly deferred — "we'll coordinate with woocommerce, but
+		// not right now"), just enough to get the print-ready sheet feature
+		// working end to end today. Clamped up to the known per-size
+		// minimum (never silently under-delivers) rather than rejecting
+		// the submission over a quantity mistake.
+		$quantity = isset( $design_raw['quantity'] ) ? (int) $design_raw['quantity'] : 1;
+		$quantity = max( rrt_label_min_qty_for_size( $size_key ), $quantity );
+
+		$layers_raw = is_array( $design_raw['layers'] ?? null ) ? $design_raw['layers'] : array();
+		if ( empty( $layers_raw ) ) {
+			continue;
+		}
+
+		// The actual uploaded logo FILES for THIS design travel separately
+		// as logo_files_{i}[] (multipart can't nest files inside JSON, and
+		// each design needs its own slot so one design's uploads can't be
+		// mismatched against another's 'logo' entries) — see
+		// label-configurator.js's submit handler.
+		$logo_tmp_paths = array();
+		$files_field    = 'logo_files_' . $design_i;
+		if ( ! empty( $_FILES[ $files_field ]['tmp_name'] ) && is_array( $_FILES[ $files_field ]['tmp_name'] ) ) {
+			foreach ( $_FILES[ $files_field ]['tmp_name'] as $tmp_name ) {
+				if ( is_uploaded_file( $tmp_name ) ) {
+					$logo_tmp_paths[] = $tmp_name;
+				}
+			}
+		}
+
+		$resolved = rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, $size_key );
+		$layers   = $resolved['layers'];
+		if ( empty( $layers ) ) {
+			continue;
+		}
+
+		// Pete, 2026-10-27: "have those saved in a manner so they are
+		// grouped with all the parts, easily identifiable and side by
+		// side in a folder" — still true per design, just one level
+		// deeper now: each design gets its own subfolder of the shared
+		// order folder so two designs' same-named output files (both
+		// produce "label-flat.png" etc.) can never collide.
+		$design_dir = trailingslashit( $order_dir ) . sprintf( 'design-%d-%s-%s', $design_i + 1, $flavor_key, $size_key );
+		wp_mkdir_p( $design_dir );
+
+		// Pete, 2026-11-08: "I get emails with the order, customer etc,
+		// but the file carries NO info other than a count, we need more
+		// identification in the filename itself" -> "filename, customer/
+		// quant/size/flavor maybe?" — prepended to every file this design
+		// produces (see $file_prefix in rrt_label_composite()'s own note),
+		// so each file still identifies its order on its own once saved
+		// out of the order folder, not just by sitting inside it.
+		$file_prefix = sanitize_file_name( $name ) . '-qty' . $quantity . '-' . $size_key . '-' . $flavor_key . '-';
+
+		// Pete, 2026-10-20: tiny sort mark baked into the label itself (see
+		// rrt_label_draw_order_id()) — name + quantity, the two things
+		// he'd actually look for while sorting a stack of freshly cut
+		// labels.
+		$order_id_text  = sprintf( "%s \xC2\xB7 Qty %d", $name, $quantity );
+		$composite_path = rrt_label_composite( $size_key, $layers, $design_dir, $order_id_text, $flavor_key, $file_prefix );
+		if ( is_wp_error( $composite_path ) ) {
+			continue; // this one design failed to composite — don't let it sink every other held design in the order.
+		}
+
+		// Pete, 2026-10-18: "I need to get the file out of the
+		// configurator flat and layered... with the full file at 300 dpi
+		// ready to print" — see rrt_label_composite_layers()'s own note on
+		// why this exists; not fatal if it fails.
+		$layer_paths = rrt_label_composite_layers( $size_key, $layers, $design_dir, $flavor_key, $file_prefix );
+		if ( is_wp_error( $layer_paths ) ) {
+			$layer_paths = array();
+		}
+
+		// Pete, 2026-10-19: the print-ready sheet — see
+		// rrt_label_composite_sheet()'s own note. 2026-11-08: "just give
+		// me the number order, do not add more than what is in the
+		// quantity the customer asks for" — no more +5% buffer; this is
+		// exactly the customer's requested quantity.
+		$labels_needed = $quantity;
+		$sheet_path    = rrt_label_composite_sheet( $size_key, $composite_path, $design_dir, $labels_needed, $file_prefix );
+		if ( is_wp_error( $sheet_path ) ) {
+			$sheet_path = null;
+		}
+
+		$original_paths = rrt_label_save_originals( $design_dir, $layers, $file_prefix );
+
+		$proof_path = rrt_label_composite_proof( $size_key, $composite_path, $design_dir, $file_prefix );
+		if ( is_wp_error( $proof_path ) ) {
+			$proof_path = null;
+		}
+
+		$design_results[] = array(
+			'flavor_label'       => $flavors[ $flavor_key ]['label'],
+			'size_label'         => $sizes[ $size_key ]['label'],
+			'quantity'           => $quantity,
+			'labels_needed'      => $labels_needed,
+			'layers'             => $layers,
+			'dropped_logo_count' => $resolved['dropped_logo_count'],
+			'composite_path'     => $composite_path,
+			'layer_paths'        => $layer_paths,
+			'sheet_path'         => $sheet_path,
+			'original_paths'     => $original_paths,
+			'proof_path'         => $proof_path,
+		);
+		$dropped_logo_count_total += $resolved['dropped_logo_count'];
 	}
 
-	// Pete, 2026-10-18: "I need to get the file out of the configurator
-	// flat and layered, so I can adjust if need to, with the full file
-	// (11" tall label) with user art intact at 300 dpi ready to print" —
-	// the flat composite above already IS the full 11" template (not
-	// just the customer's small zone), now saved as lossless PNG with
-	// real 300 DPI metadata instead of a lossy 90%-quality JPEG with no
-	// DPI tag at all. This adds the "layered" half: one separate,
-	// same-size, transparent PNG per layer (plus the bare template as
-	// its own base layer) so Pete can stack them back up by hand in
-	// Photoshop/GIMP and adjust any one piece without redoing the whole
-	// composite. GD has no native concept of layers and this server has
-	// no Imagick extension (confirmed — can't write a true PSD), so this
-	// is the achievable version of "layered" without a new dependency.
-	$layer_paths = rrt_label_composite_layers( $size_key, $layers, $order_dir );
-	if ( is_wp_error( $layer_paths ) ) {
-		$layer_paths = array(); // not fatal — the flat composite alone still gets emailed.
+	if ( empty( $design_results ) ) {
+		wp_send_json_error( array( 'message' => 'Please add a logo and/or some text to your label.' ) );
 	}
 
-	// Pete, 2026-10-19: "the label needs to be doubled, side by side on a
-	// file 8.25in wide and 11in tall, with the order's name attached...
-	// and quantity plus 5% in the file name... attached to any customer
-	// emails and on the order confirmation page" — the actual print-ready
-	// sheet. Pete reprints this SAME file as many times as it takes to
-	// cover the order (the filename's qty already includes the 5% buffer,
-	// so he doesn't have to do that math by hand each time).
-	$labels_needed = (int) ceil( $quantity * 1.05 );
-	$sheet_path    = rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $labels_needed );
-	if ( is_wp_error( $sheet_path ) ) {
-		$sheet_path = null; // not fatal — the flat composite alone still gets emailed.
-	}
-
-	// Pete, 2026-10-27: "have those saved in a manner so they are grouped
-	// with all the parts, easily identifiable and side by side in a
-	// folder" — the customer's ORIGINAL raw upload only ever exists as
-	// PHP's own upload tmp file, which PHP deletes at the end of this
-	// request, so it has to be copied into $order_dir now or it's gone
-	// for good once the email is sent. Same getimagesize()-based mime
-	// detection as rrt_label_donate_to_community_library() (tmp_path has
-	// no real file extension of its own to go by).
-	$original_paths = rrt_label_save_originals( $order_dir, $layers );
-
-	// Pete, 2026-10-27: customer-facing proof of their logo/text placement
-	// in context on the real label — not fatal if it fails (GD edge cases
-	// on an unusual size config), the admin email/order folder still have
-	// everything they need either way.
-	$proof_path = rrt_label_composite_proof( $size_key, $composite_path, $order_dir );
-	if ( is_wp_error( $proof_path ) ) {
-		$proof_path = null;
-	}
-
-	$fields = array(
-		'size'                => $sizes[ $size_key ]['label'],
-		'name'                => $name,
-		'email'               => $email,
-		'phone'               => $phone,
-		'message'             => $message,
-		'layers'              => $layers,
-		'quantity'            => $quantity,
-		'labels_needed'       => $labels_needed,
-		'dropped_logo_count'  => $dropped_logo_count,
+	$order_fields = array(
+		'name'               => $name,
+		'email'              => $email,
+		'phone'              => $phone,
+		'message'            => $message,
+		'quantity'           => array_sum( wp_list_pluck( $design_results, 'quantity' ) ),
+		'labels_needed'      => array_sum( wp_list_pluck( $design_results, 'labels_needed' ) ),
+		'dropped_logo_count' => $dropped_logo_count_total,
 	);
 
 	// Email is attempted (useful once this is live on GoDaddy, where real
@@ -330,12 +405,12 @@ function rrt_label_handle_submit() {
 	// fails or just never gets tested at all. Either way, the files on
 	// disk (now in $order_dir, alongside order-info.txt below) are the
 	// real, always-true answer regardless of whether mail works.
-	rrt_label_email_submission( $fields, $composite_path, $layer_paths, $sheet_path, $original_paths, $order_dir, $proof_path );
+	rrt_label_email_submission( $order_fields, $design_results, $order_dir );
 
 	// Same details as the email body, saved to disk too so the folder is
 	// self-contained — every part of the order "side by side," per Pete's
 	// own ask, without needing to go dig the matching email back out.
-	rrt_label_write_order_info( $order_dir, $fields );
+	rrt_label_write_order_info( $order_dir, $order_fields, $design_results );
 
 	// Pete, 2026-10-26: "donate their image for others to use... immediately
 	// goes to our library" — purely additive, runs AFTER the real order
@@ -347,15 +422,27 @@ function rrt_label_handle_submit() {
 	// (rrt-label-configurator.php) stores them as PRIVATE admin-only
 	// postmeta only — never public, never returned by
 	// rrt_label_community_art(). Itself quietly no-ops on any error.
-	foreach ( $layers as $layer ) {
-		if ( 'logo' === $layer['type'] && ! empty( $layer['donate'] ) && empty( $layer['art_key'] ) ) {
-			rrt_label_donate_to_community_library( $layer['tmp_path'], $name, $email );
+	foreach ( $design_results as $design_result ) {
+		foreach ( $design_result['layers'] as $layer ) {
+			if ( 'logo' === $layer['type'] && ! empty( $layer['donate'] ) && empty( $layer['art_key'] ) ) {
+				rrt_label_donate_to_community_library( $layer['tmp_path'], $name, $email );
+			}
 		}
 	}
 
-	$all_paths = array_merge( array( $composite_path ), $layer_paths, $original_paths, $sheet_path ? array( $sheet_path ) : array(), $proof_path ? array( $proof_path ) : array() );
-	$folder    = wp_normalize_path( $order_dir );
-	$filenames = array_map( 'basename', $all_paths );
+	$all_paths = array();
+	foreach ( $design_results as $design_result ) {
+		$all_paths = array_merge(
+			$all_paths,
+			array( $design_result['composite_path'] ),
+			$design_result['layer_paths'],
+			$design_result['original_paths'],
+			$design_result['sheet_path'] ? array( $design_result['sheet_path'] ) : array(),
+			$design_result['proof_path'] ? array( $design_result['proof_path'] ) : array()
+		);
+	}
+
+	$design_count = count( $design_results );
 
 	wp_send_json_success(
 		array(
@@ -365,9 +452,11 @@ function rrt_label_handle_submit() {
 			// live) — fixed to a generic confirmation; the real folder/
 			// filenames still ride along in the JSON for anyone (Pete,
 			// browser devtools) who actually needs them.
-			'message'   => "Thanks, {$name}! Your label design has been submitted — we'll be in touch.",
-			'folder'    => $folder,
-			'filenames' => $filenames,
+			'message'   => $design_count > 1
+				? "Thanks, {$name}! Your {$design_count} label designs have been submitted — we'll be in touch."
+				: "Thanks, {$name}! Your label design has been submitted — we'll be in touch.",
+			'folder'    => wp_normalize_path( $order_dir ),
+			'filenames' => array_map( 'basename', $all_paths ),
 		)
 	);
 }
@@ -379,8 +468,10 @@ function rrt_label_handle_submit() {
  * email attachment, never saved anywhere alongside the rest of the
  * order's parts. Skips art_key layers (this plugin's own bundled art, not
  * a customer upload — nothing original to save).
+ *
+ * $file_prefix — see rrt_label_composite()'s own note on this same param.
  */
-function rrt_label_save_originals( $order_dir, $layers ) {
+function rrt_label_save_originals( $order_dir, $layers, $file_prefix = '' ) {
 	$paths = array();
 	$n     = 0;
 	foreach ( $layers as $layer ) {
@@ -396,7 +487,7 @@ function rrt_label_save_originals( $order_dir, $layers ) {
 			continue;
 		}
 		++$n;
-		$dest = sprintf( '%s/original-logo-%d.%s', $order_dir, $n, $ext );
+		$dest = sprintf( '%s/%soriginal-logo-%d.%s', $order_dir, $file_prefix, $n, $ext );
 		if ( copy( $layer['tmp_path'], $dest ) ) {
 			$paths[] = $dest;
 		}
@@ -410,34 +501,49 @@ function rrt_label_save_originals( $order_dir, $layers ) {
  * (rrt_label_email_submission()), but saved to disk too so the folder is
  * self-contained and "easily identifiable" without needing the matching
  * email alongside it.
+ *
+ * Pete, 2026-11-07: $order_fields now holds only the customer-level
+ * fields (name/email/phone/message/totals) — per-design details
+ * (size/flavor/quantity/layers) live in $design_results, one section per
+ * held design, so an order with 3 designs reads as 3 sections instead of
+ * one design's info silently standing in for the whole order.
  */
-function rrt_label_write_order_info( $order_dir, $fields ) {
-	$body  = 'Box size: ' . $fields['size'] . "\n";
-	$body .= 'Name: ' . $fields['name'] . "\n";
-	$body .= 'Email: ' . $fields['email'] . "\n";
-	$body .= 'Phone: ' . $fields['phone'] . "\n";
-	$body .= 'Quantity requested: ' . $fields['quantity'] . "\n";
-	$body .= 'Labels to print (qty + 5% buffer): ' . $fields['labels_needed'] . "\n";
+function rrt_label_write_order_info( $order_dir, $order_fields, $design_results ) {
+	$body  = 'Name: ' . $order_fields['name'] . "\n";
+	$body .= 'Email: ' . $order_fields['email'] . "\n";
+	$body .= 'Phone: ' . $order_fields['phone'] . "\n";
+	// Pete, 2026-11-08: "just give me the number order, do not add more
+	// than what is in the quantity the customer asks for" — labels_needed
+	// is now always exactly $quantity (no more +5% buffer), so the old
+	// second "labels to print" line was just a confusing duplicate of
+	// this one; dropped rather than reworded.
+	$body .= 'Total quantity requested (all designs): ' . $order_fields['quantity'] . "\n";
 
-	if ( ! empty( $fields['dropped_logo_count'] ) ) {
-		$body .= "\n\xE2\x9A\xA0\xE2\x9A\xA0 " . $fields['dropped_logo_count'] . " image(s) the customer tried to add did NOT come through -- this order may be MISSING ARTWORK. Contact the customer before printing.\n\n";
+	if ( ! empty( $order_fields['dropped_logo_count'] ) ) {
+		$body .= "\n\xE2\x9A\xA0\xE2\x9A\xA0 " . $order_fields['dropped_logo_count'] . " image(s) the customer tried to add did NOT come through -- this order may be MISSING ARTWORK. Contact the customer before printing.\n\n";
 	}
 
-	$logo_n = 0;
-	$text_n = 0;
-	foreach ( $fields['layers'] as $layer ) {
-		if ( 'logo' === $layer['type'] ) {
-			++$logo_n;
-			if ( ! empty( $layer['low_quality'] ) ) {
-				$body .= "\xE2\x9A\xA0 Logo {$logo_n} may be low-resolution for the size it was placed at — check before printing.\n";
+	foreach ( $design_results as $i => $design_result ) {
+		$body .= "\n--- Design " . ( $i + 1 ) . ': ' . $design_result['flavor_label'] . ' / ' . $design_result['size_label'] . " ---\n";
+		$body .= 'Quantity requested: ' . $design_result['quantity'] . "\n";
+
+		$logo_n = 0;
+		$text_n = 0;
+		foreach ( $design_result['layers'] as $layer ) {
+			if ( 'logo' === $layer['type'] ) {
+				++$logo_n;
+				if ( ! empty( $layer['low_quality'] ) ) {
+					$body .= "\xE2\x9A\xA0 Logo {$logo_n} may be low-resolution for the size it was placed at — check before printing.\n";
+				}
+			} else {
+				++$text_n;
+				$body .= 'Text ' . $text_n . ': ' . $layer['text'] . "\n";
 			}
-		} else {
-			++$text_n;
-			$body .= 'Text ' . $text_n . ': ' . $layer['text'] . "\n";
 		}
 	}
-	if ( $fields['message'] ) {
-		$body .= "\nMessage:\n" . $fields['message'] . "\n";
+
+	if ( $order_fields['message'] ) {
+		$body .= "\nMessage:\n" . $order_fields['message'] . "\n";
 	}
 
 	file_put_contents( $order_dir . '/order-info.txt', $body );
@@ -474,14 +580,25 @@ function rrt_label_write_order_info( $order_dir, $fields ) {
  * rrt_label_order_folder()) rather than a shared temp folder, so this
  * file sits "grouped with all the parts, side by side" alongside the
  * layers, print sheet, and original upload(s) from the same order.
+ *
+ * $flavor_key (Pete, 2026-11-07) picks which flavor's template image to
+ * composite onto — see rrt_label_flavors() in rrt-label-configurator.php.
+ *
+ * $file_prefix (Pete, 2026-11-08: "I get emails with the order, customer
+ * etc, but the file carries NO info other than a count, we need more
+ * identification in the filename itself") — prepended to every file this
+ * function (and its siblings below) writes, so a file still identifies
+ * its order/customer/design even after being saved out of its own folder
+ * (e.g. straight from the email's download link). Built once per design
+ * in rrt_label_handle_submit() as "{customer-name}-{flavor}-{size}-".
  */
-function rrt_label_composite( $size_key, $layers, $order_dir, $order_id_text = '' ) {
+function rrt_label_composite( $size_key, $layers, $order_dir, $order_id_text = '', $flavor_key = 'original-almond', $file_prefix = '' ) {
 	$px = rrt_label_zone_px( $size_key );
 	if ( ! $px ) {
 		return new WP_Error( 'rrt_bad_size', 'Unknown box size.' );
 	}
 
-	$sizes    = rrt_label_sizes();
+	$sizes    = rrt_label_sizes( $flavor_key );
 	$template = RRT_LABEL_PATH . $sizes[ $size_key ]['template_file'];
 	if ( ! file_exists( $template ) ) {
 		return new WP_Error( 'rrt_missing_template', 'Label template is missing on the server.' );
@@ -502,7 +619,7 @@ function rrt_label_composite( $size_key, $layers, $order_dir, $order_id_text = '
 
 	rrt_label_draw_order_id( $canvas, $size_key, $order_id_text );
 
-	$out_path = $order_dir . '/label-flat.png';
+	$out_path = $order_dir . '/' . $file_prefix . 'label-flat.png';
 	imagepng( $canvas, $out_path, 6 ); // 6 = a reasonable PNG compression level; always lossless regardless of level.
 	imagedestroy( $canvas );
 	rrt_label_set_png_dpi( $out_path, 300 );
@@ -564,14 +681,17 @@ function rrt_label_draw_order_id( $canvas, $size_key, $id_text ) {
  * the same add-order as the customer's layers) or a WP_Error.
  *
  * Saves into $order_dir (see rrt_label_composite()'s own note on this).
+ *
+ * $flavor_key / $file_prefix — see rrt_label_composite()'s own notes on
+ * these same params.
  */
-function rrt_label_composite_layers( $size_key, $layers, $order_dir ) {
+function rrt_label_composite_layers( $size_key, $layers, $order_dir, $flavor_key = 'original-almond', $file_prefix = '' ) {
 	$px = rrt_label_zone_px( $size_key );
 	if ( ! $px ) {
 		return new WP_Error( 'rrt_bad_size', 'Unknown box size.' );
 	}
 
-	$sizes    = rrt_label_sizes();
+	$sizes    = rrt_label_sizes( $flavor_key );
 	$template = RRT_LABEL_PATH . $sizes[ $size_key ]['template_file'];
 	if ( ! file_exists( $template ) ) {
 		return new WP_Error( 'rrt_missing_template', 'Label template is missing on the server.' );
@@ -589,7 +709,7 @@ function rrt_label_composite_layers( $size_key, $layers, $order_dir ) {
 	// Layer 0: the bare template itself, so the full stack is self-
 	// contained (Pete doesn't have to separately dig up the master
 	// template file to reconstruct the design).
-	$base_path = $order_dir . '/layer-00-template.png';
+	$base_path = $order_dir . '/' . $file_prefix . 'layer-00-template.png';
 	imagepng( $template_img, $base_path, 6 );
 	imagedestroy( $template_img );
 	rrt_label_set_png_dpi( $base_path, 300 );
@@ -620,7 +740,7 @@ function rrt_label_composite_layers( $size_key, $layers, $order_dir ) {
 			$suffix = 'text';
 		}
 
-		$layer_path = sprintf( '%s/layer-%02d-%s.png', $order_dir, $i, sanitize_key( $suffix ) );
+		$layer_path = sprintf( '%s/%slayer-%02d-%s.png', $order_dir, $file_prefix, $i, sanitize_key( $suffix ) );
 		imagepng( $layer_canvas, $layer_path, 6 );
 		imagedestroy( $layer_canvas );
 		rrt_label_set_png_dpi( $layer_path, 300 );
@@ -642,11 +762,17 @@ function rrt_label_composite_layers( $size_key, $layers, $order_dir ) {
  * canvas), so a plain imagecopy per slot is enough — no alpha blending
  * needed here.
  *
- * Saves into $order_dir (see rrt_label_composite()'s own note on this) —
- * the customer's name is already baked into that folder's own name, so
- * the filename itself only needs the quantity now.
+ * Saves into $order_dir (see rrt_label_composite()'s own note on this).
+ *
+ * $file_prefix — see rrt_label_composite()'s own note on this same param;
+ * $labels_needed used to be quantity+5% but Pete, 2026-11-08: "just give
+ * me the number order, do not add more than what is in the quantity the
+ * customer asks for" — it's exactly the customer's requested quantity now
+ * (see rrt_label_handle_submit()), kept as its own param/name rather than
+ * inlining $quantity so a future buffer policy (if ever wanted again) has
+ * one place to change again.
  */
-function rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $labels_needed ) {
+function rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $labels_needed, $file_prefix = '' ) {
 	$sheet_cfg = rrt_label_sheet_config( $size_key );
 	if ( ! $sheet_cfg ) {
 		return new WP_Error( 'rrt_no_sheet_layout', 'No print-sheet layout defined for this box size.' );
@@ -681,7 +807,7 @@ function rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $lab
 	}
 	imagedestroy( $single );
 
-	$out_path = sprintf( '%s/print-sheet-qty%d.png', $order_dir, $labels_needed );
+	$out_path = sprintf( '%s/%sprint-sheet-qty%d.png', $order_dir, $file_prefix, $labels_needed );
 
 	imagepng( $sheet, $out_path, 6 );
 	imagedestroy( $sheet );
@@ -712,7 +838,7 @@ function rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $lab
  * line means, since this image leaves the configurator's own on-screen
  * instructions behind.
  */
-function rrt_label_composite_proof( $size_key, $composite_path, $order_dir ) {
+function rrt_label_composite_proof( $size_key, $composite_path, $order_dir, $file_prefix = '' ) {
 	$px   = rrt_label_zone_px( $size_key );
 	$crop = rrt_label_crop_px( $size_key );
 	if ( ! $px || ! $crop ) {
@@ -771,7 +897,7 @@ function rrt_label_composite_proof( $size_key, $composite_path, $order_dir ) {
 		}
 	}
 
-	$out_path = $order_dir . '/proof.png';
+	$out_path = $order_dir . '/' . $file_prefix . 'proof.png';
 	imagepng( $canvas, $out_path, 6 );
 	imagedestroy( $canvas );
 
@@ -1137,110 +1263,127 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
  * own uploads folder (already public, like any other WP upload) instead
  * of as a MIME attachment. No size ceiling either way now.
  */
-function rrt_label_email_submission( $fields, $composite_path, $layer_paths = array(), $sheet_path = null, $original_paths = array(), $order_dir = '', $proof_path = null ) {
+function rrt_label_email_submission( $order_fields, $design_results, $order_dir ) {
 	// Pete, 2026-10-28: admin_email (pete@redrockstoffee.com) wasn't getting
 	// checked — submissions were landing with no one seeing them. Send to
 	// both so a missed inbox on one side doesn't mean a missed order.
 	$to            = array_unique( array_filter( array( get_option( 'admin_email' ), 'pete@roadrex.com' ) ) );
-	$missing_image = ! empty( $fields['dropped_logo_count'] );
-	$subject       = ( $missing_image ? '[MISSING IMAGE] ' : '' ) . sprintf( '[Co-Branding Label] New design from %s', $fields['name'] );
-
-	$logo_count = 0;
-	$text_lines = array();
-	foreach ( $fields['layers'] as $layer ) {
-		if ( 'logo' === $layer['type'] ) {
-			++$logo_count;
-		} else {
-			$text_lines[] = $layer['text'];
-		}
-	}
+	$missing_image = ! empty( $order_fields['dropped_logo_count'] );
+	$design_count  = count( $design_results );
+	$subject       = ( $missing_image ? '[MISSING IMAGE] ' : '' ) . sprintf(
+		'[Co-Branding Label] New %s from %s',
+		$design_count > 1 ? ( $design_count . ' designs' ) : 'design',
+		$order_fields['name']
+	);
 
 	$upload_dir = wp_upload_dir();
 	$order_url  = trailingslashit( $upload_dir['baseurl'] ) . 'rrt-label-orders/' . rawurlencode( basename( $order_dir ) );
 
-	$files = array();
-	if ( $composite_path && file_exists( $composite_path ) ) {
-		$files['Flat label (300 DPI, ready to print)'] = $composite_path;
-	}
-	if ( $sheet_path && file_exists( $sheet_path ) ) {
-		$files[ sprintf( 'Print-ready sheet (%d labels tiled)', $fields['labels_needed'] ) ] = $sheet_path;
-	}
-	if ( $proof_path && file_exists( $proof_path ) ) {
-		$files['Customer-facing proof (logo/text in context)'] = $proof_path;
-	}
-	foreach ( $layer_paths as $layer_path ) {
-		if ( file_exists( $layer_path ) ) {
-			$files[ 'Layer: ' . basename( $layer_path ) ] = $layer_path;
-		}
-	}
-	// Pete, 2026-10-27: "here are the files" — one came through named
-	// literally "phpgTLcxA", no extension at all. $layer['tmp_path'] for a
-	// real upload is PHP's own raw upload tmp file, which has no real
-	// filename of its own. $original_paths (rrt_label_save_originals(),
-	// called before this function) already copied the same files into the
-	// order folder under proper names (original-logo-1.jpg, etc.) — link
-	// those instead so the filename actually means something.
-	foreach ( $original_paths as $original_path ) {
-		if ( file_exists( $original_path ) ) {
-			$files[ 'Original upload: ' . basename( $original_path ) ] = $original_path;
-		}
-	}
-
 	$body  = '<html><body style="font-family: Arial, sans-serif; line-height: 1.6;">';
 	if ( $missing_image ) {
 		$body .= '<div style="background:#b00020; color:#fff; font-weight:bold; padding:14px 18px; border-radius:6px; margin-bottom:16px;">';
-		$body .= '&#9888; ' . esc_html( $fields['dropped_logo_count'] ) . ' image(s) this customer tried to add did NOT come through. This order is likely MISSING ARTWORK — contact them before printing.';
+		$body .= '&#9888; ' . esc_html( $order_fields['dropped_logo_count'] ) . ' image(s) this customer tried to add did NOT come through. This order is likely MISSING ARTWORK — contact them before printing.';
 		$body .= '</div>';
 	}
-	$body .= '<h2 style="margin-bottom:4px;">New co-branding label design</h2>';
+	$body .= '<h2 style="margin-bottom:4px;">New co-branding label ' . ( $design_count > 1 ? 'order (' . $design_count . ' designs)' : 'design' ) . '</h2>';
 	$body .= '<table style="border-collapse: collapse; width: 100%; max-width: 600px;">';
-	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Box size</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['size'] ) . '</td></tr>';
-	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Name</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['name'] ) . '</td></tr>';
-	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Email</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><a href="mailto:' . esc_attr( $fields['email'] ) . '">' . esc_html( $fields['email'] ) . '</a></td></tr>';
-	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Phone</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['phone'] ) . '</td></tr>';
-	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Quantity requested</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['quantity'] ) . '</td></tr>';
-	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Labels to print (+5%)</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $fields['labels_needed'] ) . '</td></tr>';
-	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Logos</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $logo_count ) . '</td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Name</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $order_fields['name'] ) . '</td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Email</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><a href="mailto:' . esc_attr( $order_fields['email'] ) . '">' . esc_html( $order_fields['email'] ) . '</a></td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Phone</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $order_fields['phone'] ) . '</td></tr>';
+	$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #ddd;"><strong>Total quantity requested</strong></td><td style="padding:6px 8px; border-bottom:1px solid #ddd;">' . esc_html( $order_fields['quantity'] ) . '</td></tr>';
 	$body .= '</table>';
 
-	// Pete, 2026-10-26: "I don't want to take someone's money and print a
-	// really sh*t label from a garbage file" — warn-not-block (confirmed),
-	// so this is the backstop: even if the customer ignored the on-page
-	// warning, Pete sees it here before he actually prints anything. Only
-	// ever set on a real-upload logo layer, never an art_key one (see
-	// $low_quality in rrt_label_handle_submit()'s logo-layer loop).
-	$logo_n = 0;
-	foreach ( $fields['layers'] as $layer ) {
-		if ( 'logo' !== $layer['type'] ) {
-			continue;
-		}
-		++$logo_n;
-		if ( ! empty( $layer['low_quality'] ) ) {
-			$body .= '<p style="color:#b00020; font-weight:bold;">&#9888; Logo ' . esc_html( $logo_n ) . ' may be low-resolution for the size it was placed at — check before printing.</p>';
-		}
+	if ( $order_fields['message'] ) {
+		$body .= '<h3 style="margin-bottom:4px;">Message</h3><p>' . nl2br( esc_html( $order_fields['message'] ) ) . '</p>';
 	}
 
-	if ( $text_lines ) {
-		$body .= '<h3 style="margin-bottom:4px;">Text</h3><ul>';
-		foreach ( $text_lines as $i => $line ) {
-			$body .= '<li>Text ' . ( $i + 1 ) . ': ' . esc_html( $line ) . '</li>';
+	// Pete, 2026-11-07: one section per held design (flavor/size/qty, its
+	// own text/logo layers, its own files) — previously this whole email
+	// only ever described ONE design because only one could exist per
+	// submission.
+	foreach ( $design_results as $i => $design_result ) {
+		$logo_count = 0;
+		$text_lines = array();
+		foreach ( $design_result['layers'] as $layer ) {
+			if ( 'logo' === $layer['type'] ) {
+				++$logo_count;
+			} else {
+				$text_lines[] = $layer['text'];
+			}
 		}
-		$body .= '</ul>';
-	}
-	if ( $fields['message'] ) {
-		$body .= '<h3 style="margin-bottom:4px;">Message</h3><p>' . nl2br( esc_html( $fields['message'] ) ) . '</p>';
-	}
 
-	$body .= '<h3 style="margin-bottom:4px;">Files</h3>';
-	if ( $files ) {
+		$body .= '<hr style="margin:20px 0; border:none; border-top:2px solid #ddd;">';
+		$body .= '<h3 style="margin-bottom:4px;">Design ' . ( $i + 1 ) . ': ' . esc_html( $design_result['flavor_label'] ) . ' — ' . esc_html( $design_result['size_label'] ) . '</h3>';
 		$body .= '<table style="border-collapse: collapse; width: 100%; max-width: 600px;">';
-		foreach ( $files as $label => $path ) {
-			$file_url = trailingslashit( $order_url ) . rawurlencode( basename( $path ) );
-			$body    .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #eee;">' . esc_html( $label ) . '</td><td style="padding:6px 8px; border-bottom:1px solid #eee;"><a href="' . esc_url( $file_url ) . '" style="display:inline-block; padding:6px 14px; background:#3d4348; color:#fff; text-decoration:none; border-radius:4px;">Download</a></td></tr>';
-		}
+		$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #eee;"><strong>Quantity requested</strong></td><td style="padding:6px 8px; border-bottom:1px solid #eee;">' . esc_html( $design_result['quantity'] ) . '</td></tr>';
+		$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #eee;"><strong>Logos</strong></td><td style="padding:6px 8px; border-bottom:1px solid #eee;">' . esc_html( $logo_count ) . '</td></tr>';
 		$body .= '</table>';
-	} else {
-		$body .= '<p>No files were generated for this order — check the order folder on the server.</p>';
+
+		// Pete, 2026-10-26: "I don't want to take someone's money and print
+		// a really sh*t label from a garbage file" — warn-not-block
+		// (confirmed), so this is the backstop: even if the customer
+		// ignored the on-page warning, Pete sees it here before he
+		// actually prints anything. Only ever set on a real-upload logo
+		// layer, never an art_key one.
+		$logo_n = 0;
+		foreach ( $design_result['layers'] as $layer ) {
+			if ( 'logo' !== $layer['type'] ) {
+				continue;
+			}
+			++$logo_n;
+			if ( ! empty( $layer['low_quality'] ) ) {
+				$body .= '<p style="color:#b00020; font-weight:bold;">&#9888; Logo ' . esc_html( $logo_n ) . ' may be low-resolution for the size it was placed at — check before printing.</p>';
+			}
+		}
+
+		if ( $text_lines ) {
+			$body .= '<h4 style="margin-bottom:4px;">Text</h4><ul>';
+			foreach ( $text_lines as $j => $line ) {
+				$body .= '<li>Text ' . ( $j + 1 ) . ': ' . esc_html( $line ) . '</li>';
+			}
+			$body .= '</ul>';
+		}
+
+		$files = array();
+		if ( $design_result['composite_path'] && file_exists( $design_result['composite_path'] ) ) {
+			$files['Flat label (300 DPI, ready to print)'] = $design_result['composite_path'];
+		}
+		if ( $design_result['sheet_path'] && file_exists( $design_result['sheet_path'] ) ) {
+			$files[ sprintf( 'Print-ready sheet (%d labels tiled)', $design_result['labels_needed'] ) ] = $design_result['sheet_path'];
+		}
+		if ( $design_result['proof_path'] && file_exists( $design_result['proof_path'] ) ) {
+			$files['Customer-facing proof (logo/text in context)'] = $design_result['proof_path'];
+		}
+		foreach ( $design_result['layer_paths'] as $layer_path ) {
+			if ( file_exists( $layer_path ) ) {
+				$files[ 'Layer: ' . basename( $layer_path ) ] = $layer_path;
+			}
+		}
+		// Pete, 2026-10-27: "here are the files" — one came through named
+		// literally "phpgTLcxA", no extension at all. $layer['tmp_path']
+		// for a real upload is PHP's own raw upload tmp file, which has no
+		// real filename of its own. $original_paths
+		// (rrt_label_save_originals(), called before this function)
+		// already copied the same files into the order folder under
+		// proper names (original-logo-1.jpg, etc.) — link those instead
+		// so the filename actually means something.
+		foreach ( $design_result['original_paths'] as $original_path ) {
+			if ( file_exists( $original_path ) ) {
+				$files[ 'Original upload: ' . basename( $original_path ) ] = $original_path;
+			}
+		}
+
+		$body .= '<h4 style="margin-bottom:4px;">Files</h4>';
+		if ( $files ) {
+			$body .= '<table style="border-collapse: collapse; width: 100%; max-width: 600px;">';
+			foreach ( $files as $label => $path ) {
+				$file_url = trailingslashit( $order_url ) . rawurlencode( basename( dirname( $path ) ) ) . '/' . rawurlencode( basename( $path ) );
+				$body    .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #eee;">' . esc_html( $label ) . '</td><td style="padding:6px 8px; border-bottom:1px solid #eee;"><a href="' . esc_url( $file_url ) . '" style="display:inline-block; padding:6px 14px; background:#3d4348; color:#fff; text-decoration:none; border-radius:4px;">Download</a></td></tr>';
+			}
+			$body .= '</table>';
+		} else {
+			$body .= '<p>No files were generated for this design — check the order folder on the server.</p>';
+		}
 	}
 
 	$body .= '</body></html>';

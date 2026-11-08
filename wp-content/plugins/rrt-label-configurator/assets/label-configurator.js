@@ -26,7 +26,7 @@
 ( function () {
 	'use strict';
 
-	var config = window.rrtLabelConfigurator || { sizes: {}, fonts: {}, art: {}, ajaxUrl: '' };
+	var config = window.rrtLabelConfigurator || { flavors: {}, sizes: {}, fonts: {}, art: {}, ajaxUrl: '' };
 
 	var root = document.getElementById( 'rrt-label-configurator' );
 	if ( ! root ) {
@@ -74,7 +74,15 @@
 	};
 
 	var els = {
-		size: document.getElementById( 'rrt-lc-size' ),
+		// Pete, 2026-11-07: "change the dropdown that says box size, to
+		// radio buttons" -- was a single <select id="rrt-lc-size">, now a
+		// NodeList of radios sharing name="rrt-lc-size" (see
+		// rrt-label-configurator.php). The "change" binding below iterates
+		// this instead of listening on one element.
+		flavor: document.querySelectorAll( 'input[name="rrt-lc-flavor"]' ),
+		size: document.querySelectorAll( 'input[name="rrt-lc-size"]' ),
+		heldDesigns: document.getElementById( 'rrt-lc-held-designs' ),
+		heldList: document.getElementById( 'rrt-lc-held-list' ),
 		stage: document.getElementById( 'rrt-lc-stage' ),
 		stageInner: document.getElementById( 'rrt-lc-stage-inner' ),
 		instructions: document.getElementById( 'rrt-lc-instructions' ),
@@ -92,9 +100,18 @@
 		boxPerspective: document.getElementById( 'rrt-lc-box-perspective' ),
 		boxPreviewBtn: document.getElementById( 'rrt-lc-box-preview-btn' ),
 		boxModal: document.getElementById( 'rrt-lc-box-modal' ),
+		boxModalHeading: document.getElementById( 'rrt-lc-box-modal-heading' ),
 		boxModalBackdrop: document.getElementById( 'rrt-lc-box-modal-backdrop' ),
 		boxLoveBtn: document.getElementById( 'rrt-lc-box-love-btn' ),
 		boxBackBtn: document.getElementById( 'rrt-lc-box-back-btn' ),
+
+		addAnotherBtn: document.getElementById( 'rrt-lc-add-another-btn' ),
+		heldPreviewModal: document.getElementById( 'rrt-lc-held-preview-modal' ),
+		heldPreviewBackdrop: document.getElementById( 'rrt-lc-held-preview-backdrop' ),
+		heldPreviewThumb: document.getElementById( 'rrt-lc-held-preview-thumb' ),
+		heldPreviewBoxBtn: document.getElementById( 'rrt-lc-held-preview-box-btn' ),
+		heldPreviewDetails: document.getElementById( 'rrt-lc-held-preview-details' ),
+		heldPreviewClose: document.getElementById( 'rrt-lc-held-preview-close' ),
 
 		tabBtnQuote: document.getElementById( 'tab-btn-quote' ),
 		tabBtnLogo: document.getElementById( 'tab-btn-logo' ),
@@ -141,7 +158,40 @@
 		spinner: document.getElementById( 'rrt-lc-spinner' ),
 	};
 
+	// Pete, 2026-11-08: "the 'off-center' alarm button needs to... popup
+	// just under the preview box... with a dismiss button x that says 'X
+	// DISMISS'... to the right end" — #center-text-btn's markup is a
+	// byte-for-byte copy of TheUnframer's quote-module-card.part.php
+	// ("copy means copy" — see that file's own notes), so it's relocated
+	// (not retyped) here at runtime, wrapped in a new flex row alongside a
+	// JS-built dismiss button pinned to that row's right end. Moving the
+	// live DOM node (not cloning it) keeps its existing click handler
+	// untouched — only WHERE it renders, and what sits beside it, changes.
+	// Visibility is now driven by the WRAPPER's `hidden` (see
+	// updateCenterBtn() below) instead of the button's own inline
+	// style.display, so the button's baked-in `display:none` is cleared
+	// once here and never touched again.
+	var offCenterWrap = null;
+	var centerTextDismissBtn = null;
+	if ( els.centerTextBtn && els.stage && els.stage.parentNode ) {
+		offCenterWrap = document.createElement( 'div' );
+		offCenterWrap.className = 'rrt-lc-offcenter-wrap';
+		offCenterWrap.hidden = true;
+		els.stage.insertAdjacentElement( 'afterend', offCenterWrap );
+
+		els.centerTextBtn.style.display = '';
+		offCenterWrap.appendChild( els.centerTextBtn );
+
+		centerTextDismissBtn = document.createElement( 'button' );
+		centerTextDismissBtn.type = 'button';
+		centerTextDismissBtn.className = 'rrt-lc-offcenter-dismiss';
+		centerTextDismissBtn.textContent = '× DISMISS';
+		centerTextDismissBtn.setAttribute( 'aria-label', 'Dismiss off-center warning' );
+		offCenterWrap.appendChild( centerTextDismissBtn );
+	}
+
 	var state = {
+		flavorKey: null,
 		sizeKey: null,
 		textGroups: [], // { id, text, font, fontSize, bold, italic, shadowColor, pos, el }
 		activeGroupId: null,
@@ -151,16 +201,53 @@
 		nextLogoId: 1,
 		addingNewLogo: false, // true while waiting on the file picker for a brand-new logo (vs. replacing the active one)
 		dragging: null,
+		// Pete, 2026-11-07: "if user wishes to put together an order for
+		// each size, file is saved(held)... with a descriptor/tally
+		// showing until files sent" — a PLAIN ARRAY, not keyed by size/
+		// flavor, since "or more than one of one size" means two held
+		// designs can share the same size (even the same flavor+size).
+		// Each entry: { id, flavorLabel, sizeLabel, quantity, layersMeta,
+		// logoFiles } — layersMeta/logoFiles are built the exact same way
+		// the old single-design submit handler built them (see
+		// buildSubmitPayloadForDraft() below), just captured at "hold"
+		// time instead of at submit time.
+		heldDesigns: [],
+		nextHeldId: 1,
+		// Pete, 2026-11-08: "quantity not right somehow" — root cause: a
+		// fresh design (after a hold, or on first load) should always show
+		// THIS size's own minimum, but switching size used to only bump
+		// the field UP when the current value fell below the new min,
+		// never back DOWN — so e.g. holding a 4oz (qty 6) then switching
+		// to 8oz left "6" sitting in the field instead of resetting to 2.
+		// This flag distinguishes "untouched default" (always snap to the
+		// new size's min on a size change) from "customer typed their own
+		// number" (only enforce the floor, never overwrite a deliberate
+		// value) — see the quantity input listener and loadSize() below.
+		quantityTouched: false,
 	};
 
 	function activeSize() {
-		return config.sizes[ state.sizeKey ];
+		return ( config.sizes[ state.flavorKey ] || {} )[ state.sizeKey ];
 	}
+
+	// --- flavor switching ---
+	// Pete, 2026-11-07: "we also have two flavors" — same radio-group
+	// pattern as size below. Changing flavor re-loads the CURRENT size
+	// under the new flavor (same geometry, different template image) —
+	// it does not reset the design in progress.
+	els.flavor.forEach( function ( radio ) {
+		radio.addEventListener( 'change', function () {
+			state.flavorKey = radio.value;
+			loadSize( state.sizeKey );
+		} );
+	} );
 
 	// --- size switching (unchanged from before, still the "right" part) ---
 
-	els.size.addEventListener( 'change', function () {
-		loadSize( els.size.value );
+	els.size.forEach( function ( radio ) {
+		radio.addEventListener( 'change', function () {
+			loadSize( radio.value );
+		} );
 	} );
 
 	// Pete, 2026-10-18: "min of 2 for the 8 oz, and min of 6 for the 4 oz."
@@ -170,8 +257,12 @@
 	// contradicting it.
 	var MIN_QTY = { '8oz': 2, '4oz': 6 };
 
+	els.quantity.addEventListener( 'input', function () {
+		state.quantityTouched = true;
+	} );
+
 	function loadSize( sizeKey ) {
-		var size = config.sizes[ sizeKey ];
+		var size = ( config.sizes[ state.flavorKey ] || {} )[ sizeKey ];
 		if ( ! size ) {
 			return;
 		}
@@ -185,7 +276,10 @@
 
 		var minQty = MIN_QTY[ sizeKey ] || 1;
 		els.quantity.min = minQty;
-		if ( ! els.quantity.value || parseInt( els.quantity.value, 10 ) < minQty ) {
+		// Untouched (fresh design or just-reset-after-hold): always snap to
+		// THIS size's own minimum. Customer-typed: only enforce the floor,
+		// never silently overwrite a number they deliberately chose.
+		if ( ! state.quantityTouched || ! els.quantity.value || parseInt( els.quantity.value, 10 ) < minQty ) {
 			els.quantity.value = minQty;
 		}
 
@@ -424,13 +518,52 @@
 	// inches — no DOM measurement, so no perspective distortion to get
 	// wrong) — the popup-closed case is now just a boolean
 	// els.boxModal.hidden check, not a measurement.
+	// Pete, 2026-11-08: "possible to look at the file (view) on the box
+	// before committing/submitting? To save any number of labels and then
+	// go back through them to see them on the box?" — non-null while the
+	// box popup is showing a SAVED design (see openBoxModalForHeldDesign()
+	// below) instead of the live draft; syncBoxMirror() branches on it so
+	// the exact same 3D mockup can be driven by either source.
+	var boxModalHeldDesign = null;
+
+	// Which size config the box popup should measure against right now —
+	// the held design's own size (so e.g. a held 4oz still renders at 4oz
+	// box dimensions even while the live draft sits on 8oz) or, in normal
+	// live-editing mode, whatever's currently on the stage.
+	function currentBoxSizeCfg() {
+		if ( boxModalHeldDesign ) {
+			var sizeCfg = ( config.sizes[ boxModalHeldDesign.flavorKey ] || {} )[ boxModalHeldDesign.sizeKey ];
+			if ( sizeCfg ) {
+				return sizeCfg;
+			}
+		}
+		return activeSize();
+	}
+
 	var mirrorSyncScheduled = false;
 	function syncBoxMirror() {
-		if ( ! els.zoneMirrorInner || ! els.zoneMirror || ! els.zone ) {
+		if ( ! els.zoneMirrorInner || ! els.zoneMirror ) {
 			return;
 		}
 		if ( ! els.boxModal || els.boxModal.hidden ) {
 			return; // not open — openBoxModal() re-syncs fresh every time it opens
+		}
+		if ( boxModalHeldDesign ) {
+			// A held design has no live #rrt-lc-zone to measure/clone — it
+			// carries its own frozen snapshot (zoneWidth/zoneHeight/zoneHtml,
+			// captured at hold time — see the boxLoveBtn handler below).
+			var d = boxModalHeldDesign;
+			if ( ! d.zoneWidth || ! d.zoneHeight || zoneMirrorTargetW <= 0 ) {
+				return;
+			}
+			els.zoneMirrorInner.style.width = d.zoneWidth + 'px';
+			els.zoneMirrorInner.style.height = d.zoneHeight + 'px';
+			els.zoneMirrorInner.style.transform = 'scale(' + ( zoneMirrorTargetW / d.zoneWidth ) + ')';
+			els.zoneMirrorInner.innerHTML = d.zoneHtml;
+			return;
+		}
+		if ( ! els.zone ) {
+			return;
 		}
 		var real = els.zone.getBoundingClientRect();
 		if ( real.width <= 0 || real.height <= 0 || zoneMirrorTargetW <= 0 ) {
@@ -527,11 +660,15 @@
 	// Pete, 2026-10-25: "'let me see what we have' button and a 'Love
 	// it!' button under the popup image and a 'back to the drawing
 	// board' button" — the box mockup now only renders inside this
-	// popup, not inline. Both action buttons just close it: all the
-	// actual editing already happens live behind it (see
-	// mirrorZoneToBox()'s MutationObserver above), so "back to the
-	// drawing board" needs no separate state to restore — closing IS
-	// going back.
+	// popup, not inline. "back to the drawing board" just closes it: all
+	// the actual editing already happens live behind it (see
+	// mirrorZoneToBox()'s MutationObserver above), so it needs no
+	// separate state to restore — closing IS going back.
+	//
+	// Pete, 2026-11-07: "Love it!" no longer JUST closes the popup — it
+	// now holds the current design (see the boxLoveBtn handler further
+	// down, near the submit logic) before closing it, so its binding is
+	// NOT included in the plain closeBoxModal() group below.
 	function openBoxModal() {
 		if ( ! els.boxModal ) {
 			return;
@@ -555,14 +692,14 @@
 		// computeBoxFaces() is cheap and idempotent, so extra calls cost
 		// nothing — this should paper over whatever's left regardless of
 		// its exact source.
-		computeBoxFaces( activeSize() );
+		computeBoxFaces( currentBoxSizeCfg() );
 		requestAnimationFrame( function () {
-			computeBoxFaces( activeSize() );
+			computeBoxFaces( currentBoxSizeCfg() );
 		} );
 		[ 50, 200, 500 ].forEach( function ( delayMs ) {
 			setTimeout( function () {
 				if ( els.boxModal && ! els.boxModal.hidden ) {
-					computeBoxFaces( activeSize() );
+					computeBoxFaces( currentBoxSizeCfg() );
 				}
 			}, delayMs );
 		} );
@@ -571,12 +708,45 @@
 		if ( els.boxModal ) {
 			els.boxModal.hidden = true;
 		}
+		// Leaving held-design mode — restore the popup to its normal
+		// live-editing state so the NEXT open (from "See your Label on the
+		// box", on the real live draft) looks like it always has.
+		if ( boxModalHeldDesign ) {
+			boxModalHeldDesign = null;
+			if ( els.boxLoveBtn ) {
+				els.boxLoveBtn.hidden = false;
+			}
+			if ( els.boxBackBtn ) {
+				els.boxBackBtn.textContent = 'Back to the drawing board';
+			}
+			if ( els.boxModalHeading ) {
+				els.boxModalHeading.textContent = 'How it’ll look on the box';
+			}
+		}
+	}
+	// Pete, 2026-11-08: "possible to look at the file (view) on the box
+	// before committing/submitting? To save any number of labels and then
+	// go back through them to see them on the box?" — reuses this SAME
+	// popup (not a second one) in a read-only mode: no "Harry, I love it!"
+	// (nothing to hold — it's already held) and "Back to the drawing
+	// board" relabeled "Close" (there's no live draft here to go back to).
+	// Called from the flat held-preview popup's "See on the Box" button —
+	// see openHeldPreview() below.
+	function openBoxModalForHeldDesign( design ) {
+		boxModalHeldDesign = design;
+		if ( els.boxLoveBtn ) {
+			els.boxLoveBtn.hidden = true;
+		}
+		if ( els.boxBackBtn ) {
+			els.boxBackBtn.textContent = 'Close';
+		}
+		if ( els.boxModalHeading ) {
+			els.boxModalHeading.textContent = design.flavorLabel + ' · ' + design.sizeLabel + ' · Qty ' + design.quantity;
+		}
+		openBoxModal();
 	}
 	if ( els.boxPreviewBtn ) {
 		els.boxPreviewBtn.addEventListener( 'click', openBoxModal );
-	}
-	if ( els.boxLoveBtn ) {
-		els.boxLoveBtn.addEventListener( 'click', closeBoxModal );
 	}
 	if ( els.boxBackBtn ) {
 		els.boxBackBtn.addEventListener( 'click', closeBoxModal );
@@ -589,6 +759,84 @@
 			closeBoxModal();
 		}
 	} );
+
+	// --- "can I look again?" read-only held-design preview popup ---
+
+	function closeHeldPreview() {
+		if ( els.heldPreviewModal ) {
+			els.heldPreviewModal.hidden = true;
+		}
+	}
+	// Scales a stored zone-content snapshot (captured at hold time — see
+	// the boxLoveBtn handler below) into a fixed-width thumbnail, the same
+	// clone+transform:scale technique syncBoxMirror() uses above, just
+	// targeting a plain <div> instead of the 3D box mockup.
+	function renderThumbInto( containerEl, design, targetWidth ) {
+		if ( ! containerEl || ! design.zoneWidth || ! design.zoneHeight ) {
+			return;
+		}
+		var scale        = targetWidth / design.zoneWidth;
+		var targetHeight = design.zoneHeight * scale;
+		containerEl.style.width  = targetWidth + 'px';
+		containerEl.style.height = targetHeight + 'px';
+		var inner = document.createElement( 'div' );
+		inner.className        = 'rrt-lc-held-thumb-inner';
+		inner.style.width      = design.zoneWidth + 'px';
+		inner.style.height     = design.zoneHeight + 'px';
+		inner.style.transform  = 'scale(' + scale + ')';
+		inner.innerHTML        = design.zoneHtml;
+		containerEl.innerHTML = '';
+		containerEl.appendChild( inner );
+	}
+	// Which held design the flat preview popup is currently showing — the
+	// "See on the Box" button reads this to know which one to hand off to
+	// openBoxModalForHeldDesign().
+	var currentPreviewDesign = null;
+	function openHeldPreview( design ) {
+		if ( ! els.heldPreviewModal ) {
+			return;
+		}
+		currentPreviewDesign = design;
+		renderThumbInto( els.heldPreviewThumb, design, 280 );
+		els.heldPreviewDetails.textContent = design.flavorLabel + ' · ' + design.sizeLabel + ' · Qty ' + design.quantity;
+		els.heldPreviewModal.hidden = false;
+	}
+	if ( els.heldPreviewClose ) {
+		els.heldPreviewClose.addEventListener( 'click', closeHeldPreview );
+	}
+	if ( els.heldPreviewBackdrop ) {
+		els.heldPreviewBackdrop.addEventListener( 'click', closeHeldPreview );
+	}
+	if ( els.heldPreviewBoxBtn ) {
+		els.heldPreviewBoxBtn.addEventListener( 'click', function () {
+			if ( ! currentPreviewDesign ) {
+				return;
+			}
+			var design = currentPreviewDesign;
+			closeHeldPreview();
+			openBoxModalForHeldDesign( design );
+		} );
+	}
+	document.addEventListener( 'keydown', function ( evt ) {
+		if ( 'Escape' === evt.key && els.heldPreviewModal && ! els.heldPreviewModal.hidden ) {
+			closeHeldPreview();
+		}
+	} );
+
+	// Pete, 2026-11-08: "I need a 'make another label?' button, that sends
+	// me back to the top" — the draft is already a blank slate the moment
+	// a design is held (see resetDraftAfterHold()); this button's whole
+	// job is just making that obvious by scrolling back up to where the
+	// flavor/size choice lives, instead of leaving the customer staring at
+	// an emptied stage wondering what happened.
+	if ( els.addAnotherBtn ) {
+		els.addAnotherBtn.addEventListener( 'click', function () {
+			var sizeCard = document.querySelector( '.config-card.rrt-lc-card--size' );
+			if ( sizeCard ) {
+				sizeCard.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+			}
+		} );
+	}
 
 	// --- tabs ---
 
@@ -624,12 +872,18 @@
 			id: state.nextGroupId++,
 			text: '',
 			font: 'oswald',
-			fontSize: 5,
+			// Pete, 2026-11-08: "default text: should be black type with
+			// shadow set at lowest on slider and the font size being 4
+			// clicks on + from what is now" — fs-slider's step is 0.5 (see
+			// inc/quote-module-card.part.php), so 4 clicks up from the old
+			// default of 5 was 7; "go up one more click" (same day) makes
+			// it 7.5. shadow-intensity-slider's min is 0.
+			fontSize: 7.5,
 			bold: false,
 			italic: false,
-			shadowColor: 'white', // WHITE TYPE (default): white text, black outline. BLACK TYPE: inverted — see renderTextGroup().
+			shadowColor: 'black', // BLACK TYPE (default): black text, white outline. WHITE TYPE: inverted — see renderTextGroup().
 			textColor: null, // null = use shadowColor's white/black preset. A hex string (palette swatch or custom picker) overrides it — see renderTextGroup().
-			shadowIntensity: 60, // Pete, 2026-10-17: "shadow intensity adjustment slider" — 0-100, replaces the old fixed full/subtle auto-switch with a continuous dial the customer controls directly — see outlineShadow().
+			shadowIntensity: 0, // 0-100 dial — see outlineShadow(). Lowest = no shadow by default.
 			sideMargin: 2, // matches the real site's defaultQuote() — maxWidth = 100-2*this
 			pos: defaultPos( state.textGroups.length ),
 		};
@@ -734,14 +988,38 @@
 	// handler — shows a "TEXT OFF CENTER — TAP TO RECENTER" alarm button
 	// whenever the active text group has drifted off horizontal center,
 	// clicking it snaps x back to 50%. Hidden whenever nothing is
-	// off-center (or there's no active group at all).
+	// off-center, there's no active group, the group has no TEXT yet, or
+	// the customer dismissed it for this particular off-center position
+	// (see the dismiss handler and attachDrag()'s drag-start reset below —
+	// a fresh drag re-arms it).
+	//
+	// Pete, 2026-11-08: "the alarm is on with nothing in the text box!" —
+	// defaultPos() (above) nudges every 2nd+ group a few % off dead-center
+	// on purpose so they don't stack exactly on top of each other; that
+	// nudge alone was already enough to trip the 0.1% off-center check
+	// even on a brand-new, still-empty group — just easy to miss before
+	// this alarm got loud and moved right under the preview box. Gating on
+	// actual text content is the real fix (an empty box has nothing to be
+	// "off center"), not changing the nudge amount.
 	function updateCenterBtn() {
-		var group = activeGroup();
-		if ( ! group || Math.abs( group.pos.x - 50 ) <= 0.1 ) {
-			els.centerTextBtn.style.display = 'none';
+		if ( ! offCenterWrap ) {
 			return;
 		}
-		els.centerTextBtn.style.display = '';
+		var group = activeGroup();
+		if ( ! group || ! group.text.trim() || Math.abs( group.pos.x - 50 ) <= 0.1 || group.offCenterDismissed ) {
+			offCenterWrap.hidden = true;
+			return;
+		}
+		offCenterWrap.hidden = false;
+	}
+	if ( centerTextDismissBtn ) {
+		centerTextDismissBtn.addEventListener( 'click', function () {
+			var group = activeGroup();
+			if ( group ) {
+				group.offCenterDismissed = true;
+			}
+			offCenterWrap.hidden = true;
+		} );
 	}
 
 	els.centerTextBtn.addEventListener( 'click', function () {
@@ -907,6 +1185,11 @@
 		group.text = typedValue;
 		els.quoteText.value = typedValue;
 		renderTextGroup( group );
+		// A 2nd+ group can start off-center (see defaultPos()) but
+		// suppressed-as-empty (see updateCenterBtn()) — the moment real
+		// text lands in it, re-check so the alarm shows up right away
+		// instead of waiting on some unrelated drag/style change first.
+		updateCenterBtn();
 	} );
 
 	els.btnBold.addEventListener( 'click', function () {
@@ -1475,6 +1758,11 @@
 			// textGlyphGapPct()'s comment (near clampGroupToZone()) for why
 			// this exists at all: line-height's leading, not padding.
 			var glyphGap = 'text' === kind ? textGlyphGapPct( el, zoneRect ) : { top: 0, bottom: 0 };
+			// A fresh drag re-arms the off-center alarm even if it was
+			// dismissed for the PREVIOUS position — see updateCenterBtn().
+			if ( 'text' === kind ) {
+				item.offCenterDismissed = false;
+			}
 			state.dragging = {
 				item: item,
 				el: el,
@@ -1662,7 +1950,7 @@
 		return '-1px -1px 0 rgba(0,0,0,' + ring + '), 1px -1px 0 rgba(0,0,0,' + ring + '), -1px 1px 0 rgba(0,0,0,' + ring + '), 1px 1px 0 rgba(0,0,0,' + ring + '), 2px 2px 5px rgba(0,0,0,' + nearBlur + '), 0 0 12px rgba(0,0,0,' + farBlur + ')';
 	}
 
-	// --- submit ---
+	// --- submit / hold-for-multi-size-order ---
 
 	function setStatus( message, type ) {
 		els.status.textContent = message;
@@ -1681,27 +1969,262 @@
 			} );
 	}
 
-	els.submit.addEventListener( 'click', function () {
-		var hasText = state.textGroups.some( function ( g ) {
+	function draftHasContent() {
+		return state.logos.length > 0 || state.textGroups.some( function ( g ) {
 			return g.text.trim();
 		} );
+	}
+
+	// Pete, 2026-11-08: "no way to tell what it is" — a short one-line
+	// identifier for a held design's tray row, distinct from the generic
+	// flavor/size/qty line (two designs of the same size would otherwise
+	// read identically). Prefers the customer's own text since that's
+	// what they'll actually recognize their design by.
+	function summarizeDraftContent() {
+		var firstText = null;
+		state.textGroups.some( function ( g ) {
+			var t = g.text.trim();
+			if ( t ) {
+				firstText = t;
+				return true;
+			}
+			return false;
+		} );
+		if ( firstText ) {
+			return firstText.length > 32 ? ( firstText.slice( 0, 32 ) + '…' ) : firstText;
+		}
+		if ( state.logos.length ) {
+			return state.logos.length > 1 ? ( state.logos.length + ' logos' ) : 'Logo';
+		}
+		return 'Blank label';
+	}
+
+	// Builds the same { type: 'logo'|'text', ... } layer list + the real
+	// uploaded File objects (for non-art logos) the old single-design
+	// submit handler built inline — now shared between "hold this design"
+	// and the final submit of whatever's still on the stage.
+	function buildLayersMetaForDraft() {
+		var layersMeta = [];
+		var logoFiles  = [];
+		state.logos.forEach( function ( logo ) {
+			// ART logos have no uploaded File at all — nothing to send in
+			// logo_files, just the art_key so the server can pull its own
+			// bundled asset (see rrt_label_art_library() in
+			// inc/handle-submission.php). Real uploads still travel as
+			// actual File objects, matched back up to their 'logo' entry
+			// in order on the server side.
+			if ( ! logo.artKey ) {
+				logoFiles.push( logo.file );
+			}
+			layersMeta.push( { type: 'logo', pos: logo.pos, scale: logo.scale, art_key: logo.artKey || '', donate: ! logo.artKey && !! logo.donate } );
+		} );
+		state.textGroups.forEach( function ( group ) {
+			if ( group.text.trim() ) {
+				// forPrint=true: WHITE TYPE must stay pure white here — see
+				// resolveTextColor()'s own note on why the print path and
+				// the on-screen preview deliberately diverge only for that
+				// one case.
+				var resolvedColor = resolveTextColor( group, true );
+				layersMeta.push( {
+					type: 'text',
+					pos: group.pos,
+					text: group.text,
+					font: group.font,
+					font_size: group.fontSize,
+					side_margin: group.sideMargin,
+					bold: !! group.bold,
+					italic: !! group.italic,
+					color: resolvedColor.color,
+					outline: resolvedColor.outline,
+					shadow: group.shadowIntensity > 0,
+					shadow_intensity: group.shadowIntensity,
+				} );
+			}
+		} );
+		return { layersMeta: layersMeta, logoFiles: logoFiles };
+	}
+
+	// Pete, 2026-11-07: "fires off the Harry I love it button with a
+	// descriptor/tally showing" — clearing + re-starting the draft here
+	// (rather than just closing the popup) is what lets the SAME button
+	// also cover "or more than one of one size": nothing stops the
+	// customer from holding a second 8oz design right after the first.
+	function resetDraftAfterHold() {
+		state.textGroups.forEach( function ( g ) {
+			if ( g.el ) {
+				g.el.remove();
+			}
+		} );
+		state.logos.forEach( function ( l ) {
+			if ( l.el ) {
+				l.el.remove();
+			}
+		} );
+		state.textGroups   = [];
+		state.logos        = [];
+		state.activeGroupId = null;
+		state.activeLogoId  = null;
+		renderSelectorPills();
+		renderLogoSelectorPills();
+		els.quoteText.value = '';
+		updateCenterBtn();
+		els.logoFilename.textContent = '';
+		syncDonateRow( null );
+		checkLogoQuality( null );
+		state.quantityTouched = false;
+		els.quantity.value = MIN_QTY[ state.sizeKey ] || 1;
+	}
+
+	function renderHeldDesigns() {
+		var n = state.heldDesigns.length;
+		els.heldDesigns.hidden = 0 === n;
+		els.heldList.innerHTML = '';
+		state.heldDesigns.forEach( function ( design ) {
+			var li = document.createElement( 'li' );
+			li.className = 'rrt-lc-held-item';
+
+			var main = document.createElement( 'div' );
+			main.className = 'rrt-lc-held-item-main';
+
+			var thumb = document.createElement( 'div' );
+			thumb.className = 'rrt-lc-held-item-thumb';
+			renderThumbInto( thumb, design, 56 );
+
+			var text = document.createElement( 'div' );
+			text.className = 'rrt-lc-held-item-text';
+			var title = document.createElement( 'div' );
+			title.className = 'rrt-lc-held-item-title';
+			title.textContent = design.flavorLabel + ' · ' + design.sizeLabel + ' · Qty ' + design.quantity;
+			var summary = document.createElement( 'div' );
+			summary.className = 'rrt-lc-held-item-summary';
+			summary.textContent = design.summary || '';
+			text.appendChild( title );
+			text.appendChild( summary );
+
+			var actions = document.createElement( 'div' );
+			actions.className = 'rrt-lc-held-item-actions';
+
+			var viewBtn = document.createElement( 'button' );
+			viewBtn.type = 'button';
+			viewBtn.className = 'rrt-lc-held-item-view';
+			viewBtn.textContent = 'View';
+			viewBtn.addEventListener( 'click', function () {
+				openHeldPreview( design );
+			} );
+
+			var removeBtn = document.createElement( 'button' );
+			removeBtn.type = 'button';
+			removeBtn.className = 'rrt-lc-held-item-remove';
+			removeBtn.setAttribute( 'aria-label', 'Remove this saved design' );
+			removeBtn.textContent = '×';
+			removeBtn.addEventListener( 'click', function () {
+				state.heldDesigns = state.heldDesigns.filter( function ( d ) {
+					return d.id !== design.id;
+				} );
+				renderHeldDesigns();
+			} );
+
+			actions.appendChild( viewBtn );
+			actions.appendChild( removeBtn );
+
+			main.appendChild( thumb );
+			main.appendChild( text );
+			li.appendChild( main );
+			li.appendChild( actions );
+			els.heldList.appendChild( li );
+		} );
+
+		// Pete: submit always bundles held designs PLUS whatever's still
+		// on the stage, so the button's wording reflects that total, not
+		// just the held count — a customer who never touches "Harry, I
+		// love it!" still just sees "Submit my label design," same as
+		// before this feature existed.
+		var total = n + ( draftHasContent() ? 1 : 0 );
+		els.submit.textContent = total > 1 ? ( 'Submit ' + total + ' label designs' ) : 'Submit my label design';
+	}
+
+	if ( els.boxLoveBtn ) {
+		// Replaces the old "just closes the popup" binding — see
+		// openBoxModal()/closeBoxModal() above, both still used by the
+		// OTHER popup button ("back to the drawing board").
+		els.boxLoveBtn.addEventListener( 'click', function () {
+			if ( ! draftHasContent() ) {
+				closeBoxModal();
+				return;
+			}
+			var built = buildLayersMetaForDraft();
+			// Pete, 2026-11-08: "no way to tell what it is" / "can I look
+			// again?" — snapshot the zone's own rendered content (same
+			// clone technique syncBoxMirror() uses for the box mockup)
+			// WHILE it's still on the stage, since resetDraftAfterHold()
+			// right below clears it for the next design.
+			var zoneRect = els.zone.getBoundingClientRect();
+			state.heldDesigns.push( {
+				id: state.nextHeldId++,
+				flavorKey: state.flavorKey,
+				flavorLabel: ( config.flavors[ state.flavorKey ] || {} ).label || state.flavorKey,
+				sizeKey: state.sizeKey,
+				sizeLabel: activeSize().label,
+				quantity: parseInt( els.quantity.value, 10 ) || MIN_QTY[ state.sizeKey ] || 1,
+				summary: summarizeDraftContent(),
+				zoneHtml: els.zone.innerHTML,
+				zoneWidth: zoneRect.width,
+				zoneHeight: zoneRect.height,
+				layersMeta: built.layersMeta,
+				logoFiles: built.logoFiles,
+			} );
+			// Pete, 2026-11-08: "why does it say submit 3 label designs
+			// when I made only two?" — root cause: renderHeldDesigns()
+			// used to run BEFORE resetDraftAfterHold(), so its total
+			// (heldDesigns.length + draftHasContent()?1:0) counted the
+			// design just pushed TWICE — once as a held design, once more
+			// because the stage still showed its old content as an
+			// "unsaved draft" for that instant. resetDraftAfterHold() must
+			// run first so draftHasContent() is already false by the time
+			// the count is computed.
+			resetDraftAfterHold();
+			renderHeldDesigns();
+			closeBoxModal();
+			setStatus( activeSize().label + ' design saved — see it under Saved Designs below.', 'success' );
+		} );
+	}
+
+	els.submit.addEventListener( 'click', function () {
+		var hasDraft = draftHasContent();
 
 		if ( ! els.name.value.trim() || ! els.email.value.trim() ) {
 			setStatus( 'Please fill in your name and email.', 'error' );
 			return;
 		}
-		var minQty = MIN_QTY[ state.sizeKey ] || 1;
-		if ( parseInt( els.quantity.value, 10 ) < minQty ) {
-			setStatus( 'Minimum order for ' + config.sizes[ state.sizeKey ].label + ' is ' + minQty + '.', 'error' );
-			return;
+		if ( hasDraft ) {
+			var minQty = MIN_QTY[ state.sizeKey ] || 1;
+			if ( parseInt( els.quantity.value, 10 ) < minQty ) {
+				setStatus( 'Minimum order for ' + activeSize().label + ' is ' + minQty + '.', 'error' );
+				return;
+			}
 		}
-		if ( ! state.logos.length && ! hasText ) {
+		if ( ! state.heldDesigns.length && ! hasDraft ) {
 			setStatus( 'Please add a logo and/or some text to your label.', 'error' );
 			return;
 		}
 
+		// Whatever's still on the stage counts as the final design in the
+		// order too — the customer doesn't have to click "Harry, I love
+		// it!" one extra time just to submit the last (or only) size.
+		var designs = state.heldDesigns.slice();
+		if ( hasDraft ) {
+			var built = buildLayersMetaForDraft();
+			designs.push( {
+				flavorKey: state.flavorKey,
+				sizeKey: state.sizeKey,
+				quantity: parseInt( els.quantity.value, 10 ) || MIN_QTY[ state.sizeKey ] || 1,
+				layersMeta: built.layersMeta,
+				logoFiles: built.logoFiles,
+			} );
+		}
+
 		els.submit.disabled = true;
-		setStatus( 'Submitting your design…' );
+		setStatus( designs.length > 1 ? 'Submitting your designs…' : 'Submitting your design…' );
 		els.spinner.classList.add( 'is-visible' );
 
 		fetchFreshNonce().then( function ( nonce ) {
@@ -1715,65 +2238,23 @@
 			var body = new FormData();
 			body.append( 'action', 'rrt_label_submit' );
 			body.append( 'nonce', nonce );
-			body.append( 'size', state.sizeKey );
 			body.append( 'name', els.name.value.trim() );
 			body.append( 'email', els.email.value.trim() );
 			body.append( 'phone', els.phone.value.trim() );
-			body.append( 'quantity', els.quantity.value );
 			body.append( 'message', els.message.value.trim() );
 
-			var layersMeta = [];
-			state.logos.forEach( function ( logo ) {
-				// ART logos have no uploaded File at all — nothing to send
-				// in logo_files[], just the art_key so the server can pull
-				// its own bundled asset (see rrt_label_art_library() in
-				// inc/handle-submission.php). Real uploads still go through
-				// logo_files[] exactly as before.
-				if ( ! logo.artKey ) {
-					body.append( 'logo_files[]', logo.file );
-				}
-				layersMeta.push( { type: 'logo', pos: logo.pos, scale: logo.scale, art_key: logo.artKey || '', donate: ! logo.artKey && !! logo.donate } );
+			var designsMeta = designs.map( function ( design, i ) {
+				design.logoFiles.forEach( function ( file ) {
+					body.append( 'logo_files_' + i + '[]', file );
+				} );
+				return {
+					flavor: design.flavorKey,
+					size: design.sizeKey,
+					quantity: design.quantity,
+					layers: design.layersMeta,
+				};
 			} );
-			state.textGroups.forEach( function ( group ) {
-				if ( group.text.trim() ) {
-					// forPrint=true: WHITE TYPE must stay pure white here —
-					// see resolveTextColor()'s own note on why the print
-					// path and the on-screen preview deliberately diverge
-					// only for that one case.
-					var resolvedColor = resolveTextColor( group, true );
-					layersMeta.push( {
-						type: 'text',
-						pos: group.pos,
-						text: group.text,
-						font: group.font,
-						font_size: group.fontSize,
-						// Pete, 2026-10-25: "confirm all elements... have
-						// no bugs" — this was never sent at all, so the
-						// print file always wrapped at a fixed width
-						// instead of whatever the TEXT WIDTH slider
-						// actually showed the customer (see renderTextGroup()'s
-						// maxWidth line and rrt_label_draw_text() server-side).
-						side_margin: group.sideMargin,
-						// Same audit: Bold/Italic toggle fully live in the
-						// preview (renderTextGroup()'s fontWeight/fontStyle
-						// lines) but never sent to the server at all before
-						// this — printed text silently ignored both.
-						bold: !! group.bold,
-						italic: !! group.italic,
-						// So the server-side composite (what Pete actually
-						// reviews/approves) matches the color the customer
-						// saw, instead of GD's old hardcoded near-black text.
-						color: resolvedColor.color,
-						outline: resolvedColor.outline,
-						// No more separate on/off checkbox (see renderTextGroup()) —
-						// derive it from intensity so the PHP side (still expecting
-						// both fields) gets a consistent value either way.
-						shadow: group.shadowIntensity > 0,
-						shadow_intensity: group.shadowIntensity,
-					} );
-				}
-			} );
-			body.append( 'layers', JSON.stringify( layersMeta ) );
+			body.append( 'designs', JSON.stringify( designsMeta ) );
 
 			fetch( config.ajaxUrl, { method: 'POST', body: body } )
 				.then( function ( r ) {
@@ -1784,6 +2265,8 @@
 					els.spinner.classList.remove( 'is-visible' );
 					if ( json.success ) {
 						setStatus( json.data.message, 'success' );
+						state.heldDesigns = [];
+						renderHeldDesigns();
 					} else {
 						setStatus( json.data && json.data.message ? json.data.message : 'Something went wrong. Please try again.', 'error' );
 					}
@@ -1802,8 +2285,13 @@
 	// panel; typing in the text box (or the font-drum's own fallback in
 	// the text-input handler above) is what actually creates the first
 	// text group, same moment a real customer would expect one to exist.
-	var firstSize = Object.keys( config.sizes )[ 0 ];
+	var firstFlavor = Object.keys( config.flavors )[ 0 ];
+	if ( firstFlavor ) {
+		state.flavorKey = firstFlavor;
+	}
+	var firstSize = Object.keys( config.sizes[ firstFlavor ] || {} )[ 0 ];
 	if ( firstSize ) {
 		loadSize( firstSize );
 	}
+	renderHeldDesigns();
 } )();

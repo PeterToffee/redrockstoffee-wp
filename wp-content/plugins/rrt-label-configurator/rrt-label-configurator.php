@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.55.0' );
+define( 'RRT_LABEL_VERSION', '3.60.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -89,6 +89,37 @@ add_action(
 );
 
 /**
+ * Pete, 2026-11-07: "we also have two flavors we'll be adding that
+ * shortly with the additions of two label files, one 8 oz and one 4 oz of
+ * the new flavor" — the flavor currently shipping (both box sizes) is
+ * Original Almond; Koffie-Almond is coming but its 2 template files don't
+ * exist on disk yet. Scaffolded as a real selectable dimension now (not a
+ * side channel) so going live later is just: drop the 4 template files
+ * into assets/templates/koffie-almond/ (same {size}-template.jpg /
+ * {size}-template-tinted.jpg naming the existing files already use) and
+ * flip 'available' to true below — nothing else has to change.
+ *
+ * 'template_dir' is relative to assets/templates/ and is where
+ * rrt_label_sizes() below looks for that flavor's {size}-template.jpg —
+ * empty string for Original Almond keeps today's existing files (which
+ * live directly in assets/templates/) working untouched.
+ */
+function rrt_label_flavors() {
+	return array(
+		'original-almond' => array(
+			'label'        => 'Original Almond',
+			'template_dir' => '',
+			'available'    => true,
+		),
+		'koffie-almond'   => array(
+			'label'        => 'Koffie-Almond',
+			'template_dir' => 'koffie-almond/',
+			'available'    => false,
+		),
+	);
+}
+
+/**
  * One place to adjust each label size's template image and its blank
  * customer-content zone. Everything is in inches, not pixels, so it reads
  * the way the real label artwork is measured and is easy to hand-tune.
@@ -96,8 +127,18 @@ add_action(
  * zone width/height are centered on the label; zone "top_in" is measured
  * from the end of the label FARTHEST from the mountain logo (confirmed
  * with Pete — that's the Nutrition Facts panel end on both templates).
+ *
+ * $flavor_key only changes WHICH template image 'template_file' points at
+ * (rrt_label_flavors() above) — every other number here (dpi, zone
+ * geometry, box dimensions) is the same real physical box/label
+ * regardless of flavor, so it's still one array, not duplicated per
+ * flavor.
  */
-function rrt_label_sizes() {
+function rrt_label_sizes( $flavor_key = 'original-almond' ) {
+	$flavors      = rrt_label_flavors();
+	$flavor       = $flavors[ $flavor_key ] ?? $flavors['original-almond'];
+	$template_dir = $flavor['template_dir'];
+
 	return array(
 		'8oz' => array(
 			'label'           => '8oz Box',
@@ -106,8 +147,8 @@ function rrt_label_sizes() {
 			// field from 'label' since that one's also used in the
 			// submission email and the JS "minimum order" error message,
 			// where this phrasing wouldn't read right.
-			'dropdown_note'   => 'Custom Min. 2 Boxes',
-			'template_file'   => 'assets/templates/8oz-template.jpg',
+			'dropdown_note'   => 'Min. 2 Boxes',
+			'template_file'   => 'assets/templates/' . $template_dir . '8oz-template.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 4.127,
 			'image_height_in' => 11,
@@ -136,8 +177,8 @@ function rrt_label_sizes() {
 		),
 		'4oz' => array(
 			'label'           => '4oz Box',
-			'dropdown_note'   => 'Custom Min. 6 Boxes, sold in 2 packs',
-			'template_file'   => 'assets/templates/4oz-template.jpg',
+			'dropdown_note'   => 'Min. 6, sold in 2s',
+			'template_file'   => 'assets/templates/' . $template_dir . '4oz-template.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 2.627,
 			'image_height_in' => 11,
@@ -931,42 +972,61 @@ function rrt_label_configurator_shortcode( $atts ) {
 		null
 	);
 
+	// Pete, 2026-11-07: flavor is now a real second axis alongside size
+	// (see rrt_label_flavors() above) — $sizes itself is flavor-independent
+	// geometry, used only to enumerate the two size keys and build $geo
+	// (same regardless of flavor); $js_sizes nests PER FLAVOR because
+	// that's the only thing that actually changes per flavor
+	// (template_url/template_tinted_url).
 	$sizes    = rrt_label_sizes();
+	$flavors  = rrt_label_flavors();
 	$js_sizes = array();
-	foreach ( $sizes as $key => $cfg ) {
-		$geo = rrt_label_display_geometry( $key );
-		$js_sizes[ $key ] = array_merge(
-			array(
-				'label'           => $cfg['label'],
-				'template_url'    => RRT_LABEL_URL . $cfg['template_file'],
-				// Pete, 2026-10-25: "start from scratch... for that part
-				// of the image" — every CSS-only attempt (multiply blend,
-				// flat alpha wash, sepia filter) either faded the ink or
-				// got the color wrong, because none of them can actually
-				// tell paper from ink. Real fix: a build-time script
-				// (scratchpad's tint-template.php, GD-based) recolors
-				// only the near-white background pixels of the actual
-				// template JPG, leaving true ink/logo colors alone —
-				// used ONLY by the 3D box mockup, never the flat 2D
-				// preview or the real print compositing in
-				// inc/handle-submission.php, which still use the
-				// original untouched template.
-				'template_tinted_url' => RRT_LABEL_URL . str_replace( '.jpg', '-tinted.jpg', $cfg['template_file'] ),
-				// Raw inches for the 3D box-mockup preview (see
-				// assets/label-configurator.js's computeBoxFaces()) — the
-				// mockup computes its own crop windows directly from these
-				// rather than reusing $geo above, which is tuned for the
-				// flat scrollable preview's different framing.
-				'image_width_in'  => $cfg['image_width_in'],
-				'image_height_in' => $cfg['image_height_in'],
-				'box_width_in'    => $cfg['box_width_in'],
-				'box_depth_in'    => $cfg['box_depth_in'],
-				'box_height_in'   => $cfg['box_height_in'],
-				'zone_width_in'   => $cfg['zone']['width_in'],
-				'zone_height_in'  => $cfg['zone']['height_in'],
-				'zone_top_in'     => $cfg['zone']['top_in'],
-			),
-			$geo
+	foreach ( $flavors as $flavor_key => $flavor_cfg ) {
+		$flavor_sizes             = rrt_label_sizes( $flavor_key );
+		$js_sizes[ $flavor_key ]  = array();
+		foreach ( $flavor_sizes as $key => $cfg ) {
+			$geo = rrt_label_display_geometry( $key );
+			$js_sizes[ $flavor_key ][ $key ] = array_merge(
+				array(
+					'label'           => $cfg['label'],
+					'template_url'    => RRT_LABEL_URL . $cfg['template_file'],
+					// Pete, 2026-10-25: "start from scratch... for that part
+					// of the image" — every CSS-only attempt (multiply blend,
+					// flat alpha wash, sepia filter) either faded the ink or
+					// got the color wrong, because none of them can actually
+					// tell paper from ink. Real fix: a build-time script
+					// (scratchpad's tint-template.php, GD-based) recolors
+					// only the near-white background pixels of the actual
+					// template JPG, leaving true ink/logo colors alone —
+					// used ONLY by the 3D box mockup, never the flat 2D
+					// preview or the real print compositing in
+					// inc/handle-submission.php, which still use the
+					// original untouched template.
+					'template_tinted_url' => RRT_LABEL_URL . str_replace( '.jpg', '-tinted.jpg', $cfg['template_file'] ),
+					// Raw inches for the 3D box-mockup preview (see
+					// assets/label-configurator.js's computeBoxFaces()) — the
+					// mockup computes its own crop windows directly from these
+					// rather than reusing $geo above, which is tuned for the
+					// flat scrollable preview's different framing.
+					'image_width_in'  => $cfg['image_width_in'],
+					'image_height_in' => $cfg['image_height_in'],
+					'box_width_in'    => $cfg['box_width_in'],
+					'box_depth_in'    => $cfg['box_depth_in'],
+					'box_height_in'   => $cfg['box_height_in'],
+					'zone_width_in'   => $cfg['zone']['width_in'],
+					'zone_height_in'  => $cfg['zone']['height_in'],
+					'zone_top_in'     => $cfg['zone']['top_in'],
+				),
+				$geo
+			);
+		}
+	}
+
+	$js_flavors = array();
+	foreach ( $flavors as $flavor_key => $flavor_cfg ) {
+		$js_flavors[ $flavor_key ] = array(
+			'label'     => $flavor_cfg['label'],
+			'available' => ! empty( $flavor_cfg['available'] ),
 		);
 	}
 
@@ -1007,6 +1067,7 @@ function rrt_label_configurator_shortcode( $atts ) {
 		'window.rrtLabelConfigurator = ' . wp_json_encode(
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				'flavors' => $js_flavors,
 				'sizes'   => $js_sizes,
 				'fonts'   => $js_fonts,
 				'art'     => $js_art,
@@ -1024,8 +1085,44 @@ function rrt_label_configurator_shortcode( $atts ) {
 
 				<div class="config-card rrt-lc-card--size">
 					<div class="rrt-lc-field">
-						<label for="rrt-lc-size">Box size</label>
-						<select id="rrt-lc-size">
+						<label class="rrt-lc-field-label">Flavor</label>
+						<?php
+						// Pete, 2026-11-07: "we also have two flavors we'll be
+						// adding that shortly" — Koffie-Almond's radio renders
+						// now (disabled, "Coming soon") so the UI already
+						// tells customers it exists; it becomes pickable the
+						// moment rrt_label_flavors() flips 'available' to
+						// true (see that function in this file).
+						$is_first_flavor = true;
+						?>
+						<div class="rrt-lc-size-options rrt-lc-flavor-options" role="radiogroup" aria-label="Flavor">
+							<?php foreach ( $flavors as $flavor_key => $flavor_cfg ) : ?>
+								<label class="rrt-lc-size-option<?php echo empty( $flavor_cfg['available'] ) ? ' rrt-lc-size-option--disabled' : ''; ?>">
+									<input type="radio" name="rrt-lc-flavor" value="<?php echo esc_attr( $flavor_key ); ?>"<?php echo $is_first_flavor ? ' checked' : ''; ?><?php echo empty( $flavor_cfg['available'] ) ? ' disabled' : ''; ?>>
+									<span><?php echo esc_html( $flavor_cfg['label'] ); ?><?php echo empty( $flavor_cfg['available'] ) ? ' — Coming soon' : ''; ?></span>
+								</label>
+								<?php $is_first_flavor = false; ?>
+							<?php endforeach; ?>
+						</div>
+					</div>
+					<div class="rrt-lc-field">
+						<?php
+						// Pete, 2026-11-07: "change the dropdown that says box
+						// size, to radio buttons for the two current, both
+						// showing" -- was a <select>, now both sizes sit
+						// right on the page (only two options, no real need
+						// to hide one behind a dropdown). Same id="rrt-lc-size"
+						// is gone (radios share one name instead); JS below
+						// reads whichever one is :checked.
+						//
+						// Pete, 2026-11-08: "remove the 'BOX SIZE' title
+						// lettering" — the visible <label> is gone; the
+						// radiogroup's aria-label below keeps this
+						// identifiable for screen readers even with no
+						// visible heading.
+						$is_first_size = true;
+						?>
+						<div class="rrt-lc-size-options" role="radiogroup" aria-label="Box size">
 							<?php foreach ( $sizes as $key => $cfg ) : ?>
 								<?php
 								// Pete, 2026-10-21: "need the appropriate Minimum number" shown
@@ -1036,9 +1133,13 @@ function rrt_label_configurator_shortcode( $atts ) {
 								// where this longer phrasing wouldn't read right.
 								$option_text = $cfg['label'] . ' — ' . $cfg['dropdown_note'];
 								?>
-								<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $option_text ); ?></option>
+								<label class="rrt-lc-size-option">
+									<input type="radio" name="rrt-lc-size" value="<?php echo esc_attr( $key ); ?>"<?php echo $is_first_size ? ' checked' : ''; ?>>
+									<span><?php echo esc_html( $option_text ); ?></span>
+								</label>
+								<?php $is_first_size = false; ?>
 							<?php endforeach; ?>
-						</select>
+						</div>
 					</div>
 				</div>
 
@@ -1079,6 +1180,45 @@ function rrt_label_configurator_shortcode( $atts ) {
 					<div class="rrt-lc-field">
 						<label for="rrt-lc-message">Anything else we should know?</label>
 						<textarea id="rrt-lc-message" rows="3"></textarea>
+					</div>
+
+					<?php
+					/**
+					 * Pete, 2026-11-07: "so far we have two files user stuff
+					 * gets jammed into. We need to make allowances so if
+					 * user wishes to put together an order for each size,
+					 * file is saved(held), fires off the Harry I love it
+					 * button with a descriptor/tally showing until files
+					 * sent by 'submit my files design(s)'" — clicking
+					 * "Harry, I love it!" on the box-preview popup now holds
+					 * a snapshot of the design in progress instead of just
+					 * closing the popup (see the boxLoveBtn handler in
+					 * label-configurator.js). This tray lists every held
+					 * design with a quick remove, and stays hidden until at
+					 * least one exists. Submit always bundles whatever's
+					 * held here PLUS whatever's still on the stage, so a
+					 * single-design order needs no extra click, same as
+					 * before this feature existed.
+					 */
+					?>
+					<?php
+					/**
+					 * Pete, 2026-11-08: "doesn't make sense yet... a) no way
+					 * to tell what it is, b) can I look again?, c) I need a
+					 * 'make another label?' button" — each held <li> now
+					 * carries a live thumbnail + a one-line content summary
+					 * (built in label-configurator.js) so two held designs
+					 * never look identical, a "View" button reopens a bigger
+					 * read-only version of that same thumbnail, and this
+					 * explicit button scrolls back up to the flavor/size
+					 * card instead of expecting the customer to notice the
+					 * stage already reset on its own.
+					 */
+					?>
+					<div class="rrt-lc-held-designs" id="rrt-lc-held-designs" hidden>
+						<h3 class="rrt-lc-heading">Saved designs</h3>
+						<ul class="rrt-lc-held-list" id="rrt-lc-held-list"></ul>
+						<button type="button" id="rrt-lc-add-another-btn" class="rrt-lc-btn-secondary rrt-lc-add-another-btn">+ Make another label</button>
 					</div>
 
 					<button type="button" id="rrt-lc-submit" class="rrt-lc-btn-primary">Submit my label design</button>
@@ -1187,6 +1327,44 @@ function rrt_label_configurator_shortcode( $atts ) {
 						<div class="rrt-lc-box-modal-actions">
 							<button type="button" id="rrt-lc-box-love-btn" class="rrt-lc-btn-primary"><span class="rrt-lc-love-icon-wrap"><img class="rrt-lc-love-icon" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' ); ?>" width="36" height="21" decoding="sync" alt=""></span>Harry, I love it!</button>
 							<button type="button" id="rrt-lc-box-back-btn" class="rrt-lc-btn-secondary">Back to the drawing board</button>
+						</div>
+					</div>
+				</div>
+
+				<?php
+				/**
+				 * Pete, 2026-11-08: "can I look again?" — a small read-only
+				 * popup that re-shows a held design's thumbnail (the same
+				 * cloned-zone snapshot used in the tray <li>, just bigger)
+				 * so a customer can check what they saved without it being
+				 * loaded back onto the live editing stage. Reuses the same
+				 * .rrt-lc-box-modal* classes as the box-mockup popup above —
+				 * same backdrop/centered-panel look, nothing box-specific
+				 * about those classes.
+				 */
+				?>
+				<div class="rrt-lc-box-modal" id="rrt-lc-held-preview-modal" hidden>
+					<div class="rrt-lc-box-modal-backdrop" id="rrt-lc-held-preview-backdrop"></div>
+					<div class="rrt-lc-box-modal-panel" role="dialog" aria-modal="true" aria-labelledby="rrt-lc-held-preview-heading">
+						<h3 class="rrt-lc-heading" id="rrt-lc-held-preview-heading">Saved design</h3>
+						<div class="rrt-lc-held-preview-thumb" id="rrt-lc-held-preview-thumb"></div>
+						<p class="rrt-lc-held-preview-details" id="rrt-lc-held-preview-details"></p>
+						<?php
+						/**
+						 * Pete, 2026-11-08: "possible to look at the file
+						 * (view) on the box before committing/submitting?
+						 * To save any number of labels and then go back
+						 * through them to see them on the box?" — hands off
+						 * to the SAME 3D box-mockup popup used while live-
+						 * editing (openBoxModalForHeldDesign() in
+						 * label-configurator.js), just fed this held
+						 * design's own frozen snapshot instead of the live
+						 * stage.
+						 */
+						?>
+						<div class="rrt-lc-box-modal-actions">
+							<button type="button" id="rrt-lc-held-preview-box-btn" class="rrt-lc-btn-primary">See on the Box</button>
+							<button type="button" id="rrt-lc-held-preview-close" class="rrt-lc-btn-secondary">Close</button>
 						</div>
 					</div>
 				</div>

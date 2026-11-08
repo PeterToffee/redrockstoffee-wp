@@ -43,6 +43,73 @@
 	display: block !important;
 }
 
+/* Pete, 2026-11-08: "the 'off-center' alarm button needs to be more
+   pronounced" and "popup just under the preview box, with a dismiss
+   button x that says 'X DISMISS'" — relocated into this wrap (see the
+   insertAdjacentElement()/createElement() build in label-configurator.js)
+   sitting right under the preview box. Same day: "still screwed, it
+   opens with the alarm ON... revert to when it was under" — TWO bugs,
+   both now fixed:
+   1) `.rrt-lc-offcenter-wrap { display:flex; ... }` had the SAME
+      specificity as the browser's own `[hidden]{display:none}`, so this
+      rule silently won the cascade and the wrap rendered regardless of
+      its `hidden` attribute — the actual cause of "opens with the alarm
+      on," not the content-gating logic in label-configurator.js. Same
+      `:not([hidden])` guard this codebase already uses for
+      .rrt-lc-box-modal, just missed here.
+   2) Dismiss moved from beside the alarm button back to underneath it,
+      per Pete's explicit "revert... to when it was under."
+   #center-text-btn's own markup sets everything inline (byte-for-byte
+   copy from TheUnframer — see this file's header note), so these still
+   need !important to win over it. */
+.rrt-lc-offcenter-wrap:not( [hidden] ) {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 0.75rem;
+}
+
+#center-text-btn {
+	margin-top: 0 !important;
+	padding: 0.9rem 1rem !important;
+	font-size: 0.92rem !important;
+	letter-spacing: 0.3px;
+	/* A base button rule elsewhere in the copied CSS sets white-space:
+	   nowrap (pill-button buttons sitting on one line sitewide), which
+	   would otherwise clip "TAP TO RECENTER" at this card's width instead
+	   of wrapping it to a 2nd line. */
+	white-space: normal !important;
+	animation: rrt-lc-offcenter-pulse 1s ease-in-out infinite;
+	transform-origin: center;
+}
+
+.rrt-lc-offcenter-dismiss {
+	align-self: center;
+	border-radius: 999px;
+	background: #fff;
+	color: #e03020;
+	border: 1.5px solid #e03020;
+	font-family: 'Poppins', sans-serif;
+	font-weight: 700;
+	font-size: 0.78rem;
+	letter-spacing: 0.3px;
+	padding: 8px 22px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.rrt-lc-offcenter-dismiss:hover {
+	background: #e03020;
+	color: #fff;
+}
+@keyframes rrt-lc-offcenter-pulse {
+	0%, 100% {
+		box-shadow: -4px 0 14px rgba( 220, 40, 20, 0.75 ), 4px 0 14px rgba( 220, 40, 20, 0.75 ), 0 0 8px rgba( 220, 40, 20, 0.4 );
+	}
+	50% {
+		box-shadow: -6px 0 22px rgba( 220, 40, 20, 0.95 ), 6px 0 22px rgba( 220, 40, 20, 0.95 ), 0 0 16px rgba( 220, 40, 20, 0.7 );
+	}
+}
+
 /* These two are ALSO separately gated behind JS in the source (the
    textarea via its own inline display:none, the font-drum/sliders via
    the plain .quote-options class needing JS to add a .visible class) —
@@ -253,6 +320,224 @@
 	letter-spacing: 0.5px;
 	color: var( --rrt-primary );
 	margin-bottom: 0.25rem;
+}
+
+/* Pete, 2026-11-07: "change the dropdown that says box size, to radio
+   buttons for the two current, both showing" -- the group heading
+   (.rrt-lc-field-label) keeps the bold/uppercase/primary-color look the
+   old <select>'s label had; the per-option labels (.rrt-lc-size-option)
+   need their OWN look instead of inheriting that same bold/uppercase
+   treatment from the ".rrt-lc-field label" rule above. */
+.rrt-lc-size-options {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* Pete, 2026-11-08: "make the flavors radio buttons on the same line" —
+   only the flavor group goes side by side; box size (above) stays the
+   original stacked column. A 2-column grid (not flex+nowrap) guarantees
+   both pills start on the same row even at this sidebar's ~400px width —
+   "Koffie-Almond — Coming soon" wraps to a 2nd line WITHIN its own pill
+   instead of pushing the whole pill down to its own row. */
+.rrt-lc-flavor-options {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+}
+.rrt-lc-flavor-options .rrt-lc-size-option {
+	padding: 10px 8px;
+	font-size: 0.85rem;
+}
+
+.rrt-lc-field label.rrt-lc-size-option {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding: 10px 12px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	font-weight: 400;
+	font-size: 0.95rem;
+	text-transform: none;
+	letter-spacing: normal;
+	color: var( --rrt-text );
+	cursor: pointer;
+	transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.rrt-lc-size-option:has( input:checked ) {
+	border-color: var( --rrt-primary );
+	background: rgba( 153, 30, 33, 0.05 );
+}
+
+.rrt-lc-size-option input[type="radio"] {
+	margin-top: 3px;
+	accent-color: var( --rrt-primary );
+	flex-shrink: 0;
+}
+
+/* Pete, 2026-11-07: Koffie-Almond renders now (not hidden) so customers
+   see it's coming, but it isn't pickable until rrt_label_flavors() flips
+   'available' to true — same disabled radio, just dimmed/no-pointer so it
+   doesn't look like a live, clickable option. */
+.rrt-lc-size-option--disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+.rrt-lc-size-option--disabled input[type="radio"] {
+	cursor: not-allowed;
+}
+
+/* --- held-design tray (see rrt-lc-held-designs in rrt-label-configurator.php
+   and the boxLoveBtn/renderHeldDesigns() handling in label-configurator.js) --- */
+.rrt-lc-held-designs {
+	margin: 1rem 0;
+	padding: 12px 14px;
+	border: 1px solid var( --rrt-primary );
+	border-radius: 6px;
+	background: rgba( 153, 30, 33, 0.05 );
+}
+
+.rrt-lc-held-designs .rrt-lc-heading {
+	margin: 0 0 0.5rem;
+}
+
+.rrt-lc-held-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+/* Pete, 2026-11-08: "no way to tell what it is" — each held item is now
+   thumbnail + 2 text lines (flavor/size/qty, then a content summary) +
+   View + remove, instead of one bare line of flavor/size/qty that looked
+   identical for any two designs of the same size. */
+.rrt-lc-held-item {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 8px 10px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	font-size: 0.9rem;
+	color: var( --rrt-text );
+}
+
+.rrt-lc-held-item-main {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.rrt-lc-held-item-text {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.rrt-lc-held-item-title {
+	font-weight: 600;
+}
+
+.rrt-lc-held-item-summary {
+	color: #666;
+	font-size: 0.82rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rrt-lc-held-item-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.rrt-lc-held-item-view {
+	border: 1px solid var( --rrt-primary );
+	background: transparent;
+	color: var( --rrt-primary );
+	border-radius: 999px;
+	font-weight: 700;
+	font-size: 0.75rem;
+	line-height: 1;
+	cursor: pointer;
+	padding: 6px 10px;
+	white-space: nowrap;
+}
+.rrt-lc-held-item-view:hover {
+	background: var( --rrt-primary );
+	color: #fff;
+}
+
+.rrt-lc-held-item-remove {
+	border: none;
+	background: transparent;
+	color: var( --rrt-primary );
+	font-weight: 700;
+	font-size: 1.1rem;
+	line-height: 1;
+	cursor: pointer;
+	padding: 2px 6px;
+	flex-shrink: 0;
+}
+.rrt-lc-held-item-remove:hover {
+	color: var( --rrt-primary-dark );
+}
+
+/* The thumbnail is a scaled-down clone of #rrt-lc-zone's own content at
+   hold time (see renderHeldThumbnail() in label-configurator.js) — same
+   "clone + transform:scale" technique already used for the box-mockup's
+   .rrt-lc-zone-mirror above, just smaller and inside the tray <li>
+   instead of on the box popup. */
+.rrt-lc-held-item-thumb {
+	position: relative;
+	overflow: hidden;
+	flex-shrink: 0;
+	background: #fcf6cd;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.rrt-lc-held-thumb-inner {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: top left;
+	pointer-events: none;
+}
+
+/* Pete, 2026-11-08: "I need a 'make another label?' button, that sends me
+   back to the top" — scrolls to the flavor/size card (see the
+   addAnotherBtn handler in label-configurator.js); the draft itself is
+   already reset the moment a design is held, so this is purely a "go
+   look up there" affordance, not another reset. */
+.rrt-lc-add-another-btn {
+	display: block;
+	width: 100%;
+	margin-top: 10px;
+}
+
+/* --- "can I look again?" read-only preview popup (reuses
+   .rrt-lc-box-modal* for the backdrop/panel shell) --- */
+.rrt-lc-held-preview-thumb {
+	position: relative;
+	overflow: hidden;
+	margin: 0 auto 0.75rem;
+	background: #fcf6cd;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+}
+
+.rrt-lc-held-preview-details {
+	text-align: center;
+	font-size: 0.95rem;
+	color: var( --rrt-text );
 }
 
 .rrt-lc-field input[type="text"],
