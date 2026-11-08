@@ -75,3 +75,10 @@
 - inc/handle-submission.php  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (10 checks, 0 warnings). Server backups: ~/deploy-backups/1794113387/backup. Rollback: .claude/deploy/rollback.sh 1794113387 --go
+
+## 2026-11-07 21:58 - deploy 1794113387 (commit 5ea7d5a8)
+- assets/label-configurator.css  (DIFF)
+- assets/label-configurator.js  (DIFF)
+- inc/handle-submission.php  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (14 checks, 0 warnings). Server backups: *.bak.1794113387. Rollback: .claude/deploy/rollback.sh 1794113387 --go
