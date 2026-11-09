@@ -1639,13 +1639,40 @@
 	// .art-picker-item's CSS (width:100% of its grid cell,
 	// label-configurator.css) renders proportionally larger thumbnails
 	// without yet another guessed fixed px size.
+	// Pete, 2026-11-09: "the library is hanging out... I can't look down
+	// the library" — top used to be set to btnRect.bottom+4 with no
+	// regard for whether that pushes the panel (up to 60vh tall per
+	// label-configurator.css, and genuinely that tall with the full art
+	// library in it) past the bottom of the real viewport. Since this
+	// panel is position:fixed (needed to escape #logo-selector-row's own
+	// overflow:hidden — see the note above), once it renders off-screen
+	// there is NO scroll gesture that can ever bring it back: a fixed
+	// element doesn't move when the page scrolls, by definition — the
+	// wheel just ends up scrolling the page underneath it instead, which
+	// is exactly the "unattached from where it started out" symptom.
+	// Measuring the panel's real rendered height (only possible once
+	// it's actually displayed, not while it's still display:none) and
+	// clamping top against the viewport — flipping to open ABOVE the
+	// button when there's more room there — keeps the whole panel on
+	// screen and scrollable every time.
 	function positionArtPanel() {
 		var btnRect = els.artPickerBtn.getBoundingClientRect();
 		var card = document.getElementById( 'quote-module-card' );
 		var colRect = card ? card.getBoundingClientRect() : btnRect;
 		els.artPickerPanel.style.left = colRect.left + 'px';
 		els.artPickerPanel.style.width = colRect.width + 'px';
-		els.artPickerPanel.style.top = ( btnRect.bottom + 4 ) + 'px';
+		var margin = 8;
+		var panelHeight = els.artPickerPanel.getBoundingClientRect().height;
+		var top = btnRect.bottom + 4;
+		if ( top + panelHeight > window.innerHeight - margin ) {
+			var spaceAbove = btnRect.top - margin;
+			if ( spaceAbove >= panelHeight ) {
+				top = btnRect.top - panelHeight - 4;
+			} else {
+				top = Math.max( margin, window.innerHeight - panelHeight - margin );
+			}
+		}
+		els.artPickerPanel.style.top = top + 'px';
 	}
 
 	// Pete, 2026-11-09: "make it highlighted when choosing, then
@@ -1664,8 +1691,12 @@
 		if ( isOpen ) {
 			closeArtPanel();
 		} else {
-			positionArtPanel();
+			// display must be set BEFORE positionArtPanel() runs — it now
+			// measures the panel's own real rendered height to clamp its
+			// position within the viewport, which reads 0 while it's
+			// still display:none.
 			els.artPickerPanel.style.display = 'grid';
+			positionArtPanel();
 			els.artPickerBtn.classList.add( 'selected' );
 			// Pete, 2026-10-26: "be able to use the up/down arrows on
 			// desktop" — focusing the (now-visible, tabindex="-1") panel
