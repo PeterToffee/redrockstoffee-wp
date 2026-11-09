@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.60.0' );
+define( 'RRT_LABEL_VERSION', '3.75.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -1326,7 +1326,35 @@ function rrt_label_configurator_shortcode( $atts ) {
 						</div>
 						<div class="rrt-lc-box-modal-actions">
 							<button type="button" id="rrt-lc-box-love-btn" class="rrt-lc-btn-primary"><span class="rrt-lc-love-icon-wrap"><img class="rrt-lc-love-icon" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' ); ?>" width="36" height="21" decoding="sync" alt=""></span>Harry, I love it!</button>
+							<?php
+							/**
+							 * Pete, 2026-11-09: "can we throw it back to the
+							 * preview/edit field?" — only shown while this
+							 * popup is viewing a SAVED design (see
+							 * openBoxModalForHeldDesign() in
+							 * label-configurator.js), hidden the rest of the
+							 * time same as the love-it button is in reverse.
+							 */
+							?>
+							<button type="button" id="rrt-lc-box-edit-btn" class="rrt-lc-btn-primary" hidden>Edit This Design</button>
 							<button type="button" id="rrt-lc-box-back-btn" class="rrt-lc-btn-secondary">Back to the drawing board</button>
+							<?php
+							/**
+							 * Pete, 2026-11-09: "I think we can safely remove
+							 * the 'back to the drawing board,' let's put a
+							 * 'delete/start again' in its place that removes
+							 * and gets us back to the beginning" — ONLY while
+							 * viewing a SAVED design (same condition as
+							 * #rrt-lc-box-edit-btn above): "back to the
+							 * drawing board" doesn't apply there — there's no
+							 * live draft to go back to — and REAL closing
+							 * (no change, keep the saved design) is still
+							 * available via the backdrop click or Escape, so
+							 * nothing is lost by dropping it as a labeled
+							 * button here.
+							 */
+							?>
+							<button type="button" id="rrt-lc-box-delete-btn" class="rrt-lc-btn-secondary" hidden>Delete / Start Again</button>
 						</div>
 					</div>
 				</div>
@@ -1364,7 +1392,64 @@ function rrt_label_configurator_shortcode( $atts ) {
 						?>
 						<div class="rrt-lc-box-modal-actions">
 							<button type="button" id="rrt-lc-held-preview-box-btn" class="rrt-lc-btn-primary">See on the Box</button>
+							<?php
+							/**
+							 * Pete, 2026-11-09: "can we throw it back to the
+							 * preview/edit field?" — sends this saved design
+							 * back onto the live stage for more editing (see
+							 * editHeldDesign() in label-configurator.js).
+							 */
+							?>
+							<button type="button" id="rrt-lc-held-preview-edit-btn" class="rrt-lc-btn-primary">Edit This Design</button>
 							<button type="button" id="rrt-lc-held-preview-close" class="rrt-lc-btn-secondary">Close</button>
+						</div>
+					</div>
+				</div>
+
+				<?php
+				/**
+				 * Pete, 2026-11-09: "what if there's a user that wants
+				 * nothing?? when they hit harry I love it, we need a
+				 * popup, you didn't add anything, is this what you want?
+				 * A yes, and a go back and redo" — previously, clicking
+				 * "Harry, I love it!" with no text/logo just silently
+				 * closed the box popup (see draftHasContent() check in
+				 * label-configurator.js). Now it opens this confirmation
+				 * instead, so a customer who genuinely wants a blank
+				 * label can say so on purpose rather than it happening by
+				 * accident. Same .rrt-lc-box-modal* classes as the other
+				 * popups.
+				 */
+				?>
+				<div class="rrt-lc-box-modal" id="rrt-lc-empty-confirm-modal" hidden>
+					<div class="rrt-lc-box-modal-backdrop" id="rrt-lc-empty-confirm-backdrop"></div>
+					<div class="rrt-lc-box-modal-panel" role="dialog" aria-modal="true" aria-labelledby="rrt-lc-empty-confirm-heading">
+						<h3 class="rrt-lc-heading" id="rrt-lc-empty-confirm-heading">You didn't add anything</h3>
+						<p class="rrt-lc-empty-confirm-text">No text or image is on this label yet. Is that what you want?</p>
+						<div class="rrt-lc-box-modal-actions">
+							<button type="button" id="rrt-lc-empty-confirm-yes-btn" class="rrt-lc-btn-primary">Yes, save it blank</button>
+							<button type="button" id="rrt-lc-empty-confirm-back-btn" class="rrt-lc-btn-secondary">Go back and redo</button>
+						</div>
+					</div>
+				</div>
+				<?php
+				/**
+				 * Pete, 2026-11-09: "if we X the saved file out... maybe we
+				 * need a 'this will delete your saved file' and a way back
+				 * if that's a mistake" — the × on a Saved Designs tray row
+				 * used to delete immediately with no confirmation and no
+				 * undo. Same confirm-modal pattern as the empty-label
+				 * popup above, just for this action instead.
+				 */
+				?>
+				<div class="rrt-lc-box-modal" id="rrt-lc-delete-confirm-modal" hidden>
+					<div class="rrt-lc-box-modal-backdrop" id="rrt-lc-delete-confirm-backdrop"></div>
+					<div class="rrt-lc-box-modal-panel" role="dialog" aria-modal="true" aria-labelledby="rrt-lc-delete-confirm-heading">
+						<h3 class="rrt-lc-heading" id="rrt-lc-delete-confirm-heading">Delete this saved design?</h3>
+						<p class="rrt-lc-empty-confirm-text">This will delete your saved design. This can't be undone.</p>
+						<div class="rrt-lc-box-modal-actions">
+							<button type="button" id="rrt-lc-delete-confirm-yes-btn" class="rrt-lc-btn-secondary">Yes, delete it</button>
+							<button type="button" id="rrt-lc-delete-confirm-back-btn" class="rrt-lc-btn-primary">No, keep it</button>
 						</div>
 					</div>
 				</div>

@@ -540,6 +540,13 @@
 	color: var( --rrt-text );
 }
 
+.rrt-lc-empty-confirm-text {
+	text-align: center;
+	font-size: 0.95rem;
+	color: var( --rrt-text );
+	margin: 0 0 1rem;
+}
+
 .rrt-lc-field input[type="text"],
 .rrt-lc-field input[type="email"],
 .rrt-lc-field input[type="tel"],
@@ -968,6 +975,114 @@
 
 .rrt-lc-status.is-success {
 	color: #1a7a3c;
+}
+
+/* Pete, 2026-11-09: "the hover or highlight colors aren't easy to figure
+   out, make the B, I, and the white type button red - they're not
+   highlighted/chosen, and the black type the highlighted chosen default
+   goldenrod" — the shared .toggle-btn base (configurator-components.css)
+   is a light purple-bordered pill for "off" and a plain maroon fill for
+   "on," too close to each other to read at a glance. Overriding just
+   these three controls: red resting state, amber/goldenrod ".selected"
+   state — same amber gradient .rrt-pill-tab.active already uses above,
+   so "this is the active choice" reads the same way across the whole
+   card. */
+#btn-bold,
+#btn-italic,
+#shadow-color-row .toggle-btn,
+#shadow-outline-row .toggle-btn {
+	background: var( --rrt-primary );
+	color: #fff;
+	border-color: var( --rrt-primary );
+}
+#btn-bold:hover,
+#btn-italic:hover,
+#shadow-color-row .toggle-btn:hover,
+#shadow-outline-row .toggle-btn:hover {
+	background: var( --rrt-primary-dark );
+	border-color: var( --rrt-primary-dark );
+}
+#btn-bold.selected,
+#btn-italic.selected,
+#shadow-color-row .toggle-btn.selected,
+#shadow-outline-row .toggle-btn.selected {
+	background: linear-gradient( 135deg, #f59e0b, #d97e06 );
+	color: #3d1c00;
+	border-color: #d97e06;
+}
+
+/* Pete, 2026-11-09: "change 'our art library' button to 'ART LIBRARY' and
+   make it highlighted when choosing, then unhighlights when closes/item
+   selected" — this button's color used to be hardcoded inline in the PHP
+   markup (background:#991e21), so it could never reflect an "open" state.
+   Moved the resting look here (same maroon as before) and added the same
+   amber ".selected" treatment used everywhere else on this card; JS
+   (label-configurator.js) now toggles .selected while the panel is open. */
+#art-picker-btn {
+	background: var( --rrt-primary );
+	color: #fff;
+	border-color: var( --rrt-primary );
+}
+#art-picker-btn:hover {
+	background: var( --rrt-primary-dark );
+	border-color: var( --rrt-primary-dark );
+}
+#art-picker-btn.selected {
+	background: linear-gradient( 135deg, #f59e0b, #d97e06 );
+	color: #3d1c00;
+	border-color: #d97e06;
+}
+
+/* Pete, 2026-11-09: "why isn't things going to the goldenrod when
+   highlight like the add text and the add-logo buttons? with the
+   black type button already highlighted?" / scope: "in the add text
+   area/add logo area only" — the other two "this one's picked" states
+   inside these two tab panels (the 1/2/3 text-group and logo-group
+   number pills, and the selected font card) were still on the plain
+   .toggle-btn.selected / .radio-card.selected base (plain maroon fill
+   for the pills, a barely-there light-lavender tint for the font card
+   — same tint as its own :hover, hard to tell "picked" from "pointed
+   at"). Same amber treatment as BLACK TYPE/ADD TEXT above. */
+#quote-selector-btns .toggle-btn.selected,
+#logo-selector-btns .toggle-btn.selected {
+	background: linear-gradient( 135deg, #f59e0b, #d97e06 );
+	color: #3d1c00;
+	border-color: #d97e06;
+}
+/* Pete, 2026-10-X [pre-existing]: .radio-card.selected in
+   configurator-components.css was written for a JS-toggled class that
+   this font picker never actually adds — fontRadios' only JS listener
+   (label-configurator.js) just reads radio.checked, never sets
+   .selected. So the "picked" font card had NO highlight at all beyond
+   the small native radio dot. :has() targets the real checked state
+   instead, which both fixes that and gets the goldenrod treatment. */
+#tab-panel-quote .radio-card:has( input:checked ) {
+	border-color: #d97e06;
+	background: linear-gradient( 135deg, #fdf0d5, #fbe3b8 );
+}
+#tab-panel-quote .radio-card:has( input:checked ) .radio-card-label {
+	color: #3d1c00;
+}
+
+/* Pete, 2026-11-09: "change the plus and minuses on the sliders to
+   black, with white - +" — the shared .slider-step-btn base
+   (configurator-components.css) is a white circle with a maroon
+   border/symbol; this plugin's own sliders (Shadow, Font, Text Width,
+   Logo Size) get black circles with a white symbol instead.
+   !important required: turns out these buttons were NEVER actually
+   showing that white/maroon base — the same .elementor-kit-4045
+   button global-reset conflict documented below on .font-drum-rotator
+   (1 class + 1 type beats this plugin's lone .slider-step-btn class)
+   was silently winning all along, painting them the kit's "accent"
+   color instead. Same justified use of !important as that case. */
+.slider-step-btn {
+	background: #000 !important;
+	color: #fff !important;
+	border-color: #000 !important;
+}
+.slider-step-btn:hover {
+	background: #2a2a2a !important;
+	border-color: #2a2a2a !important;
 }
 
 /* --- text color palette ---

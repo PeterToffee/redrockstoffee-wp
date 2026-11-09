@@ -52,18 +52,22 @@
 												<button class="slider-step-btn" data-for="shadow-intensity-slider" data-dir="1" style="width:18px;height:18px;flex-shrink:0;">+</button>
 											</div>
 										</div>
-										<div id="text-color-row" style="display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0;">
-											<div class="slider-header">
-												<span class="slider-name">Color</span>
-											</div>
-											<div class="color-row" id="text-color-swatches" style="display:none;">
-												<div class="color-swatch" data-color="red" title="Red"></div>
-												<div class="color-swatch" data-color="gold" title="Gold"></div>
-												<div class="color-swatch" data-color="brown" title="Brown"></div>
-												<div class="color-swatch" data-color="cream" title="Cream"></div>
-												<div class="color-swatch" data-color="slate" title="Slate"></div>
-											</div>
-											<input type="color" id="text-color-custom" value="#991e21" title="Custom color">
+										<?php
+										/**
+										 * Pete, 2026-11-09: "to the right of the shadow size, we need
+										 * a white or black shadow choice" — the shadow/outline drawn
+										 * behind the text (outlineShadow() in label-configurator.js,
+										 * rrt_label_draw_text()'s $outline_hex server-side) was always
+										 * hardcoded black regardless of anything else on the card; this
+										 * is a genuinely new, separate choice from the existing WHITE
+										 * TYPE/BLACK TYPE pair below (which picks the TEXT FILL, not
+										 * the outline behind it — see group.shadowColor vs the new
+										 * group.outlineColor in label-configurator.js).
+										 */
+										?>
+										<div id="shadow-outline-row" class="toggle-row" style="gap:0.25rem; flex-shrink:0;">
+											<button class="toggle-btn" data-outline-color="white" style="padding:0.2rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">WHITE<br>SHADOW</button>
+											<button class="toggle-btn selected" data-outline-color="black" style="padding:0.2rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">BLACK<br>SHADOW</button>
 										</div>
 									</div>
 
@@ -123,10 +127,22 @@
 												<button class="toggle-btn" data-shadow-color="white" style="padding:0.25rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">WHITE<br>TYPE</button>
 												<button class="toggle-btn" data-shadow-color="black" style="padding:0.25rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">BLACK<br>TYPE</button>
 											</div>
-											<!-- 2026-10-21: "move the colorpicker up to that line as well" —
-											     #text-color-row relocated up to the Text Group/Add/Remove/Shadow
-											     row above (same change already made on TheUnframer's own upload
-											     configurator). -->
+											<!-- Pete, 2026-11-09: "move the color selector to the right of
+											     the 'black type' button, on the same line" — relocated here
+											     from the Text Group/Add/Remove/Shadow row above. -->
+											<div id="text-color-row" style="display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0;">
+												<div class="slider-header">
+													<span class="slider-name">Color</span>
+												</div>
+												<div class="color-row" id="text-color-swatches" style="display:none;">
+													<div class="color-swatch" data-color="red" title="Red"></div>
+													<div class="color-swatch" data-color="gold" title="Gold"></div>
+													<div class="color-swatch" data-color="brown" title="Brown"></div>
+													<div class="color-swatch" data-color="cream" title="Cream"></div>
+													<div class="color-swatch" data-color="slate" title="Slate"></div>
+												</div>
+												<input type="color" id="text-color-custom" value="#991e21" title="Custom color">
+											</div>
 										</div>
 
 										<div class="font-drum-row">
@@ -267,7 +283,7 @@
 										     position:fixed, positioned under the button at open-time — the
 										     standard way a popover escapes a clipped/scrolling ancestor. -->
 										<div id="art-picker" style="position:relative; flex-shrink:0; display:inline-flex;">
-											<button id="art-picker-btn" type="button" style="font-size:0.6rem; padding:0.45rem 0.3rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">Our Art Library</button>
+											<button id="art-picker-btn" type="button" style="font-size:0.6rem; padding:0.45rem 0.3rem; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">ART LIBRARY</button>
 											<!-- Pete, 2026-10-17: "are there more we can add?" -> "more" — the
 										     library grew from 6 to 27 pieces, so the panel now needs to
 										     scroll (max-height + overflow-y:auto) instead of just growing

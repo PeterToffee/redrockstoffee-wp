@@ -103,13 +103,24 @@
 		boxModalHeading: document.getElementById( 'rrt-lc-box-modal-heading' ),
 		boxModalBackdrop: document.getElementById( 'rrt-lc-box-modal-backdrop' ),
 		boxLoveBtn: document.getElementById( 'rrt-lc-box-love-btn' ),
+		boxEditBtn: document.getElementById( 'rrt-lc-box-edit-btn' ),
 		boxBackBtn: document.getElementById( 'rrt-lc-box-back-btn' ),
+		boxDeleteBtn: document.getElementById( 'rrt-lc-box-delete-btn' ),
 
 		addAnotherBtn: document.getElementById( 'rrt-lc-add-another-btn' ),
+		emptyConfirmModal: document.getElementById( 'rrt-lc-empty-confirm-modal' ),
+		emptyConfirmBackdrop: document.getElementById( 'rrt-lc-empty-confirm-backdrop' ),
+		emptyConfirmYesBtn: document.getElementById( 'rrt-lc-empty-confirm-yes-btn' ),
+		emptyConfirmBackBtn: document.getElementById( 'rrt-lc-empty-confirm-back-btn' ),
+		deleteConfirmModal: document.getElementById( 'rrt-lc-delete-confirm-modal' ),
+		deleteConfirmBackdrop: document.getElementById( 'rrt-lc-delete-confirm-backdrop' ),
+		deleteConfirmYesBtn: document.getElementById( 'rrt-lc-delete-confirm-yes-btn' ),
+		deleteConfirmBackBtn: document.getElementById( 'rrt-lc-delete-confirm-back-btn' ),
 		heldPreviewModal: document.getElementById( 'rrt-lc-held-preview-modal' ),
 		heldPreviewBackdrop: document.getElementById( 'rrt-lc-held-preview-backdrop' ),
 		heldPreviewThumb: document.getElementById( 'rrt-lc-held-preview-thumb' ),
 		heldPreviewBoxBtn: document.getElementById( 'rrt-lc-held-preview-box-btn' ),
+		heldPreviewEditBtn: document.getElementById( 'rrt-lc-held-preview-edit-btn' ),
 		heldPreviewDetails: document.getElementById( 'rrt-lc-held-preview-details' ),
 		heldPreviewClose: document.getElementById( 'rrt-lc-held-preview-close' ),
 
@@ -127,6 +138,7 @@
 		fsSlider: document.getElementById( 'fs-slider' ),
 		boxSideMargin: document.getElementById( 'box-side-margin' ),
 		shadowColorRow: document.getElementById( 'shadow-color-row' ),
+		shadowOutlineRow: document.getElementById( 'shadow-outline-row' ),
 		textColorSwatches: document.getElementById( 'text-color-swatches' ),
 		textColorCustom: document.getElementById( 'text-color-custom' ),
 		shadowIntensitySlider: document.getElementById( 'shadow-intensity-slider' ),
@@ -213,17 +225,6 @@
 		// time instead of at submit time.
 		heldDesigns: [],
 		nextHeldId: 1,
-		// Pete, 2026-11-08: "quantity not right somehow" — root cause: a
-		// fresh design (after a hold, or on first load) should always show
-		// THIS size's own minimum, but switching size used to only bump
-		// the field UP when the current value fell below the new min,
-		// never back DOWN — so e.g. holding a 4oz (qty 6) then switching
-		// to 8oz left "6" sitting in the field instead of resetting to 2.
-		// This flag distinguishes "untouched default" (always snap to the
-		// new size's min on a size change) from "customer typed their own
-		// number" (only enforce the floor, never overwrite a deliberate
-		// value) — see the quantity input listener and loadSize() below.
-		quantityTouched: false,
 	};
 
 	function activeSize() {
@@ -257,8 +258,27 @@
 	// contradicting it.
 	var MIN_QTY = { '8oz': 2, '4oz': 6 };
 
-	els.quantity.addEventListener( 'input', function () {
-		state.quantityTouched = true;
+	// Pete, 2026-11-09: "the min on the radio buttons doesn't reset... the
+	// min is never reset" — a prior fix let a customer-typed quantity
+	// survive a size switch (only enforcing the floor, never snapping back
+	// down), but that made the field "stick" at a stale number across
+	// switches with no way to tell it was stale. Simpler and matches what
+	// Pete expects: switching size ALWAYS resets quantity to that size's
+	// own minimum, full stop — see loadSize() below.
+	//
+	// "if I adjust the number... even if I leave it at 0... leaving it
+	// open to an order of 1" — typing below the minimum (or clearing the
+	// field) used to go uncaught until final Submit, and a held design's
+	// quantity (captured by "Harry, I love it!") was never checked against
+	// the minimum at all. Clamp on blur so the field corrects itself right
+	// away, and also re-check at hold time (see holdCurrentDraft() below)
+	// so a bad number can't sneak into a held design either.
+	els.quantity.addEventListener( 'blur', function () {
+		var minQty = MIN_QTY[ state.sizeKey ] || 1;
+		var val = parseInt( els.quantity.value, 10 );
+		if ( ! val || val < minQty ) {
+			els.quantity.value = minQty;
+		}
 	} );
 
 	function loadSize( sizeKey ) {
@@ -276,12 +296,7 @@
 
 		var minQty = MIN_QTY[ sizeKey ] || 1;
 		els.quantity.min = minQty;
-		// Untouched (fresh design or just-reset-after-hold): always snap to
-		// THIS size's own minimum. Customer-typed: only enforce the floor,
-		// never silently overwrite a number they deliberately chose.
-		if ( ! state.quantityTouched || ! els.quantity.value || parseInt( els.quantity.value, 10 ) < minQty ) {
-			els.quantity.value = minQty;
-		}
+		els.quantity.value = minQty;
 
 		// Pete, 2026-10-19: "the previous window... loads with the same
 		// size as before" — .rrt-lc-stage (the VISIBLE box) sizes to
@@ -716,8 +731,14 @@
 			if ( els.boxLoveBtn ) {
 				els.boxLoveBtn.hidden = false;
 			}
+			if ( els.boxEditBtn ) {
+				els.boxEditBtn.hidden = true;
+			}
 			if ( els.boxBackBtn ) {
-				els.boxBackBtn.textContent = 'Back to the drawing board';
+				els.boxBackBtn.hidden = false;
+			}
+			if ( els.boxDeleteBtn ) {
+				els.boxDeleteBtn.hidden = true;
 			}
 			if ( els.boxModalHeading ) {
 				els.boxModalHeading.textContent = 'How it’ll look on the box';
@@ -728,8 +749,13 @@
 	// before committing/submitting? To save any number of labels and then
 	// go back through them to see them on the box?" — reuses this SAME
 	// popup (not a second one) in a read-only mode: no "Harry, I love it!"
-	// (nothing to hold — it's already held) and "Back to the drawing
-	// board" relabeled "Close" (there's no live draft here to go back to).
+	// (nothing to hold — it's already held).
+	// Pete, 2026-11-09: "we can safely remove the 'back to the drawing
+	// board,' let's put a 'delete/start again' in its place" — "back to
+	// the drawing board" doesn't mean anything here (no live draft to go
+	// back to), so it's hidden entirely rather than relabeled; a plain,
+	// non-destructive close is still reachable via the backdrop click or
+	// Escape (see the listeners below), same as before.
 	// Called from the flat held-preview popup's "See on the Box" button —
 	// see openHeldPreview() below.
 	function openBoxModalForHeldDesign( design ) {
@@ -737,8 +763,14 @@
 		if ( els.boxLoveBtn ) {
 			els.boxLoveBtn.hidden = true;
 		}
+		if ( els.boxEditBtn ) {
+			els.boxEditBtn.hidden = false;
+		}
 		if ( els.boxBackBtn ) {
-			els.boxBackBtn.textContent = 'Close';
+			els.boxBackBtn.hidden = true;
+		}
+		if ( els.boxDeleteBtn ) {
+			els.boxDeleteBtn.hidden = false;
 		}
 		if ( els.boxModalHeading ) {
 			els.boxModalHeading.textContent = design.flavorLabel + ' · ' + design.sizeLabel + ' · Qty ' + design.quantity;
@@ -748,8 +780,26 @@
 	if ( els.boxPreviewBtn ) {
 		els.boxPreviewBtn.addEventListener( 'click', openBoxModal );
 	}
+	if ( els.boxEditBtn ) {
+		els.boxEditBtn.addEventListener( 'click', function () {
+			if ( ! boxModalHeldDesign ) {
+				return;
+			}
+			var design = boxModalHeldDesign;
+			closeBoxModal();
+			editHeldDesign( design );
+		} );
+	}
 	if ( els.boxBackBtn ) {
 		els.boxBackBtn.addEventListener( 'click', closeBoxModal );
+	}
+	if ( els.boxDeleteBtn ) {
+		els.boxDeleteBtn.addEventListener( 'click', function () {
+			if ( ! boxModalHeldDesign ) {
+				return;
+			}
+			openDeleteConfirmModal( boxModalHeldDesign, true );
+		} );
 	}
 	if ( els.boxModalBackdrop ) {
 		els.boxModalBackdrop.addEventListener( 'click', closeBoxModal );
@@ -817,6 +867,16 @@
 			openBoxModalForHeldDesign( design );
 		} );
 	}
+	if ( els.heldPreviewEditBtn ) {
+		els.heldPreviewEditBtn.addEventListener( 'click', function () {
+			if ( ! currentPreviewDesign ) {
+				return;
+			}
+			var design = currentPreviewDesign;
+			closeHeldPreview();
+			editHeldDesign( design );
+		} );
+	}
 	document.addEventListener( 'keydown', function ( evt ) {
 		if ( 'Escape' === evt.key && els.heldPreviewModal && ! els.heldPreviewModal.hidden ) {
 			closeHeldPreview();
@@ -854,6 +914,18 @@
 
 	els.tabBtnQuote.addEventListener( 'click', function () {
 		selectTab( 'quote' );
+		// Pete, 2026-11-09: "the black type button is the default and
+		// should be highlighted when we choose add text to start in
+		// there" — a group (and its controls — BLACK TYPE, the font
+		// radio, etc.) used to only get created lazily on the FIRST
+		// keystroke in the textarea (see the quoteText input handler
+		// below), so opening this tab showed all those controls with
+		// nothing marked as picked yet, even though typing immediately
+		// would default to black. Create the group right away instead,
+		// same as that lazy path does, just one step earlier.
+		if ( ! activeGroup() ) {
+			addTextGroup();
+		}
 	} );
 	els.tabBtnLogo.addEventListener( 'click', function () {
 		selectTab( 'logo' );
@@ -884,6 +956,12 @@
 			shadowColor: 'black', // BLACK TYPE (default): black text, white outline. WHITE TYPE: inverted — see renderTextGroup().
 			textColor: null, // null = use shadowColor's white/black preset. A hex string (palette swatch or custom picker) overrides it — see renderTextGroup().
 			shadowIntensity: 0, // 0-100 dial — see outlineShadow(). Lowest = no shadow by default.
+			// Pete, 2026-11-09: "to the right of the shadow size, we need a
+			// white or black shadow choice" — the OUTLINE drawn behind the
+			// text, separate from shadowColor above (which is the TEXT
+			// FILL, not what's behind it). Was always hardcoded black
+			// until now — see outlineShadow()/resolveTextColor().
+			outlineColor: 'black',
 			sideMargin: 2, // matches the real site's defaultQuote() — maxWidth = 100-2*this
 			pos: defaultPos( state.textGroups.length ),
 		};
@@ -966,6 +1044,9 @@
 		// right now (see the textColor branch in renderTextGroup()).
 		els.shadowColorRow.querySelectorAll( '.toggle-btn' ).forEach( function ( btn ) {
 			btn.classList.toggle( 'selected', ! group.textColor && btn.dataset.shadowColor === group.shadowColor );
+		} );
+		els.shadowOutlineRow.querySelectorAll( '.toggle-btn' ).forEach( function ( btn ) {
+			btn.classList.toggle( 'selected', btn.dataset.outlineColor === group.outlineColor );
 		} );
 		els.textColorSwatches.querySelectorAll( '.color-swatch' ).forEach( function ( swatch ) {
 			swatch.classList.toggle( 'selected', TEXT_COLOR_SWATCHES[ swatch.dataset.color ] === group.textColor );
@@ -1066,7 +1147,7 @@
 		// on/off checkbox (matches Unframer's current version of this row,
 		// which never had one); shadowIntensity 0 already reads as fully
 		// invisible per outlineShadow()'s own math, so it doubles as "off".
-		group.el.style.textShadow = group.shadowIntensity > 0 ? outlineShadow( group.shadowIntensity ) : 'none';
+		group.el.style.textShadow = group.shadowIntensity > 0 ? outlineShadow( group.shadowIntensity, 'white' === group.outlineColor ? '255,255,255' : '0,0,0' ) : 'none';
 		group.el.style.display = group.text ? 'block' : 'none';
 		group.el.style.fontFamily = TEXT_FONTS[ group.font ] || 'sans-serif';
 		group.el.style.fontWeight = group.bold ? '700' : '400';
@@ -1256,6 +1337,21 @@
 			}
 			group.shadowColor = btn.dataset.shadowColor;
 			group.textColor = null; // WHITE/BLACK TYPE and the custom palette are mutually exclusive.
+			loadGroupIntoControls( group );
+			renderTextGroup( group );
+		} );
+	} );
+
+	// Pete, 2026-11-09: "to the right of the shadow size, we need a white
+	// or black shadow choice" — independent of WHITE TYPE/BLACK TYPE
+	// above (that's the text fill; this is the outline behind it).
+	els.shadowOutlineRow.querySelectorAll( '.toggle-btn' ).forEach( function ( btn ) {
+		btn.addEventListener( 'click', function () {
+			var group = activeGroup();
+			if ( ! group ) {
+				return;
+			}
+			group.outlineColor = btn.dataset.outlineColor;
 			loadGroupIntoControls( group );
 			renderTextGroup( group );
 		} );
@@ -1552,14 +1648,25 @@
 		els.artPickerPanel.style.top = ( btnRect.bottom + 4 ) + 'px';
 	}
 
+	// Pete, 2026-11-09: "make it highlighted when choosing, then
+	// unhighlights when closes when item selected" — one place to close
+	// the panel so every path (toggle off, pick an item, click outside)
+	// also drops the .selected highlight together, instead of each path
+	// remembering to do both.
+	function closeArtPanel() {
+		els.artPickerPanel.style.display = 'none';
+		els.artPickerBtn.classList.remove( 'selected' );
+	}
+
 	els.artPickerBtn.addEventListener( 'click', function ( evt ) {
 		evt.stopPropagation();
 		var isOpen = els.artPickerPanel.style.display !== 'none';
 		if ( isOpen ) {
-			els.artPickerPanel.style.display = 'none';
+			closeArtPanel();
 		} else {
 			positionArtPanel();
 			els.artPickerPanel.style.display = 'grid';
+			els.artPickerBtn.classList.add( 'selected' );
 			// Pete, 2026-10-26: "be able to use the up/down arrows on
 			// desktop" — focusing the (now-visible, tabindex="-1") panel
 			// lets the browser's own native keyboard-scroll behavior
@@ -1572,7 +1679,7 @@
 		btn.addEventListener( 'click', function ( evt ) {
 			evt.stopPropagation();
 			addArtLogo( btn.dataset.artKey );
-			els.artPickerPanel.style.display = 'none';
+			closeArtPanel();
 		} );
 	} );
 
@@ -1582,7 +1689,7 @@
 			return;
 		}
 		if ( ! els.artPicker.contains( evt.target ) && ! els.artPickerPanel.contains( evt.target ) ) {
-			els.artPickerPanel.style.display = 'none';
+			closeArtPanel();
 		}
 	} );
 
@@ -1925,13 +2032,18 @@
 	// a stray white patch. forPrint keeps these two in sync for every
 	// other case — only WHITE TYPE diverges.
 	function resolveTextColor( group, forPrint ) {
+		// Pete, 2026-11-09: "white or black shadow choice" — the outline
+		// used to be hardcoded black in every branch below; now it's
+		// whatever group.outlineColor says, independent of the text fill
+		// these branches otherwise pick.
+		var outline = 'white' === group.outlineColor ? '#ffffff' : '#000000';
 		if ( group.textColor ) {
-			return { color: group.textColor, outline: '#000000' };
+			return { color: group.textColor, outline: outline };
 		}
 		if ( 'black' === group.shadowColor ) {
-			return { color: '#1a1a1a', outline: '#000000' };
+			return { color: '#1a1a1a', outline: outline };
 		}
-		return { color: forPrint ? '#ffffff' : RRT_LABEL_TINT_HEX, outline: '#000000' };
+		return { color: forPrint ? '#ffffff' : RRT_LABEL_TINT_HEX, outline: outline };
 	}
 
 	// Pete, 2026-10-17: "black type shadow really needs to be backed way
@@ -1942,19 +2054,43 @@
 	// themselves: 0 is invisible, 100 matches the original full-strength
 	// outline, everything between scales the same ring+blur recipe
 	// proportionally.
-	function outlineShadow( intensity ) {
+	// Pete, 2026-11-09: "white or black shadow choice" — rgb param added
+	// so this can draw either color; defaults to black (0,0,0) so every
+	// existing call site that doesn't pass one keeps today's look.
+	function outlineShadow( intensity, rgb ) {
+		rgb = rgb || '0,0,0';
 		var amount = Math.max( 0, Math.min( 100, intensity ) ) / 100;
 		var ring = ( 0.95 * amount ).toFixed( 2 );
 		var nearBlur = ( 1 * amount ).toFixed( 2 );
 		var farBlur = ( 0.5 * amount ).toFixed( 2 );
-		return '-1px -1px 0 rgba(0,0,0,' + ring + '), 1px -1px 0 rgba(0,0,0,' + ring + '), -1px 1px 0 rgba(0,0,0,' + ring + '), 1px 1px 0 rgba(0,0,0,' + ring + '), 2px 2px 5px rgba(0,0,0,' + nearBlur + '), 0 0 12px rgba(0,0,0,' + farBlur + ')';
+		return '-1px -1px 0 rgba(' + rgb + ',' + ring + '), 1px -1px 0 rgba(' + rgb + ',' + ring + '), -1px 1px 0 rgba(' + rgb + ',' + ring + '), 1px 1px 0 rgba(' + rgb + ',' + ring + '), 2px 2px 5px rgba(' + rgb + ',' + nearBlur + '), 0 0 12px rgba(' + rgb + ',' + farBlur + ')';
 	}
 
 	// --- submit / hold-for-multi-size-order ---
 
-	function setStatus( message, type ) {
+	// Pete, 2026-11-09: "remove the lettering '...saved — see it under
+	// Saved Designs below.'... show 'file deleted' for a short time" — a
+	// status message used to just sit there until the NEXT setStatus()
+	// call overwrote it (fine for "design saved," which is meant to last),
+	// so deleting a design left that old "saved" line stuck on screen with
+	// nothing telling the customer the delete even happened. autoClearMs is
+	// optional — most callers still want a message that just stays. The
+	// token guards against a short "file deleted" message getting cleared
+	// AFTER a newer, unrelated status has already replaced it on screen.
+	var statusToken = 0;
+	function setStatus( message, type, autoClearMs ) {
+		statusToken++;
+		var myToken = statusToken;
 		els.status.textContent = message;
 		els.status.className = 'rrt-lc-status' + ( type ? ' is-' + type : '' );
+		if ( autoClearMs ) {
+			setTimeout( function () {
+				if ( myToken === statusToken ) {
+					els.status.textContent = '';
+					els.status.className = 'rrt-lc-status';
+				}
+			}, autoClearMs );
+		}
 	}
 
 	function fetchFreshNonce() {
@@ -2071,7 +2207,6 @@
 		els.logoFilename.textContent = '';
 		syncDonateRow( null );
 		checkLogoQuality( null );
-		state.quantityTouched = false;
 		els.quantity.value = MIN_QTY[ state.sizeKey ] || 1;
 	}
 
@@ -2112,19 +2247,31 @@
 				openHeldPreview( design );
 			} );
 
+			// Pete, 2026-11-09: "can we throw it back to the preview/edit
+			// field?" — same styling as View, just hands the design to
+			// editHeldDesign() instead of the read-only popup.
+			var editBtn = document.createElement( 'button' );
+			editBtn.type = 'button';
+			editBtn.className = 'rrt-lc-held-item-view';
+			editBtn.textContent = 'Edit';
+			editBtn.addEventListener( 'click', function () {
+				editHeldDesign( design );
+			} );
+
 			var removeBtn = document.createElement( 'button' );
 			removeBtn.type = 'button';
 			removeBtn.className = 'rrt-lc-held-item-remove';
 			removeBtn.setAttribute( 'aria-label', 'Remove this saved design' );
 			removeBtn.textContent = '×';
+			// Pete, 2026-11-09: "maybe we need a 'this will delete your
+			// saved file' and a way back if that's a mistake" — used to
+			// delete immediately on click, no confirmation, no undo.
 			removeBtn.addEventListener( 'click', function () {
-				state.heldDesigns = state.heldDesigns.filter( function ( d ) {
-					return d.id !== design.id;
-				} );
-				renderHeldDesigns();
+				openDeleteConfirmModal( design );
 			} );
 
 			actions.appendChild( viewBtn );
+			actions.appendChild( editBtn );
 			actions.appendChild( removeBtn );
 
 			main.appendChild( thumb );
@@ -2143,51 +2290,338 @@
 		els.submit.textContent = total > 1 ? ( 'Submit ' + total + ' label designs' ) : 'Submit my label design';
 	}
 
+	// Pulled out of the boxLoveBtn handler so the empty-label confirm
+	// popup's "Yes, save it blank" button can trigger the exact same
+	// hold logic as a normal non-empty save — see that handler below.
+	function holdCurrentDraft() {
+		// Pete, 2026-11-09: "if I adjust the number in the quantities,
+		// even if I leave it at 0 it doesn't go to anything leaving it
+		// open to an order of 1" — the quantity field's own blur handler
+		// (above) normally clamps this already, but "Harry, I love it!"
+		// can fire without the field ever losing focus. Re-clamp here too
+		// so a held design can never carry a quantity below this size's
+		// real minimum.
+		var minQty = MIN_QTY[ state.sizeKey ] || 1;
+		var qty = parseInt( els.quantity.value, 10 );
+		if ( ! qty || qty < minQty ) {
+			qty = minQty;
+			els.quantity.value = qty;
+		}
+		var built = buildLayersMetaForDraft();
+		// Pete, 2026-11-08: "no way to tell what it is" / "can I look
+		// again?" — snapshot the zone's own rendered content (same
+		// clone technique syncBoxMirror() uses for the box mockup)
+		// WHILE it's still on the stage, since resetDraftAfterHold()
+		// right below clears it for the next design.
+		var zoneRect = els.zone.getBoundingClientRect();
+		// Pete, 2026-11-09: "can we throw it back to the preview/edit
+		// field?" — zoneHtml/layersMeta above are good enough to DISPLAY
+		// or SUBMIT a held design, but they're a flattened/rendered
+		// snapshot, not the editable model. Also keep the real group/logo
+		// data (everything addTextGroup()/addArtLogo() itself tracks,
+		// minus the live .el DOM node) so editHeldDesign() below can
+		// rebuild real, still-draggable layers from it later.
+		var textGroupsSnapshot = state.textGroups.map( function ( g ) {
+			return {
+				text: g.text,
+				font: g.font,
+				fontSize: g.fontSize,
+				bold: g.bold,
+				italic: g.italic,
+				shadowColor: g.shadowColor,
+				textColor: g.textColor,
+				shadowIntensity: g.shadowIntensity,
+				outlineColor: g.outlineColor,
+				sideMargin: g.sideMargin,
+				pos: { x: g.pos.x, y: g.pos.y },
+				offCenterDismissed: !! g.offCenterDismissed,
+			};
+		} );
+		var logosSnapshot = state.logos.map( function ( l ) {
+			return {
+				// A real upload's logo.el.src is already the data: URL the
+				// FileReader produced (see the file-input change handler) —
+				// reusing it here means an edited-back-in upload doesn't
+				// need its original File re-read, and it works identically
+				// for an ART piece's logo.el.src (that library image's URL).
+				src: l.el.src,
+				file: l.file || null,
+				artKey: l.artKey || null,
+				artLabel: l.artLabel || null,
+				donate: !! l.donate,
+				scale: l.scale,
+				pos: { x: l.pos.x, y: l.pos.y },
+				naturalWidth: l.naturalWidth,
+				naturalHeight: l.naturalHeight,
+			};
+		} );
+		state.heldDesigns.push( {
+			id: state.nextHeldId++,
+			flavorKey: state.flavorKey,
+			flavorLabel: ( config.flavors[ state.flavorKey ] || {} ).label || state.flavorKey,
+			sizeKey: state.sizeKey,
+			sizeLabel: activeSize().label,
+			quantity: qty,
+			summary: summarizeDraftContent(),
+			zoneHtml: els.zone.innerHTML,
+			zoneWidth: zoneRect.width,
+			zoneHeight: zoneRect.height,
+			layersMeta: built.layersMeta,
+			logoFiles: built.logoFiles,
+			textGroups: textGroupsSnapshot,
+			logos: logosSnapshot,
+		} );
+		// Pete, 2026-11-08: "why does it say submit 3 label designs
+		// when I made only two?" — root cause: renderHeldDesigns()
+		// used to run BEFORE resetDraftAfterHold(), so its total
+		// (heldDesigns.length + draftHasContent()?1:0) counted the
+		// design just pushed TWICE — once as a held design, once more
+		// because the stage still showed its old content as an
+		// "unsaved draft" for that instant. resetDraftAfterHold() must
+		// run first so draftHasContent() is already false by the time
+		// the count is computed.
+		resetDraftAfterHold();
+		renderHeldDesigns();
+		closeBoxModal();
+		setStatus( activeSize().label + ' design saved — see it under Saved Designs below.', 'success' );
+		// Pete, 2026-11-09: "when I hit harry I love it, have it go down
+		// so I see the saved designs thing, then I can hit make another
+		// and it'll shoot me back" — closing the box popup used to just
+		// drop the customer wherever they already were (often still
+		// scrolled down near the box preview button), with nothing
+		// pointing at the design that just got saved. This scrolls
+		// straight to the Saved Designs tray (which "+ Make another
+		// label" already lives inside — see its own scrollIntoView back
+		// up to the size picker, above) instead.
+		if ( els.heldDesigns ) {
+			els.heldDesigns.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+		}
+	}
+
+	// Pete, 2026-11-09: "can we throw it back to the preview/edit field?" —
+	// pulls a saved design's own textGroups/logos snapshot (see
+	// holdCurrentDraft() above) back onto the live stage as real, still-
+	// draggable layers, the same way addTextGroup()/addArtLogo() build a
+	// fresh one, just seeded from saved field values instead of defaults.
+	function editHeldDesign( design ) {
+		// Whatever's still on the stage gets saved first (as its own held
+		// design), so pulling an older one back to edit can never silently
+		// throw away unsaved work.
+		if ( draftHasContent() ) {
+			holdCurrentDraft();
+		}
+		state.heldDesigns = state.heldDesigns.filter( function ( d ) {
+			return d.id !== design.id;
+		} );
+
+		state.flavorKey = design.flavorKey;
+		els.flavor.forEach( function ( radio ) {
+			radio.checked = radio.value === design.flavorKey;
+		} );
+		// loadSize() always resets quantity to the new size's own minimum
+		// (see its own note on why) — reapply the design's real saved
+		// quantity after, same as every other field below.
+		loadSize( design.sizeKey );
+		els.size.forEach( function ( radio ) {
+			radio.checked = radio.value === design.sizeKey;
+		} );
+		els.quantity.value = design.quantity;
+
+		design.textGroups.forEach( function ( saved ) {
+			var div = document.createElement( 'div' );
+			div.className = 'preview-text-layer style-dropshadow';
+			els.zone.appendChild( div );
+			var group = {
+				id: state.nextGroupId++,
+				text: saved.text,
+				font: saved.font,
+				fontSize: saved.fontSize,
+				bold: saved.bold,
+				italic: saved.italic,
+				shadowColor: saved.shadowColor,
+				textColor: saved.textColor,
+				shadowIntensity: saved.shadowIntensity,
+				outlineColor: saved.outlineColor,
+				sideMargin: saved.sideMargin,
+				pos: { x: saved.pos.x, y: saved.pos.y },
+				offCenterDismissed: saved.offCenterDismissed,
+				el: div,
+			};
+			state.textGroups.push( group );
+			attachDrag( div, group, 'text' );
+			renderTextGroup( group );
+		} );
+		design.logos.forEach( function ( saved ) {
+			var img = document.createElement( 'img' );
+			img.className = 'rrt-lc-logo-layer';
+			img.alt = '';
+			img.src = saved.src;
+			els.zone.appendChild( img );
+			var logo = {
+				id: state.nextLogoId++,
+				file: saved.file,
+				artKey: saved.artKey,
+				artLabel: saved.artLabel,
+				donate: saved.donate,
+				scale: saved.scale,
+				pos: { x: saved.pos.x, y: saved.pos.y },
+				naturalWidth: saved.naturalWidth,
+				naturalHeight: saved.naturalHeight,
+				el: img,
+			};
+			state.logos.push( logo );
+			attachDrag( img, logo, 'logo' );
+			renderLogo( logo );
+		} );
+
+		state.activeGroupId = state.textGroups.length ? state.textGroups[ state.textGroups.length - 1 ].id : null;
+		state.activeLogoId  = state.logos.length ? state.logos[ state.logos.length - 1 ].id : null;
+		renderSelectorPills();
+		renderLogoSelectorPills();
+
+		var liveGroup = activeGroup();
+		if ( liveGroup ) {
+			loadGroupIntoControls( liveGroup );
+		} else {
+			els.quoteText.value = '';
+			updateCenterBtn();
+		}
+		var liveLogo = activeLogo();
+		els.logoFilename.textContent = liveLogo ? logoDisplayName( liveLogo ) : '';
+		if ( liveLogo ) {
+			els.logoSizeSlider.value = liveLogo.scale;
+		}
+		syncDonateRow( liveLogo );
+		checkLogoQuality( liveLogo );
+
+		renderHeldDesigns();
+		selectTab( design.textGroups.length ? 'quote' : 'logo' );
+		setStatus( 'Editing your ' + design.sizeLabel + ' design — make your changes, then hit "Harry, I love it!" again.', 'success' );
+		// Pete, 2026-11-09: "it doesn't move up, confusing" — Edit can be
+		// clicked from the Saved Designs tray, the flat preview popup, or
+		// the 3D box popup, any of which can leave the customer scrolled
+		// well past the actual editing stage once the popup closes. The
+		// design loads either way, but with nothing on screen visibly
+		// changing it looks like the click did nothing. Scrolling the
+		// stage into view makes the result of clicking Edit obvious no
+		// matter where on the page it was clicked from.
+		if ( els.stage ) {
+			els.stage.scrollIntoView( { behavior: 'smooth', block: 'center' } );
+		}
+	}
+
+	function openEmptyConfirmModal() {
+		if ( els.emptyConfirmModal ) {
+			els.emptyConfirmModal.hidden = false;
+		}
+	}
+	function closeEmptyConfirmModal() {
+		if ( els.emptyConfirmModal ) {
+			els.emptyConfirmModal.hidden = true;
+		}
+	}
+
 	if ( els.boxLoveBtn ) {
 		// Replaces the old "just closes the popup" binding — see
 		// openBoxModal()/closeBoxModal() above, both still used by the
 		// OTHER popup button ("back to the drawing board").
 		els.boxLoveBtn.addEventListener( 'click', function () {
+			// Pete, 2026-11-09: "what if there's a user that wants
+			// nothing?? ... we need a popup, you didn't add anything, is
+			// this what you want? A yes, and a go back and redo" —
+			// previously this silently closed the popup. Now it asks.
 			if ( ! draftHasContent() ) {
-				closeBoxModal();
+				openEmptyConfirmModal();
 				return;
 			}
-			var built = buildLayersMetaForDraft();
-			// Pete, 2026-11-08: "no way to tell what it is" / "can I look
-			// again?" — snapshot the zone's own rendered content (same
-			// clone technique syncBoxMirror() uses for the box mockup)
-			// WHILE it's still on the stage, since resetDraftAfterHold()
-			// right below clears it for the next design.
-			var zoneRect = els.zone.getBoundingClientRect();
-			state.heldDesigns.push( {
-				id: state.nextHeldId++,
-				flavorKey: state.flavorKey,
-				flavorLabel: ( config.flavors[ state.flavorKey ] || {} ).label || state.flavorKey,
-				sizeKey: state.sizeKey,
-				sizeLabel: activeSize().label,
-				quantity: parseInt( els.quantity.value, 10 ) || MIN_QTY[ state.sizeKey ] || 1,
-				summary: summarizeDraftContent(),
-				zoneHtml: els.zone.innerHTML,
-				zoneWidth: zoneRect.width,
-				zoneHeight: zoneRect.height,
-				layersMeta: built.layersMeta,
-				logoFiles: built.logoFiles,
-			} );
-			// Pete, 2026-11-08: "why does it say submit 3 label designs
-			// when I made only two?" — root cause: renderHeldDesigns()
-			// used to run BEFORE resetDraftAfterHold(), so its total
-			// (heldDesigns.length + draftHasContent()?1:0) counted the
-			// design just pushed TWICE — once as a held design, once more
-			// because the stage still showed its old content as an
-			// "unsaved draft" for that instant. resetDraftAfterHold() must
-			// run first so draftHasContent() is already false by the time
-			// the count is computed.
-			resetDraftAfterHold();
-			renderHeldDesigns();
-			closeBoxModal();
-			setStatus( activeSize().label + ' design saved — see it under Saved Designs below.', 'success' );
+			holdCurrentDraft();
 		} );
 	}
+
+	if ( els.emptyConfirmYesBtn ) {
+		els.emptyConfirmYesBtn.addEventListener( 'click', function () {
+			closeEmptyConfirmModal();
+			holdCurrentDraft();
+		} );
+	}
+	if ( els.emptyConfirmBackBtn ) {
+		els.emptyConfirmBackBtn.addEventListener( 'click', function () {
+			closeEmptyConfirmModal();
+		} );
+	}
+	if ( els.emptyConfirmBackdrop ) {
+		els.emptyConfirmBackdrop.addEventListener( 'click', closeEmptyConfirmModal );
+	}
+	document.addEventListener( 'keydown', function ( evt ) {
+		if ( 'Escape' === evt.key && els.emptyConfirmModal && ! els.emptyConfirmModal.hidden ) {
+			closeEmptyConfirmModal();
+		}
+	} );
+
+	// Pete, 2026-11-09: "if we X the saved file out... maybe we need a
+	// 'this will delete your saved file' and a way back if that's a
+	// mistake" — same confirm-modal pattern as openEmptyConfirmModal()
+	// just above, guarding the Saved Designs tray's × (remove) button
+	// instead of an empty "Harry, I love it!".
+	var pendingDeleteDesign = null;
+	// Pete, 2026-11-09: "'delete/start again' ... that removes and gets us
+	// back to the beginning" — true only when this confirm was opened from
+	// the 3D box popup's own Delete/Start Again button (see
+	// els.boxDeleteBtn's handler below), so the Yes-handler knows to also
+	// close that popup and scroll back up to the size picker — the plain
+	// Saved Designs tray's × doesn't want either of those side effects.
+	var pendingDeleteFromBox = false;
+	function openDeleteConfirmModal( design, fromBox ) {
+		pendingDeleteDesign = design;
+		pendingDeleteFromBox = !! fromBox;
+		if ( els.deleteConfirmModal ) {
+			els.deleteConfirmModal.hidden = false;
+		}
+	}
+	function closeDeleteConfirmModal() {
+		pendingDeleteDesign = null;
+		pendingDeleteFromBox = false;
+		if ( els.deleteConfirmModal ) {
+			els.deleteConfirmModal.hidden = true;
+		}
+	}
+	if ( els.deleteConfirmYesBtn ) {
+		els.deleteConfirmYesBtn.addEventListener( 'click', function () {
+			if ( pendingDeleteDesign ) {
+				var deletedId = pendingDeleteDesign.id;
+				var fromBox = pendingDeleteFromBox;
+				state.heldDesigns = state.heldDesigns.filter( function ( d ) {
+					return d.id !== deletedId;
+				} );
+				renderHeldDesigns();
+				// Pete, 2026-11-09: "remove the lettering... show 'file
+				// deleted' for a short time" — a brief, self-clearing
+				// message instead of either leaving the old "design
+				// saved" line stuck, or a new message that itself lingers
+				// forever.
+				setStatus( 'File deleted.', 'success', 2500 );
+				if ( fromBox ) {
+					closeBoxModal();
+					var sizeCard = document.querySelector( '.config-card.rrt-lc-card--size' );
+					if ( sizeCard ) {
+						sizeCard.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+					}
+				}
+			}
+			closeDeleteConfirmModal();
+		} );
+	}
+	if ( els.deleteConfirmBackBtn ) {
+		els.deleteConfirmBackBtn.addEventListener( 'click', closeDeleteConfirmModal );
+	}
+	if ( els.deleteConfirmBackdrop ) {
+		els.deleteConfirmBackdrop.addEventListener( 'click', closeDeleteConfirmModal );
+	}
+	document.addEventListener( 'keydown', function ( evt ) {
+		if ( 'Escape' === evt.key && els.deleteConfirmModal && ! els.deleteConfirmModal.hidden ) {
+			closeDeleteConfirmModal();
+		}
+	} );
 
 	els.submit.addEventListener( 'click', function () {
 		var hasDraft = draftHasContent();
