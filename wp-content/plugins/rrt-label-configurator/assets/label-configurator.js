@@ -2278,7 +2278,31 @@
 		els.logoFilename.textContent = '';
 		syncDonateRow( null );
 		checkLogoQuality( null );
-		els.quantity.value = MIN_QTY[ state.sizeKey ] || 1;
+		// Pete, 2026-11-11: "when we save a file (not submit) we need a
+		// reset on the form... get ourselves back to the default positions
+		// on radio buttons" — this cleared the text/logo layers and the
+		// quantity field, but left the FLAVOR and SIZE radios (and
+		// state.flavorKey/sizeKey) sitting on whatever the design just held
+		// had picked, silently carrying that choice into the next design
+		// instead of starting it from the same clean slate a fresh page
+		// load gives — see the init block at the very bottom of this file,
+		// "first flavor / first size," which this matches exactly.
+		var firstFlavor = Object.keys( config.flavors )[ 0 ];
+		if ( firstFlavor ) {
+			state.flavorKey = firstFlavor;
+			els.flavor.forEach( function ( radio ) {
+				radio.checked = radio.value === firstFlavor;
+			} );
+		}
+		var firstSize = Object.keys( config.sizes[ firstFlavor ] || {} )[ 0 ];
+		if ( firstSize ) {
+			loadSize( firstSize ); // also resets els.quantity to this size's own minimum.
+			els.size.forEach( function ( radio ) {
+				radio.checked = radio.value === firstSize;
+			} );
+		} else {
+			els.quantity.value = MIN_QTY[ state.sizeKey ] || 1;
+		}
 	}
 
 	function renderHeldDesigns() {
