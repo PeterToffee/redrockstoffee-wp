@@ -175,7 +175,17 @@ function rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, 
 			);
 			++$logo_i;
 		} elseif ( 'text' === $raw['type'] ) {
-			$text = isset( $raw['text'] ) ? sanitize_text_field( wp_unslash( $raw['text'] ) ) : '';
+			// Pete, 2026-11-11: "I had added a blank line with an extra
+			// enter, it looked right on the preview but didn't give it to
+			// me on the print" — sanitize_text_field() is WP core's
+			// SINGLE-LINE sanitizer; it explicitly strips every line break
+			// (blank lines included) before this even reaches
+			// rrt_label_draw_text()'s own paragraph-splitting fix below, so
+			// fixing that function alone was never going to be enough.
+			// sanitize_textarea_field() is WP core's multi-line equivalent
+			// (same one $message already correctly uses a few lines down) —
+			// it still strips tags/invalid UTF-8 but leaves \n alone.
+			$text = isset( $raw['text'] ) ? sanitize_textarea_field( wp_unslash( $raw['text'] ) ) : '';
 			if ( '' === $text ) {
 				continue;
 			}
@@ -1133,7 +1143,14 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
 		return;
 	}
 
-	$font_size_px = ( $text_font_size / 100 ) * $px['zone_width'];
+	// Pete, 2026-11-11: "font size is out of whack with the preview" — see
+	// rrt_label_fonts()'s own note on size_calibration: GD and a browser
+	// don't render the same declared size at the same actual ink height,
+	// and the gap is font-specific, so this scales font_size_px by the
+	// measured correction for THIS font before it's used for anything
+	// (word-wrap width test below included — a mis-sized font also wraps
+	// at the wrong point).
+	$font_size_px = ( $text_font_size / 100 ) * $px['zone_width'] * ( $fonts[ $font_key ]['size_calibration'] ?? 1.0 );
 	/**
 	 * Pete, 2026-10-25: "confirm all elements... have no bugs" — this was
 	 * a hardcoded 0.92 (92%), completely ignoring the customer's TEXT
@@ -1160,25 +1177,51 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
 
 	// Word-wrap using the REAL font's own glyph widths (imagettfbbox),
 	// not a fixed-width guess, so long/short fonts wrap accurately.
-	$words = preg_split( '/\s+/', trim( $label_text ) );
+	//
+	// Pete, 2026-11-11: "I had added a blank line with an extra enter, it
+	// looked right on the preview but didn't give it to me on the print
+	// (removed the blank line)" — this used to run preg_split('/\s+/', ...)
+	// over the ENTIRE text in one shot, and \s matches newlines too, so
+	// every manual Enter (blank line or not) was just collapsed into
+	// ordinary whitespace between words and re-flowed by width alone.
+	// The browser's white-space:pre-wrap (renderTextGroup() in
+	// label-configurator.js) treats every \n the customer actually typed
+	// as a real break, blank lines included. Splitting into paragraphs on
+	// \n FIRST, then width-wrapping each one independently (an empty
+	// paragraph becomes exactly one empty output line, same as pre-wrap
+	// renders it), matches that — only a run of leading/trailing blank
+	// lines around the whole block is trimmed away, same as before.
 	$lines = array();
-	$line  = '';
-	foreach ( $words as $word ) {
-		$test = $line ? $line . ' ' . $word : $word;
-		$bbox = imagettfbbox( $font_size_px, 0, $ttf_path, $test );
-		$test_width = $bbox[2] - $bbox[0];
-		if ( $test_width > $max_width && $line ) {
+	foreach ( explode( "\n", trim( $label_text, "\n" ) ) as $paragraph ) {
+		$paragraph = trim( $paragraph );
+		if ( '' === $paragraph ) {
+			$lines[] = '';
+			continue;
+		}
+		$words = preg_split( '/\s+/', $paragraph );
+		$line  = '';
+		foreach ( $words as $word ) {
+			$test = $line ? $line . ' ' . $word : $word;
+			$bbox = imagettfbbox( $font_size_px, 0, $ttf_path, $test );
+			$test_width = $bbox[2] - $bbox[0];
+			if ( $test_width > $max_width && $line ) {
+				$lines[] = $line;
+				$line    = $word;
+			} else {
+				$line = $test;
+			}
+		}
+		if ( '' !== $line ) {
 			$lines[] = $line;
-			$line    = $word;
-		} else {
-			$line = $test;
 		}
 	}
-	if ( '' !== $line ) {
-		$lines[] = $line;
-	}
 
-	$line_height  = $font_size_px * 1.25;
+	// Pete, 2026-11-11: 1.25 here vs .preview-text-layer's real
+	// line-height:1.35 (configurator-components.css) was a second,
+	// separate contributor to "font size is out of whack with the
+	// preview" — compounds with every extra line, so a short caption was
+	// close enough to pass unnoticed while a multi-line one visibly drifted.
+	$line_height  = $font_size_px * 1.35;
 	$block_height = count( $lines ) * $line_height;
 
 	/**

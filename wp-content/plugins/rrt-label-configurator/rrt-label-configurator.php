@@ -256,6 +256,27 @@ function rrt_label_min_qty_for_size( $size_key ) {
  * Google Fonts, same place the original 3 came from) instead of trimming
  * the picker down to the 3 that already worked.
  *
+ * Pete, 2026-11-11: "font size is out of whack with the preview... lines
+ * goofed up... placement a little because of the larger font size" — GD's
+ * imagettfbbox()/imagettftext() and a browser's own text renderer do NOT
+ * agree on how tall a given font's glyphs are for the same declared pixel
+ * size; the gap is font-specific (how much ascent/descent/swash a
+ * typeface's own metrics tables claim), so feeding the identical
+ * font_size_px into both (as rrt_label_draw_text() did) rendered visibly
+ * different sizes for some fonts and barely-noticeable ones for others.
+ * Measured directly: same test string ("Jolly Big Fox", 100px) rendered in
+ * Chrome (a Range over the text node's real ink, matching
+ * textGlyphGapPct()'s own technique in label-configurator.js) versus GD's
+ * imagettfbbox() on each font's actual .ttf file below, giving a real
+ * inked-height-to-declared-size ratio per side. 'size_calibration' is
+ * browser_ratio / gd_ratio for that font — rrt_label_draw_text()
+ * multiplies font_size_px by it before doing anything else (word-wrap AND
+ * final draw), so GD ends up drawing each font at the size that actually
+ * LOOKS like what the customer saw, not just the same raw number. Worst
+ * offender was Great Vibes at 0.781 (GD was rendering it ~28% too big);
+ * most fonts needed only a small nudge. Re-measure and update this list if
+ * a font's .ttf file ever gets swapped for a different version/foundry.
+ *
  * Two key names below differ from their on-screen label for a reason:
  * - 'scripty' (label "Scripty") was 'dancingscript' here — same file,
  *   renamed to match the actual `value="scripty"` the font-drum radio
@@ -273,100 +294,116 @@ function rrt_label_min_qty_for_size( $size_key ) {
 function rrt_label_fonts() {
 	return array(
 		'opensans'      => array(
-			'label'       => 'Clean',
-			'css_family'  => "'Open Sans', sans-serif",
-			'ttf_file'    => 'assets/fonts/opensans-variable.ttf',
-			'google_font' => 'Open+Sans:wght@400;700',
+			'label'             => 'Clean',
+			'css_family'        => "'Open Sans', sans-serif",
+			'ttf_file'          => 'assets/fonts/opensans-variable.ttf',
+			'google_font'       => 'Open+Sans:wght@400;700',
+			'size_calibration'  => 1.023,
 		),
 		'oswald'        => array(
-			'label'       => 'Bold Modern',
-			'css_family'  => "'Oswald', sans-serif",
-			'ttf_file'    => 'assets/fonts/oswald-variable.ttf',
-			'google_font' => 'Oswald:wght@600',
+			'label'             => 'Bold Modern',
+			'css_family'        => "'Oswald', sans-serif",
+			'ttf_file'          => 'assets/fonts/oswald-variable.ttf',
+			'google_font'       => 'Oswald:wght@600',
+			'size_calibration'  => 1.113,
 		),
 		'luckiest'      => array(
-			'label'       => 'Luckiest Guy',
-			'css_family'  => "'Luckiest Guy', cursive",
-			'ttf_file'    => 'assets/fonts/luckiest.ttf',
-			'google_font' => 'Luckiest+Guy',
+			'label'             => 'Luckiest Guy',
+			'css_family'        => "'Luckiest Guy', cursive",
+			'ttf_file'          => 'assets/fonts/luckiest.ttf',
+			'google_font'       => 'Luckiest+Guy',
+			'size_calibration'  => 1.268,
 		),
 		'comic'         => array(
-			'label'       => 'Comic Balloon',
-			'css_family'  => "'Boogaloo', cursive",
-			'ttf_file'    => 'assets/fonts/comic.ttf',
-			'google_font' => 'Boogaloo',
+			'label'             => 'Comic Balloon',
+			'css_family'        => "'Boogaloo', cursive",
+			'ttf_file'          => 'assets/fonts/comic.ttf',
+			'google_font'       => 'Boogaloo',
+			'size_calibration'  => 0.908,
 		),
 		'satisfy'       => array(
-			'label'       => 'Bold Script',
-			'css_family'  => "'Satisfy', cursive",
-			'ttf_file'    => 'assets/fonts/satisfy.ttf',
-			'google_font' => 'Satisfy',
+			'label'             => 'Bold Script',
+			'css_family'        => "'Satisfy', cursive",
+			'ttf_file'          => 'assets/fonts/satisfy.ttf',
+			'google_font'       => 'Satisfy',
+			'size_calibration'  => 0.855,
 		),
 		'lobster'       => array(
-			'label'       => 'Lobster',
-			'css_family'  => "'Lobster', cursive",
-			'ttf_file'    => 'assets/fonts/lobster.ttf',
-			'google_font' => 'Lobster',
+			'label'             => 'Lobster',
+			'css_family'        => "'Lobster', cursive",
+			'ttf_file'          => 'assets/fonts/lobster.ttf',
+			'google_font'       => 'Lobster',
+			'size_calibration'  => 0.940,
 		),
 		'bangers'       => array(
-			'label'       => 'Bangers Bold',
-			'css_family'  => "'Bangers', cursive",
-			'ttf_file'    => 'assets/fonts/bangers.ttf',
-			'google_font' => 'Bangers',
+			'label'             => 'Bangers Bold',
+			'css_family'        => "'Bangers', cursive",
+			'ttf_file'          => 'assets/fonts/bangers.ttf',
+			'google_font'       => 'Bangers',
+			'size_calibration'  => 0.991,
 		),
 		'fredoka'       => array(
-			'label'       => 'Rounded & Fun',
-			'css_family'  => "'Fredoka One', cursive",
-			'ttf_file'    => 'assets/fonts/fredoka.ttf',
-			'google_font' => 'Fredoka+One',
+			'label'             => 'Rounded & Fun',
+			'css_family'        => "'Fredoka One', cursive",
+			'ttf_file'          => 'assets/fonts/fredoka.ttf',
+			'google_font'       => 'Fredoka+One',
+			'size_calibration'  => 0.890,
 		),
 		'montserrat'    => array(
-			'label'       => 'Clean Modern',
-			'css_family'  => "'Montserrat', sans-serif",
-			'ttf_file'    => 'assets/fonts/montserrat-bold.ttf',
-			'google_font' => 'Montserrat:wght@700',
+			'label'             => 'Clean Modern',
+			'css_family'        => "'Montserrat', sans-serif",
+			'ttf_file'          => 'assets/fonts/montserrat-bold.ttf',
+			'google_font'       => 'Montserrat:wght@700',
+			'size_calibration'  => 0.924,
 		),
 		'abril'         => array(
-			'label'       => 'Abril Fatface',
-			'css_family'  => "'Abril Fatface', cursive",
-			'ttf_file'    => 'assets/fonts/abril.ttf',
-			'google_font' => 'Abril+Fatface',
+			'label'             => 'Abril Fatface',
+			'css_family'        => "'Abril Fatface', cursive",
+			'ttf_file'          => 'assets/fonts/abril.ttf',
+			'google_font'       => 'Abril+Fatface',
+			'size_calibration'  => 1.007,
 		),
 		'greatvibes'    => array(
-			'label'       => 'Great Vibes',
-			'css_family'  => "'Great Vibes', cursive",
-			'ttf_file'    => 'assets/fonts/greatvibes.ttf',
-			'google_font' => 'Great+Vibes',
+			'label'             => 'Great Vibes',
+			'css_family'        => "'Great Vibes', cursive",
+			'ttf_file'          => 'assets/fonts/greatvibes.ttf',
+			'google_font'       => 'Great+Vibes',
+			'size_calibration'  => 0.781,
 		),
 		'sniglet'       => array(
-			'label'       => 'Sniglet',
-			'css_family'  => "'Sniglet', cursive",
-			'ttf_file'    => 'assets/fonts/sniglet.ttf',
-			'google_font' => 'Sniglet',
+			'label'             => 'Sniglet',
+			'css_family'        => "'Sniglet', cursive",
+			'ttf_file'          => 'assets/fonts/sniglet.ttf',
+			'google_font'       => 'Sniglet',
+			'size_calibration'  => 0.947,
 		),
 		'arial'         => array(
-			'label'       => 'Clean & Simple',
-			'css_family'  => 'Arial, Helvetica, sans-serif',
-			'ttf_file'    => 'assets/fonts/arial.ttf',
-			'google_font' => '',
+			'label'             => 'Clean & Simple',
+			'css_family'        => 'Arial, Helvetica, sans-serif',
+			'ttf_file'          => 'assets/fonts/arial.ttf',
+			'google_font'       => '',
+			'size_calibration'  => 0.896,
 		),
 		'playfair'      => array(
-			'label'       => 'Classic Serif',
-			'css_family'  => "'Playfair Display', serif",
-			'ttf_file'    => 'assets/fonts/playfair-italic.ttf',
-			'google_font' => 'Playfair+Display:ital@1',
+			'label'             => 'Classic Serif',
+			'css_family'        => "'Playfair Display', serif",
+			'ttf_file'          => 'assets/fonts/playfair-italic.ttf',
+			'google_font'       => 'Playfair+Display:ital@1',
+			'size_calibration'  => 1.008,
 		),
 		'scripty'       => array(
-			'label'       => 'Scripty',
-			'css_family'  => "'Dancing Script', cursive",
-			'ttf_file'    => 'assets/fonts/dancingscript-variable.ttf',
-			'google_font' => 'Dancing+Script:wght@600',
+			'label'             => 'Scripty',
+			'css_family'        => "'Dancing Script', cursive",
+			'ttf_file'          => 'assets/fonts/dancingscript-variable.ttf',
+			'google_font'       => 'Dancing+Script:wght@600',
+			'size_calibration'  => 0.896,
 		),
 		'pacifico'      => array(
-			'label'       => 'Casual Script',
-			'css_family'  => "'Pacifico', cursive",
-			'ttf_file'    => 'assets/fonts/pacifico.ttf',
-			'google_font' => 'Pacifico',
+			'label'             => 'Casual Script',
+			'css_family'        => "'Pacifico', cursive",
+			'ttf_file'          => 'assets/fonts/pacifico.ttf',
+			'google_font'       => 'Pacifico',
+			'size_calibration'  => 0.946,
 		),
 	);
 }
