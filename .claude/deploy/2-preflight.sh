@@ -167,7 +167,13 @@ echo; echo "H. Headless browser check of /co-branding/ (local)"
 # full-parity smoke test is wanted.
 if [ -x "$EDGE" ] || [ -f "$EDGE" ]; then
   "$EDGE" --headless --disable-gpu --enable-logging=stderr --v=0 --virtual-time-budget=12000 --dump-dom "$LOCAL_SITE/co-branding/" > "$TMP/edge-dom.html" 2> "$TMP/edge.err"
-  ERRS=$(grep "INFO:CONSOLE" "$TMP/edge.err" | grep -v "chrome-extension://" | grep -E "Uncaught|SyntaxError|ReferenceError|TypeError" | cut -c1-200)
+  # 2026-11-11: this launches the real system Edge, which loads Pete's actual
+  # browser profile and its installed extensions - Adobe Acrobat's extension
+  # (webpack://dc-chrome-extension/..., acrobat.adobe.com/sw.js) throws its own
+  # unrelated console errors on every page load, which this check was wrongly
+  # attributing to our JS. "chrome-extension://" alone doesn't catch it since
+  # Acrobat's errors report a webpack:// or acrobat.adobe.com source instead.
+  ERRS=$(grep "INFO:CONSOLE" "$TMP/edge.err" | grep -v -E "chrome-extension://|dc-chrome-extension|acrobat\.adobe\.com" | grep -E "Uncaught|SyntaxError|ReferenceError|TypeError" | cut -c1-200)
   if [ -n "$ERRS" ]; then fail "JavaScript errors on /co-branding/:"; echo "$ERRS" | sed 's/^/           /'; else pass "no JavaScript errors on /co-branding/"; fi
 else warn "Edge not found - skipped browser check"; fi
 
