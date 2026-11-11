@@ -155,6 +155,26 @@ function rrt_label_flavors() {
  * geometry, box dimensions) is the same real physical box/label
  * regardless of flavor, so it's still one array, not duplicated per
  * flavor.
+ *
+ * Pete, 2026-11-11: "it prints differently than if I go straight to the
+ * printer without going through the configurator" — the real bug.
+ * 'template_file' is the TRUE, untouched source (CMYK, a real embedded
+ * "U.S. Web Coated SWOP v2" print profile) — GD (inc/handle-submission.php,
+ * rrt_label_composite()/rrt_label_composite_layers()) used to load this
+ * directly via imagecreatefromjpeg(), but GD has no color management at
+ * all: it decodes CMYK with a naive formula, ignoring the embedded
+ * profile entirely. Measured directly: a bean pixel came out
+ * rgb(112,0,1) through GD (green/blue crushed to 0 — oversaturated
+ * maroon) vs. the correct rgb(128,25,28) with a real ICC-aware
+ * conversion — identical bug, identical source-file setup, for BOTH
+ * flavors, so this has likely been true of every printed order since
+ * launch. 'template_print_file' is a ONE-TIME, ICC-aware conversion of
+ * the exact same file (ImageMagick -profile against Windows' own
+ * sRGB.icm, which DOES use the embedded profile — nothing else touched,
+ * same as koffie-almond's tinted-file fix) — GD loads THIS instead, so
+ * it's just handed already-correct RGB and never has to decode CMYK
+ * itself. 'template_file' stays the real original for anything that
+ * might need it later (an actual CMYK print-shop handoff, say).
  */
 function rrt_label_sizes( $flavor_key = 'original-almond' ) {
 	$flavors      = rrt_label_flavors();
@@ -170,7 +190,8 @@ function rrt_label_sizes( $flavor_key = 'original-almond' ) {
 			// submission email and the JS "minimum order" error message,
 			// where this phrasing wouldn't read right.
 			'dropdown_note'   => 'Min. 2 Boxes',
-			'template_file'   => 'assets/templates/' . $template_dir . '8oz-template.jpg',
+			'template_file'       => 'assets/templates/' . $template_dir . '8oz-template.jpg',
+			'template_print_file' => 'assets/templates/' . $template_dir . '8oz-template-print.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 4.127,
 			'image_height_in' => 11,
@@ -200,7 +221,8 @@ function rrt_label_sizes( $flavor_key = 'original-almond' ) {
 		'4oz' => array(
 			'label'           => '4oz Box',
 			'dropdown_note'   => 'Min. 6, sold in 2s',
-			'template_file'   => 'assets/templates/' . $template_dir . '4oz-template.jpg',
+			'template_file'       => 'assets/templates/' . $template_dir . '4oz-template.jpg',
+			'template_print_file' => 'assets/templates/' . $template_dir . '4oz-template-print.jpg',
 			'dpi'             => 300,
 			'image_width_in'  => 2.627,
 			'image_height_in' => 11,

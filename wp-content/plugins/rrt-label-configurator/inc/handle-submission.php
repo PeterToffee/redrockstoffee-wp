@@ -619,7 +619,10 @@ function rrt_label_composite( $size_key, $layers, $order_dir, $order_id_text = '
 	}
 
 	$sizes    = rrt_label_sizes( $flavor_key );
-	$template = RRT_LABEL_PATH . $sizes[ $size_key ]['template_file'];
+	// Pete, 2026-11-11: "it prints differently than if I go straight to
+	// the printer" — template_print_file (not template_file) is what GD
+	// gets here; see rrt_label_sizes()'s own note on why.
+	$template = RRT_LABEL_PATH . $sizes[ $size_key ]['template_print_file'];
 	if ( ! file_exists( $template ) ) {
 		return new WP_Error( 'rrt_missing_template', 'Label template is missing on the server.' );
 	}
@@ -712,7 +715,8 @@ function rrt_label_composite_layers( $size_key, $layers, $order_dir, $flavor_key
 	}
 
 	$sizes    = rrt_label_sizes( $flavor_key );
-	$template = RRT_LABEL_PATH . $sizes[ $size_key ]['template_file'];
+	// See rrt_label_composite()'s own note just above on template_print_file.
+	$template = RRT_LABEL_PATH . $sizes[ $size_key ]['template_print_file'];
 	if ( ! file_exists( $template ) ) {
 		return new WP_Error( 'rrt_missing_template', 'Label template is missing on the server.' );
 	}
