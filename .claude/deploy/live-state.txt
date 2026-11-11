@@ -3,8 +3,8 @@ d3c21f7eaab3cbfa9f20ff3abde338bd  assets/harry-path.css
 14250008cc41d91dd392a8a64fc42194  assets/label-configurator.css
 b1d16d5732e7b572f4809867154bd7d5  assets/label-configurator.js
 0a9ca8450494d00b7b047eacf23b1a2f  inc/accessibility-statement.php
-9865c72b1c4d6cab89751a67fb70e947  inc/handle-submission.php
+0861b8d26be4c86a19a0b10f0c9d93cd  inc/handle-submission.php
 121b770a5fb724b8b9397aa6013c1666  inc/harry-path.php
 82e248b3d8169913f9d3624ceda6515b  inc/hero-ken-burns.php
 47713dead005e898afa6df026073e3c3  inc/quote-module-card.part.php
-4e705024cfd8c621e4a2e1fe5b66041e  rrt-label-configurator.php
+ad0abaff1aeef186f2fb76e71d0dd764  rrt-label-configurator.php

@@ -121,3 +121,12 @@
 - inc/handle-submission.php  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (12 checks, 0 warnings). Server backups: *.bak.1794420577. Rollback: .claude/deploy/rollback.sh 1794420577 --go
+
+## 2026-11-11 11:55 - deploy 1794423095 (commit 1afbcd6c)
+- assets/templates/4oz-template-print.jpg  (ASSET-NEW)
+- assets/templates/8oz-template-print.jpg  (ASSET-NEW)
+- assets/templates/koffie-almond/4oz-template-print.jpg  (ASSET-NEW)
+- assets/templates/koffie-almond/8oz-template-print.jpg  (ASSET-NEW)
+- inc/handle-submission.php  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (18 checks, 0 warnings). Server backups: *.bak.1794423095. Rollback: .claude/deploy/rollback.sh 1794423095 --go
