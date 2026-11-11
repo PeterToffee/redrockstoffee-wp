@@ -2426,6 +2426,34 @@
 				naturalHeight: l.naturalHeight,
 			};
 		} );
+		// Pete, 2026-11-11: "it kept the image file as a backdrop... but
+		// wiped the text layer from the preview" — editHeldDesign() rebuilds
+		// ALL text divs first, then ALL logo images (see its own two
+		// separate forEach loops below), regardless of which one the
+		// customer actually layered on top live. Text and logo stack purely
+		// by DOM order (neither has a z-index — see label-configurator.css),
+		// so a design built logo-first/text-on-top (the normal order, per
+		// "each new layer lands on top") came back from an edit with the
+		// logo re-stacked ON TOP, fully covering the text — not deleted,
+		// just hidden behind/under the now-topmost logo. zoneHtml below
+		// already captures the real order but isn't parsed back into live,
+		// draggable layers, so this instead walks the zone's actual
+		// children right now (while they're still in their true order) and
+		// records each one as {type, index into textGroups/logos}, which
+		// editHeldDesign() replays at the end to re-stack everything back
+		// to exactly how it looked right before it was held.
+		var layerOrder = Array.prototype.slice.call( els.zone.children ).reduce( function ( acc, child ) {
+			var textIdx = state.textGroups.findIndex( function ( g ) { return g.el === child; } );
+			if ( textIdx !== -1 ) {
+				acc.push( { type: 'text', index: textIdx } );
+				return acc;
+			}
+			var logoIdx = state.logos.findIndex( function ( l ) { return l.el === child; } );
+			if ( logoIdx !== -1 ) {
+				acc.push( { type: 'logo', index: logoIdx } );
+			}
+			return acc;
+		}, [] );
 		state.heldDesigns.push( {
 			id: state.nextHeldId++,
 			flavorKey: state.flavorKey,
@@ -2441,6 +2469,7 @@
 			logoFiles: built.logoFiles,
 			textGroups: textGroupsSnapshot,
 			logos: logosSnapshot,
+			layerOrder: layerOrder,
 		} );
 		// Pete, 2026-11-08: "why does it say submit 3 label designs
 		// when I made only two?" — root cause: renderHeldDesigns()
@@ -2543,6 +2572,24 @@
 			state.logos.push( logo );
 			attachDrag( img, logo, 'logo' );
 			renderLogo( logo );
+		} );
+
+		// Pete, 2026-11-11: restore the real stacking order (see
+		// holdCurrentDraft()'s own note on design.layerOrder) — the two
+		// forEach loops above always add every text div before every logo
+		// image, so without this a logo that was originally UNDER the text
+		// (the normal "logo first, text on top" order) comes back stacked
+		// OVER it instead, hiding it completely. Re-appending an
+		// already-connected element just moves it to the end, so replaying
+		// layerOrder here puts every layer back in its original order with
+		// no removal/recreation needed. Falls back to doing nothing (the
+		// already-wrong order from above) for any design held before this
+		// field existed.
+		( design.layerOrder || [] ).forEach( function ( entry ) {
+			var layer = 'text' === entry.type ? state.textGroups[ entry.index ] : state.logos[ entry.index ];
+			if ( layer && layer.el ) {
+				els.zone.appendChild( layer.el );
+			}
 		} );
 
 		state.activeGroupId = state.textGroups.length ? state.textGroups[ state.textGroups.length - 1 ].id : null;
