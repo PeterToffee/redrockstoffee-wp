@@ -109,7 +109,7 @@ function rrt_label_flavors() {
 			'available'    => true,
 		),
 		'koffie-almond'   => array(
-			'label'        => 'Koffie-Almond',
+			'label'        => 'Koffie-Almond™',
 			'template_dir' => 'koffie-almond/',
 			'available'    => true,
 		),
