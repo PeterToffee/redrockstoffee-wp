@@ -103,6 +103,7 @@
 		boxModalHeading: document.getElementById( 'rrt-lc-box-modal-heading' ),
 		boxModalBackdrop: document.getElementById( 'rrt-lc-box-modal-backdrop' ),
 		boxLoveBtn: document.getElementById( 'rrt-lc-box-love-btn' ),
+		boxKeepBtn: document.getElementById( 'rrt-lc-box-keep-btn' ),
 		boxEditBtn: document.getElementById( 'rrt-lc-box-edit-btn' ),
 		boxBackBtn: document.getElementById( 'rrt-lc-box-back-btn' ),
 		boxDeleteBtn: document.getElementById( 'rrt-lc-box-delete-btn' ),
@@ -731,6 +732,9 @@
 			if ( els.boxLoveBtn ) {
 				els.boxLoveBtn.hidden = false;
 			}
+			if ( els.boxKeepBtn ) {
+				els.boxKeepBtn.hidden = true;
+			}
 			if ( els.boxEditBtn ) {
 				els.boxEditBtn.hidden = true;
 			}
@@ -763,6 +767,9 @@
 		if ( els.boxLoveBtn ) {
 			els.boxLoveBtn.hidden = true;
 		}
+		if ( els.boxKeepBtn ) {
+			els.boxKeepBtn.hidden = false;
+		}
 		if ( els.boxEditBtn ) {
 			els.boxEditBtn.hidden = false;
 		}
@@ -779,6 +786,22 @@
 	}
 	if ( els.boxPreviewBtn ) {
 		els.boxPreviewBtn.addEventListener( 'click', openBoxModal );
+	}
+	// Pete, 2026-11-10: "when we open/view a saved file, then look at it
+	// on the box, we need to have an 'All Good - Keep' Button as well, for
+	// someone who just wants to check and it pops us back to see the
+	// saved stuff" — same non-destructive close as the backdrop/Escape,
+	// just a visible, labeled way to do it, and it also scrolls back down
+	// to the Saved Designs tray (same scrollIntoView() the "design saved"
+	// flow already uses) instead of leaving the customer wherever the box
+	// modal happened to open from.
+	if ( els.boxKeepBtn ) {
+		els.boxKeepBtn.addEventListener( 'click', function () {
+			closeBoxModal();
+			if ( els.heldDesigns ) {
+				els.heldDesigns.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+			}
+		} );
 	}
 	if ( els.boxEditBtn ) {
 		els.boxEditBtn.addEventListener( 'click', function () {

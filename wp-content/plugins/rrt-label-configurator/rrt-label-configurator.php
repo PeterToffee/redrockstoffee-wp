@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.76.0' );
+define( 'RRT_LABEL_VERSION', '3.79.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -89,15 +89,12 @@ add_action(
 );
 
 /**
- * Pete, 2026-11-07: "we also have two flavors we'll be adding that
- * shortly with the additions of two label files, one 8 oz and one 4 oz of
- * the new flavor" — the flavor currently shipping (both box sizes) is
- * Original Almond; Koffie-Almond is coming but its 2 template files don't
- * exist on disk yet. Scaffolded as a real selectable dimension now (not a
- * side channel) so going live later is just: drop the 4 template files
- * into assets/templates/koffie-almond/ (same {size}-template.jpg /
- * {size}-template-tinted.jpg naming the existing files already use) and
- * flip 'available' to true below — nothing else has to change.
+ * Pete, 2026-11-10: Koffie-Almond's 4 template files (plain + tinted,
+ * 8oz + 4oz) are now in assets/templates/koffie-almond/ — the 2 plain
+ * files Pete supplied, plus GD/ImageMagick-recolored tinted versions
+ * (same "near-white background repainted, ink left alone" approach as
+ * Original Almond, same butter-yellow paper color since it's the same
+ * paper stock). Flavor flipped to 'available' => true, live.
  *
  * 'template_dir' is relative to assets/templates/ and is where
  * rrt_label_sizes() below looks for that flavor's {size}-template.jpg —
@@ -114,7 +111,7 @@ function rrt_label_flavors() {
 		'koffie-almond'   => array(
 			'label'        => 'Koffie-Almond',
 			'template_dir' => 'koffie-almond/',
-			'available'    => false,
+			'available'    => true,
 		),
 	);
 }
@@ -1087,12 +1084,12 @@ function rrt_label_configurator_shortcode( $atts ) {
 					<div class="rrt-lc-field">
 						<label class="rrt-lc-field-label">Flavor</label>
 						<?php
-						// Pete, 2026-11-07: "we also have two flavors we'll be
-						// adding that shortly" — Koffie-Almond's radio renders
-						// now (disabled, "Coming soon") so the UI already
-						// tells customers it exists; it becomes pickable the
-						// moment rrt_label_flavors() flips 'available' to
-						// true (see that function in this file).
+						// Pete, 2026-11-10: Koffie-Almond is now available
+						// (see rrt_label_flavors() in this file), so this
+						// markup renders both flavors as plain pickable
+						// radios — the --disabled class/"Coming soon" suffix
+						// below only kick in again if a flavor's 'available'
+						// is ever set back to false.
 						$is_first_flavor = true;
 						?>
 						<div class="rrt-lc-size-options rrt-lc-flavor-options" role="radiogroup" aria-label="Flavor">
@@ -1326,6 +1323,21 @@ function rrt_label_configurator_shortcode( $atts ) {
 						</div>
 						<div class="rrt-lc-box-modal-actions">
 							<button type="button" id="rrt-lc-box-love-btn" class="rrt-lc-btn-primary"><span class="rrt-lc-love-icon-wrap"><img class="rrt-lc-love-icon" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' ); ?>" width="36" height="21" decoding="sync" alt=""></span>Harry, I love it!</button>
+							<?php
+							/**
+							 * Pete, 2026-11-10: "when we open/view a saved
+							 * file, then look at it on the box, we need to
+							 * have an 'All Good - Keep' Button as well, for
+							 * someone who just wants to check and it pops us
+							 * back to see the saved stuff" — same visibility
+							 * condition as #rrt-lc-box-edit-btn below (only
+							 * while viewing a SAVED design): a plain, labeled
+							 * way to say "this is fine as-is" instead of
+							 * relying on backdrop-click/Escape, which did the
+							 * same thing but wasn't discoverable.
+							 */
+							?>
+							<button type="button" id="rrt-lc-box-keep-btn" class="rrt-lc-btn-primary" hidden>All Good - Keep</button>
 							<?php
 							/**
 							 * Pete, 2026-11-09: "can we throw it back to the

@@ -345,8 +345,13 @@
 	grid-template-columns: 1fr 1fr;
 	gap: 8px;
 }
+/* Pete, 2026-11-10: "the radio buttons can be less tall now, as the
+   Koffie-Almond no longer needs 'Coming soon'" — that suffix was the
+   only thing that could wrap a flavor pill to 2 lines; now that both
+   flavors are available (plain one-line labels), less vertical padding
+   is needed to keep the pill snug around the text. */
 .rrt-lc-flavor-options .rrt-lc-size-option {
-	padding: 10px 8px;
+	padding: 8px 8px;
 	font-size: 0.85rem;
 }
 
@@ -357,7 +362,11 @@
 	padding: 10px 12px;
 	border: 1px solid #ccc;
 	border-radius: 6px;
-	font-weight: 400;
+	/* Pete, 2026-11-10: "make the lettering on all radio buttons a little
+	   more stout/bold" — was 400 (regular weight, same as plain body
+	   copy), bumped to 600 to read as a selectable option label, not
+	   body text. Applies to both the flavor and box-size radio rows. */
+	font-weight: 600;
 	font-size: 0.95rem;
 	text-transform: none;
 	letter-spacing: normal;
@@ -1220,8 +1229,24 @@
 
 .rrt-lc-box-modal-actions {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 0.75rem;
 	margin-top: 0.5rem;
+}
+/* Pete, 2026-11-10: "there's an 'edit this design' button, and a 'back to
+   the drawing board' button, didn't we decide to remove the back to the
+   drawing board button?" — editHeldDesign()'s JS correctly sets
+   boxBackBtn.hidden = true, but hello-elementor's reset.css has
+   `[type="button"],[type="submit"],button{display:inline-block}` AFTER
+   its own `[hidden],template{display:none}` rule; our buttons use
+   type="button", so that rule matches via the [type="button"] attribute
+   selector — same specificity as [hidden], later in source, so it
+   silently wins and the "hidden" button stays visible. Same bug class as
+   .rrt-lc-box-modal/.rrt-lc-offcenter-wrap elsewhere in this file;
+   scoped to the whole plugin card (not just this one button row) so it
+   can't bite again on some other hidden button later. */
+#rrt-label-configurator [hidden] {
+	display: none;
 }
 .rrt-lc-box-modal-actions .rrt-lc-btn-primary,
 .rrt-lc-box-modal-actions .rrt-lc-btn-secondary {
