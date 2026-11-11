@@ -407,19 +407,25 @@
 											<button class="slider-step-btn" data-for="logo-size-slider" data-dir="-1" style="width:22px;height:22px;flex-shrink:0;">−</button>
 											<?php
 										/**
-										 * Pete, 2026-10-25: "art, or my files
-										 * don't go quite as large as I'd
-										 * like" — max raised from 80 to 150
-										 * (% of zone width). No other cap
-										 * exists anywhere in the chain: GD's
-										 * dest_w = (scale/100)*zone_width in
-										 * rrt_label_draw_logo() has no
-										 * hardcoded ceiling, so this slider
-										 * was the only thing actually limiting
-										 * how big a logo/art piece could get.
+										 * Pete, 2026-11-11: the 2026-10-25 raise to 150 was a real
+										 * bug, found on Bill Bartels' order — 150 means 150% of the
+										 * ZONE's own width, which is wider than the whole label, and
+										 * the on-screen preview was silently clipping the overflow at
+										 * the dotted line (zone has overflow:hidden) instead of
+										 * actually stopping it, so the slider LOOKED maxed out at the
+										 * dotted line long before it really was. The print file has no
+										 * such clipping — GD drew it at the true, bigger size, which
+										 * ate the paper border on the sides and chopped part of the
+										 * image off at the canvas edge (looked like a distorted aspect
+										 * ratio, but it was really a crop). Back to 100 — scale=100
+										 * means the logo exactly fills the zone, so the dotted line is
+										 * now a REAL ceiling, matching clampLogoScale() in
+										 * label-configurator.js and the server-side clamp in
+										 * rrt_label_resolve_design_layers() (defense in depth, so a
+										 * stale cached JS bundle can't resurrect this).
 										 */
 										?>
-										<input type="range" id="logo-size-slider" class="style-slider" min="5" max="150" value="20" step="5" style="min-width:0;">
+										<input type="range" id="logo-size-slider" class="style-slider" min="5" max="100" value="20" step="5" style="min-width:0;">
 											<button class="slider-step-btn" data-for="logo-size-slider" data-dir="1" style="width:22px;height:22px;flex-shrink:0;">+</button>
 										</div>
 									</div>

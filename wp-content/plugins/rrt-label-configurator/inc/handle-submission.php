@@ -102,11 +102,21 @@ function rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, 
 			// it — doing so would shift the pairing for every real
 			// uploaded logo after it).
 			$art_key = isset( $raw['art_key'] ) ? sanitize_key( $raw['art_key'] ) : '';
+			// Pete, 2026-11-11: "the slider has to stop enlarging when the
+			// file hits [the dotted line]" — Bill Bartels' order showed a
+			// scale of 150 (% of the zone's own width) draws wider than the
+			// whole label with no clipping here, eating the paper border
+			// and chopping part of the image off at the canvas edge. The
+			// client now hard-caps at 100 (clampLogoScale() in
+			// label-configurator.js) so the dotted line is a real ceiling,
+			// not just a visual one — this mirrors that cap server-side too,
+			// so a stale cached JS bundle (or any other future caller) can't
+			// resurrect the bug.
 			if ( $art_key && isset( $art_library[ $art_key ] ) ) {
 				$layers[] = array(
 					'type'     => 'logo',
 					'pos'      => $pos,
-					'scale'    => (float) ( $raw['scale'] ?? 0 ),
+					'scale'    => min( 100, max( 0, (float) ( $raw['scale'] ?? 0 ) ) ),
 					'tmp_path' => RRT_LABEL_PATH . $art_library[ $art_key ]['file'],
 					'art_key'  => $art_key,
 				);
@@ -117,7 +127,7 @@ function rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, 
 				++$dropped_logo_count;
 				continue;
 			}
-			$logo_scale = (float) ( $raw['scale'] ?? 0 );
+			$logo_scale = min( 100, max( 0, (float) ( $raw['scale'] ?? 0 ) ) );
 			// Pete, 2026-10-26: "I don't want to take someone's money and
 			// print a really sh*t label from a garbage file" — warn, don't
 			// block (confirmed via AskUserQuestion), so Pete sees it in his

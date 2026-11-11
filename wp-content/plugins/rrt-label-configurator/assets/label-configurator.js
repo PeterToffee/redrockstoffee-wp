@@ -1872,7 +1872,7 @@
 		if ( ! logo ) {
 			return;
 		}
-		logo.scale = parseFloat( els.logoSizeSlider.value );
+		logo.scale = clampLogoScale( parseFloat( els.logoSizeSlider.value ) );
 		checkLogoQuality( logo );
 		renderLogo( logo );
 	} );
@@ -2008,6 +2008,23 @@
 
 	function clamp( value, min, max ) {
 		return Math.max( min, Math.min( max, value ) );
+	}
+
+	// Pete, 2026-11-11: "the slider has to stop enlarging when the file
+	// hits [the dotted line]" — Bill Bartels' order showed a logo scaled
+	// up to 150 (the slider's old max) draws at 150% of the ZONE's own
+	// width, which is wider than the whole label; GD doesn't clip to the
+	// zone, only to the canvas, so the overflow silently ate the paper
+	// border on the sides AND chopped part of the image off (looked like
+	// a distorted aspect ratio, but it was really a crop). The on-screen
+	// preview never showed any of this because the zone's own
+	// overflow:hidden was quietly absorbing everything past 100% — so the
+	// slider LOOKED maxed out at the dotted line long before it actually
+	// was. 100 is the real ceiling now (logo.scale is literally "% of the
+	// zone's own width" — see renderLogo()/checkLogoQuality()), enforced
+	// here so it can never again diverge from what the dotted line shows.
+	function clampLogoScale( scale ) {
+		return clamp( scale, parseFloat( els.logoSizeSlider.min ) || 5, 100 );
 	}
 
 	// Pete, 2026-10-20: "need to be able to slide the label in the window
@@ -2206,7 +2223,7 @@
 			if ( ! logo.artKey ) {
 				logoFiles.push( logo.file );
 			}
-			layersMeta.push( { type: 'logo', pos: logo.pos, scale: logo.scale, art_key: logo.artKey || '', donate: ! logo.artKey && !! logo.donate } );
+			layersMeta.push( { type: 'logo', pos: logo.pos, scale: clampLogoScale( logo.scale ), art_key: logo.artKey || '', donate: ! logo.artKey && !! logo.donate } );
 		} );
 		state.textGroups.forEach( function ( group ) {
 			if ( group.text.trim() ) {
@@ -2403,7 +2420,7 @@
 				artKey: l.artKey || null,
 				artLabel: l.artLabel || null,
 				donate: !! l.donate,
-				scale: l.scale,
+				scale: clampLogoScale( l.scale ),
 				pos: { x: l.pos.x, y: l.pos.y },
 				naturalWidth: l.naturalWidth,
 				naturalHeight: l.naturalHeight,
@@ -2517,7 +2534,7 @@
 				artKey: saved.artKey,
 				artLabel: saved.artLabel,
 				donate: saved.donate,
-				scale: saved.scale,
+				scale: clampLogoScale( saved.scale ),
 				pos: { x: saved.pos.x, y: saved.pos.y },
 				naturalWidth: saved.naturalWidth,
 				naturalHeight: saved.naturalHeight,
