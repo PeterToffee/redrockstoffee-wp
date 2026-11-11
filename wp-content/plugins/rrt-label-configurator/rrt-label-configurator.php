@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.83.0' );
+define( 'RRT_LABEL_VERSION', '3.84.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -304,25 +304,50 @@ function rrt_label_min_qty_for_size( $size_key ) {
  * the picker down to the 3 that already worked.
  *
  * Pete, 2026-11-11: "font size is out of whack with the preview... lines
- * goofed up... placement a little because of the larger font size" — GD's
- * imagettfbbox()/imagettftext() and a browser's own text renderer do NOT
- * agree on how tall a given font's glyphs are for the same declared pixel
- * size; the gap is font-specific (how much ascent/descent/swash a
- * typeface's own metrics tables claim), so feeding the identical
- * font_size_px into both (as rrt_label_draw_text() did) rendered visibly
- * different sizes for some fonts and barely-noticeable ones for others.
- * Measured directly: same test string ("Jolly Big Fox", 100px) rendered in
- * Chrome (a Range over the text node's real ink, matching
- * textGlyphGapPct()'s own technique in label-configurator.js) versus GD's
- * imagettfbbox() on each font's actual .ttf file below, giving a real
- * inked-height-to-declared-size ratio per side. 'size_calibration' is
- * browser_ratio / gd_ratio for that font — rrt_label_draw_text()
- * multiplies font_size_px by it before doing anything else (word-wrap AND
- * final draw), so GD ends up drawing each font at the size that actually
- * LOOKS like what the customer saw, not just the same raw number. Worst
- * offender was Great Vibes at 0.781 (GD was rendering it ~28% too big);
- * most fonts needed only a small nudge. Re-measure and update this list if
- * a font's .ttf file ever gets swapped for a different version/foundry.
+ * goofed up... placement a little because of the larger font size," then
+ * after an initial height-only fix: "it spills out further than desired...
+ * WYSIWYG is the order of the day." GD's imagettfbbox()/imagettftext() and
+ * a browser's own text renderer do NOT agree on how a given font's glyphs
+ * measure for the same declared pixel size — and, measured properly, they
+ * disagree on WIDTH and HEIGHT by DIFFERENT amounts, so no single number
+ * can make both match. Measured rigorously this time: 3 different test
+ * strings (so a font whose ratio shifts with content gets caught, not
+ * averaged away), real ink from a browser Range (matching
+ * textGlyphGapPct()'s technique in label-configurator.js) against GD's
+ * imagettfbbox() on each font's actual .ttf file, at 200px for precision.
+ *
+ * Two numbers per font come out of that:
+ * - 'size_calibration' (browser_h / gd_h, averaged) — multiplies
+ *   font_size_px itself in rrt_label_draw_text(), so the actual drawn
+ *   glyph size matches the browser's.
+ * - 'wrap_width_calibration' (browser_w / gd_w at the SAME font_size_px,
+ *   divided by size_calibration since the width this corrects is measured
+ *   AFTER font_size_px is already height-calibrated) — multiplies ONLY
+ *   the word-wrap fit-test's measured width, so the same words land on
+ *   the same lines the customer saw, without distorting the actual glyphs
+ *   drawn (which still use the height-calibrated size above). Two
+ *   different engines simply don't render the same font identically; this
+ *   is the closest a single flat number per axis can get.
+ *
+ * Three fonts got DROPPED here (Bold Script/Satisfy, Bangers Bold,
+ * Great Vibes) rather than calibrated — Pete, 2026-11-11: "if we reduce
+ * the number of fonts, that's ok, get to something that has the smallest
+ * of misalignment." Their ratios swung 5-7% just from CHANGING THE TEST
+ * STRING (every other font held under ~3.5%), meaning no fixed multiplier
+ * reliably predicts them for arbitrary customer text — recoloring the
+ * dice differently for every order. The 13 remaining fonts all measured
+ * consistent (<3.5%) across all 3 strings, so a flat per-font number
+ * actually means something for them. Remove the matching font-drum card
+ * (inc/quote-module-card.part.php) and TEXT_FONTS entry
+ * (label-configurator.js) if a font is ever dropped from here too — all
+ * three must stay in sync or a customer could still pick a font this
+ * array doesn't know (falls back to the array's first font — see
+ * $font_key below — which would re-break WYSIWYG silently).
+ *
+ * Re-measure and update this whole list (all 16 original fonts, not just
+ * survivors — a previously-inconsistent font might calibrate fine with a
+ * different .ttf) if any font's .ttf file ever gets swapped for a
+ * different version/foundry.
  *
  * Two key names below differ from their on-screen label for a reason:
  * - 'scripty' (label "Scripty") was 'dancingscript' here — same file,
@@ -341,116 +366,108 @@ function rrt_label_min_qty_for_size( $size_key ) {
 function rrt_label_fonts() {
 	return array(
 		'opensans'      => array(
-			'label'             => 'Clean',
-			'css_family'        => "'Open Sans', sans-serif",
-			'ttf_file'          => 'assets/fonts/opensans-variable.ttf',
-			'google_font'       => 'Open+Sans:wght@400;700',
-			'size_calibration'  => 1.023,
+			'label'                   => 'Clean',
+			'css_family'              => "'Open Sans', sans-serif",
+			'ttf_file'                => 'assets/fonts/opensans-variable.ttf',
+			'google_font'             => 'Open+Sans:wght@400;700',
+			'size_calibration'        => 1.019,
+			'wrap_width_calibration'  => 0.740,
 		),
 		'oswald'        => array(
-			'label'             => 'Bold Modern',
-			'css_family'        => "'Oswald', sans-serif",
-			'ttf_file'          => 'assets/fonts/oswald-variable.ttf',
-			'google_font'       => 'Oswald:wght@600',
-			'size_calibration'  => 1.113,
+			'label'                   => 'Bold Modern',
+			'css_family'              => "'Oswald', sans-serif",
+			'ttf_file'                => 'assets/fonts/oswald-variable.ttf',
+			'google_font'             => 'Oswald:wght@600',
+			'size_calibration'        => 1.115,
+			'wrap_width_calibration'  => 0.750,
 		),
 		'luckiest'      => array(
-			'label'             => 'Luckiest Guy',
-			'css_family'        => "'Luckiest Guy', cursive",
-			'ttf_file'          => 'assets/fonts/luckiest.ttf',
-			'google_font'       => 'Luckiest+Guy',
-			'size_calibration'  => 1.268,
+			'label'                   => 'Luckiest Guy',
+			'css_family'              => "'Luckiest Guy', cursive",
+			'ttf_file'                => 'assets/fonts/luckiest.ttf',
+			'google_font'             => 'Luckiest+Guy',
+			'size_calibration'        => 1.248,
+			'wrap_width_calibration'  => 0.591,
 		),
 		'comic'         => array(
-			'label'             => 'Comic Balloon',
-			'css_family'        => "'Boogaloo', cursive",
-			'ttf_file'          => 'assets/fonts/comic.ttf',
-			'google_font'       => 'Boogaloo',
-			'size_calibration'  => 0.908,
-		),
-		'satisfy'       => array(
-			'label'             => 'Bold Script',
-			'css_family'        => "'Satisfy', cursive",
-			'ttf_file'          => 'assets/fonts/satisfy.ttf',
-			'google_font'       => 'Satisfy',
-			'size_calibration'  => 0.855,
+			'label'                   => 'Comic Balloon',
+			'css_family'              => "'Boogaloo', cursive",
+			'ttf_file'                => 'assets/fonts/comic.ttf',
+			'google_font'             => 'Boogaloo',
+			'size_calibration'        => 0.911,
+			'wrap_width_calibration'  => 0.828,
 		),
 		'lobster'       => array(
-			'label'             => 'Lobster',
-			'css_family'        => "'Lobster', cursive",
-			'ttf_file'          => 'assets/fonts/lobster.ttf',
-			'google_font'       => 'Lobster',
-			'size_calibration'  => 0.940,
-		),
-		'bangers'       => array(
-			'label'             => 'Bangers Bold',
-			'css_family'        => "'Bangers', cursive",
-			'ttf_file'          => 'assets/fonts/bangers.ttf',
-			'google_font'       => 'Bangers',
-			'size_calibration'  => 0.991,
+			'label'                   => 'Lobster',
+			'css_family'              => "'Lobster', cursive",
+			'ttf_file'                => 'assets/fonts/lobster.ttf',
+			'google_font'             => 'Lobster',
+			'size_calibration'        => 0.934,
+			'wrap_width_calibration'  => 0.786,
 		),
 		'fredoka'       => array(
-			'label'             => 'Rounded & Fun',
-			'css_family'        => "'Fredoka One', cursive",
-			'ttf_file'          => 'assets/fonts/fredoka.ttf',
-			'google_font'       => 'Fredoka+One',
-			'size_calibration'  => 0.890,
+			'label'                   => 'Rounded & Fun',
+			'css_family'              => "'Fredoka One', cursive",
+			'ttf_file'                => 'assets/fonts/fredoka.ttf',
+			'google_font'             => 'Fredoka+One',
+			'size_calibration'        => 0.896,
+			'wrap_width_calibration'  => 0.831,
 		),
 		'montserrat'    => array(
-			'label'             => 'Clean Modern',
-			'css_family'        => "'Montserrat', sans-serif",
-			'ttf_file'          => 'assets/fonts/montserrat-bold.ttf',
-			'google_font'       => 'Montserrat:wght@700',
-			'size_calibration'  => 0.924,
+			'label'                   => 'Clean Modern',
+			'css_family'              => "'Montserrat', sans-serif",
+			'ttf_file'                => 'assets/fonts/montserrat-bold.ttf',
+			'google_font'             => 'Montserrat:wght@700',
+			'size_calibration'        => 0.921,
+			'wrap_width_calibration'  => 0.814,
 		),
 		'abril'         => array(
-			'label'             => 'Abril Fatface',
-			'css_family'        => "'Abril Fatface', cursive",
-			'ttf_file'          => 'assets/fonts/abril.ttf',
-			'google_font'       => 'Abril+Fatface',
-			'size_calibration'  => 1.007,
-		),
-		'greatvibes'    => array(
-			'label'             => 'Great Vibes',
-			'css_family'        => "'Great Vibes', cursive",
-			'ttf_file'          => 'assets/fonts/greatvibes.ttf',
-			'google_font'       => 'Great+Vibes',
-			'size_calibration'  => 0.781,
+			'label'                   => 'Abril Fatface',
+			'css_family'              => "'Abril Fatface', cursive",
+			'ttf_file'                => 'assets/fonts/abril.ttf',
+			'google_font'             => 'Abril+Fatface',
+			'size_calibration'        => 1.008,
+			'wrap_width_calibration'  => 0.736,
 		),
 		'sniglet'       => array(
-			'label'             => 'Sniglet',
-			'css_family'        => "'Sniglet', cursive",
-			'ttf_file'          => 'assets/fonts/sniglet.ttf',
-			'google_font'       => 'Sniglet',
-			'size_calibration'  => 0.947,
+			'label'                   => 'Sniglet',
+			'css_family'              => "'Sniglet', cursive",
+			'ttf_file'                => 'assets/fonts/sniglet.ttf',
+			'google_font'             => 'Sniglet',
+			'size_calibration'        => 0.930,
+			'wrap_width_calibration'  => 0.807,
 		),
 		'arial'         => array(
-			'label'             => 'Clean & Simple',
-			'css_family'        => 'Arial, Helvetica, sans-serif',
-			'ttf_file'          => 'assets/fonts/arial.ttf',
-			'google_font'       => '',
-			'size_calibration'  => 0.896,
+			'label'                   => 'Clean & Simple',
+			'css_family'              => 'Arial, Helvetica, sans-serif',
+			'ttf_file'                => 'assets/fonts/arial.ttf',
+			'google_font'             => '',
+			'size_calibration'        => 0.892,
+			'wrap_width_calibration'  => 0.850,
 		),
 		'playfair'      => array(
-			'label'             => 'Classic Serif',
-			'css_family'        => "'Playfair Display', serif",
-			'ttf_file'          => 'assets/fonts/playfair-italic.ttf',
-			'google_font'       => 'Playfair+Display:ital@1',
-			'size_calibration'  => 1.008,
+			'label'                   => 'Classic Serif',
+			'css_family'              => "'Playfair Display', serif",
+			'ttf_file'                => 'assets/fonts/playfair-italic.ttf',
+			'google_font'             => 'Playfair+Display:ital@1',
+			'size_calibration'        => 1.009,
+			'wrap_width_calibration'  => 0.741,
 		),
 		'scripty'       => array(
-			'label'             => 'Scripty',
-			'css_family'        => "'Dancing Script', cursive",
-			'ttf_file'          => 'assets/fonts/dancingscript-variable.ttf',
-			'google_font'       => 'Dancing+Script:wght@600',
-			'size_calibration'  => 0.896,
+			'label'                   => 'Scripty',
+			'css_family'              => "'Dancing Script', cursive",
+			'ttf_file'                => 'assets/fonts/dancingscript-variable.ttf',
+			'google_font'             => 'Dancing+Script:wght@600',
+			'size_calibration'        => 0.899,
+			'wrap_width_calibration'  => 0.843,
 		),
 		'pacifico'      => array(
-			'label'             => 'Casual Script',
-			'css_family'        => "'Pacifico', cursive",
-			'ttf_file'          => 'assets/fonts/pacifico.ttf',
-			'google_font'       => 'Pacifico',
-			'size_calibration'  => 0.946,
+			'label'                   => 'Casual Script',
+			'css_family'              => "'Pacifico', cursive",
+			'ttf_file'                => 'assets/fonts/pacifico.ttf',
+			'google_font'             => 'Pacifico',
+			'size_calibration'        => 0.943,
+			'wrap_width_calibration'  => 0.777,
 		),
 	);
 }

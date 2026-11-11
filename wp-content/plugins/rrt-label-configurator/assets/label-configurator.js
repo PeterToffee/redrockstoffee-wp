@@ -36,17 +36,22 @@
 	// Font key -> CSS family, matching the radio-card `value`s in the
 	// copied font-drum exactly (also matches the Google Fonts families
 	// this plugin already enqueues).
+	// Pete, 2026-11-11: "if we reduce the number of fonts, that's ok, get
+	// to something that has the smallest of misalignment... WYSIWYG is
+	// the order of the day" — Bold Script/Satisfy, Bangers Bold, and Great
+	// Vibes dropped from the font-drum (inc/quote-module-card.part.php)
+	// and here together; see rrt_label_fonts()'s own note in
+	// rrt-label-configurator.php for the measurement behind why these
+	// three specifically. All three lists (here, the font-drum markup,
+	// and rrt_label_fonts()) must stay in sync.
 	var TEXT_FONTS = {
 		oswald: "'Oswald', sans-serif",
 		luckiest: "'Luckiest Guy', cursive",
 		comic: "'Boogaloo', cursive",
-		satisfy: "'Satisfy', cursive",
 		lobster: "'Lobster', cursive",
-		bangers: "'Bangers', cursive",
 		fredoka: "'Fredoka One', cursive",
 		montserrat: "'Montserrat', sans-serif",
 		abril: "'Abril Fatface', cursive",
-		greatvibes: "'Great Vibes', cursive",
 		sniglet: "'Sniglet', cursive",
 		arial: "Arial, Helvetica, sans-serif",
 		playfair: "'Playfair Display', serif",

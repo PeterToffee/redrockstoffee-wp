@@ -163,19 +163,9 @@
 												<span class="font-preview comic">Life is beautiful</span>
 											</label>
 											<label class="radio-card">
-												<input type="radio" name="quote-font" value="satisfy">
-												<div class="radio-card-body"><span class="radio-card-label">Bold Script</span></div>
-												<span class="font-preview satisfy">Life is beautiful</span>
-											</label>
-											<label class="radio-card">
 												<input type="radio" name="quote-font" value="lobster">
 												<div class="radio-card-body"><span class="radio-card-label">Lobster</span></div>
 												<span class="font-preview lobster">Life is beautiful</span>
-											</label>
-											<label class="radio-card">
-												<input type="radio" name="quote-font" value="bangers">
-												<div class="radio-card-body"><span class="radio-card-label">Bangers Bold</span></div>
-												<span class="font-preview bangers">Life is beautiful</span>
 											</label>
 											<label class="radio-card">
 												<input type="radio" name="quote-font" value="fredoka">
@@ -191,11 +181,6 @@
 												<input type="radio" name="quote-font" value="abril">
 												<div class="radio-card-body"><span class="radio-card-label">Abril Fatface</span></div>
 												<span class="font-preview abril">Life is beautiful</span>
-											</label>
-											<label class="radio-card">
-												<input type="radio" name="quote-font" value="greatvibes">
-												<div class="radio-card-body"><span class="radio-card-label">Great Vibes</span></div>
-												<span class="font-preview greatvibes">Life is beautiful</span>
 											</label>
 											<label class="radio-card">
 												<input type="radio" name="quote-font" value="sniglet">

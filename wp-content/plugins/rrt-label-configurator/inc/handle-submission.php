@@ -1207,7 +1207,19 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
 		foreach ( $words as $word ) {
 			$test = $line ? $line . ' ' . $word : $word;
 			$bbox = imagettfbbox( $font_size_px, 0, $ttf_path, $test );
-			$test_width = $bbox[2] - $bbox[0];
+			// Pete, 2026-11-11: "it spills out further than desired... font
+			// coming out... a little larger than previewed" — measured
+			// directly (GD's imagettfbbox vs a real browser Range, same 3
+			// test strings, across every font): GD and the browser don't
+			// just disagree on HEIGHT (already corrected above via
+			// size_calibration) — they disagree on WIDTH too, by a
+			// DIFFERENT amount, so no single font_size_px can make both
+			// match at once. wrap_width_calibration corrects ONLY this
+			// wrap-fit test (so the same words land on the same lines the
+			// customer saw) without touching the actual glyph size drawn
+			// below — see rrt_label_fonts()'s own note for the full
+			// methodology and the per-font numbers.
+			$test_width = ( $bbox[2] - $bbox[0] ) * ( $fonts[ $font_key ]['wrap_width_calibration'] ?? 1.0 );
 			if ( $test_width > $max_width && $line ) {
 				$lines[] = $line;
 				$line    = $word;
@@ -1261,22 +1273,58 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
 		array( -1, 1 ), array( 0, 1 ), array( 1, 1 ),
 	);
 
+	// Pete, 2026-11-11: "it spills out further than desired... WYSIWYG is
+	// the order of the day" — wrap_width_calibration (above) only fixes
+	// WHICH words land on which line; it can't fix the actual on-canvas
+	// footprint, because font_size_px is one number and GD draws both
+	// axes from it — correcting height (so the glyphs LOOK the size the
+	// customer picked) necessarily leaves width wrong by a different
+	// amount (measured per-font in rrt_label_fonts()), and vice versa.
+	// Real fix: draw each line to its own transparent, uncropped
+	// intermediate canvas at the height-calibrated size (so vertical
+	// stays correct), then imagecopyresampled() it horizontally by
+	// wrap_width_calibration (height unchanged) before compositing onto
+	// the real canvas — an actual pixel stretch/squeeze of the glyphs
+	// themselves, not just a word-wrap heuristic, so the real printed
+	// footprint matches what the browser showed on both axes at once.
+	$wrap_width_calibration = $fonts[ $font_key ]['wrap_width_calibration'] ?? 1.0;
+	$pad                    = 4; // clears the 1px outline ring + 1px bold offset with room to spare.
+
 	foreach ( $lines as $i => $line_text ) {
-		$bbox        = imagettfbbox( $font_size_px, 0, $ttf_path, $line_text );
-		$line_width  = $bbox[2] - $bbox[0];
-		$x           = (int) round( $center_x - $line_width / 2 );
-		$baseline_y  = (int) round( $top + ( $i * $line_height ) + $font_size_px );
+		if ( '' === $line_text ) {
+			continue; // a blank line only ever needed its own line_height worth of vertical space, already accounted for in $block_height.
+		}
+
+		$bbox       = imagettfbbox( $font_size_px, 0, $ttf_path, $line_text );
+		$line_width = $bbox[2] - $bbox[0];
+		$ascent     = (int) ceil( max( 0, -$bbox[7] ) );
+		$descent    = (int) ceil( max( 0, $bbox[1] ) );
+
+		$strip_w = (int) ceil( $line_width ) + 2 * $pad;
+		$strip_h = $ascent + $descent + 2 * $pad;
+		$strip   = imagecreatetruecolor( $strip_w, $strip_h );
+		imagealphablending( $strip, false );
+		imagesavealpha( $strip, true );
+		$strip_transparent = imagecolorallocatealpha( $strip, 0, 0, 0, 127 );
+		imagefill( $strip, 0, 0, $strip_transparent );
+		imagealphablending( $strip, true );
+
+		// Local origin within the strip: left-ink-edge at $pad, baseline at
+		// $pad + $ascent down — matches $strip_h's own ascent+descent+2*pad
+		// layout above.
+		$local_x       = $pad - $bbox[0];
+		$local_base_y  = $pad + $ascent;
 
 		if ( $shadow_enabled ) {
 			foreach ( $outline_offsets as $offset ) {
-				imagettftext( $canvas, $font_size_px, 0, $x + $offset[0], $baseline_y + $offset[1], $outline, $ttf_path, $line_text );
+				imagettftext( $strip, $font_size_px, 0, $local_x + $offset[0], $local_base_y + $offset[1], $outline, $ttf_path, $line_text );
 			}
 		}
 		/**
 		 * Pete, 2026-10-25: "confirm all elements... have no bugs" — Bold
 		 * was fully live client-side (fontWeight:700, a real different
 		 * glyph weight from the variable/weighted web font) but never
-		 * sent to or applied by the server at all. None of these 15 fonts
+		 * sent to or applied by the server at all. None of these fonts
 		 * have a separate bold .ttf (see rrt_label_fonts() — one file
 		 * each), so a true weight-matched bold isn't available here;
 		 * faux-bold (stamping the same glyphs a second time, 1px to the
@@ -1285,10 +1333,26 @@ function rrt_label_draw_text( $canvas, $px, $label_text, $text_pos, $text_font, 
 		 * used for the outline/shadow effect just above, just a single
 		 * extra pass instead of a full ring.
 		 */
-		imagettftext( $canvas, $font_size_px, 0, $x, $baseline_y, $text_color, $ttf_path, $line_text );
+		imagettftext( $strip, $font_size_px, 0, $local_x, $local_base_y, $text_color, $ttf_path, $line_text );
 		if ( $bold ) {
-			imagettftext( $canvas, $font_size_px, 0, $x + 1, $baseline_y, $text_color, $ttf_path, $line_text );
+			imagettftext( $strip, $font_size_px, 0, $local_x + 1, $local_base_y, $text_color, $ttf_path, $line_text );
 		}
+
+		$scaled_w = max( 1, (int) round( $strip_w * $wrap_width_calibration ) );
+		$scaled   = imagecreatetruecolor( $scaled_w, $strip_h );
+		imagealphablending( $scaled, false );
+		imagesavealpha( $scaled, true );
+		$scaled_transparent = imagecolorallocatealpha( $scaled, 0, 0, 0, 127 );
+		imagefill( $scaled, 0, 0, $scaled_transparent );
+		imagecopyresampled( $scaled, $strip, 0, 0, 0, 0, $scaled_w, $strip_h, $strip_w, $strip_h );
+		imagedestroy( $strip );
+
+		$dest_x     = (int) round( $center_x - $scaled_w / 2 );
+		$baseline_y = (int) round( $top + ( $i * $line_height ) + $font_size_px );
+		$dest_y     = $baseline_y - $pad - $ascent;
+
+		imagecopy( $canvas, $scaled, $dest_x, $dest_y, 0, 0, $scaled_w, $strip_h );
+		imagedestroy( $scaled );
 	}
 }
 
