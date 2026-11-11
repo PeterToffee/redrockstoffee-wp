@@ -94,3 +94,13 @@
 - assets/label-configurator.js  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (11 checks, 0 warnings). Server backups: *.bak.1794262638. Rollback: .claude/deploy/rollback.sh 1794262638 --go
+
+## 2026-11-10 17:16 - deploy 1794355316 (commit 7e7584ea)
+- assets/templates/koffie-almond/4oz-template-tinted.jpg  (ASSET-NEW)
+- assets/templates/koffie-almond/4oz-template.jpg  (ASSET-NEW)
+- assets/templates/koffie-almond/8oz-template-tinted.jpg  (ASSET-NEW)
+- assets/templates/koffie-almond/8oz-template.jpg  (ASSET-NEW)
+- assets/label-configurator.css  (DIFF)
+- assets/label-configurator.js  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (21 checks, 0 warnings). Server backups: *.bak.1794355316. Rollback: .claude/deploy/rollback.sh 1794355316 --go
