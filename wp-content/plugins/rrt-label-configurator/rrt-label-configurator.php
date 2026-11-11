@@ -91,10 +91,35 @@ add_action(
 /**
  * Pete, 2026-11-10: Koffie-Almond's 4 template files (plain + tinted,
  * 8oz + 4oz) are now in assets/templates/koffie-almond/ — the 2 plain
- * files Pete supplied, plus GD/ImageMagick-recolored tinted versions
- * (same "near-white background repainted, ink left alone" approach as
- * Original Almond, same butter-yellow paper color since it's the same
- * paper stock). Flavor flipped to 'available' => true, live.
+ * files Pete supplied, plus tinted versions for the live preview/3D box
+ * mockup. Flavor flipped to 'available' => true, live.
+ *
+ * 2026-11-11: "the coffee label seems too heavy [saturated]... go back to
+ * the original Koffie files... figure out a workaround without touching
+ * the saturation/white" — every earlier attempt at the tinted files
+ * (hard-threshold white replace, Linear Burn, a whiteness-masked blend)
+ * assumed the problem was in how hard each one repainted the near-white
+ * background. It wasn't. The source JPEGs are CMYK with a real embedded
+ * "U.S. Web Coated (SWOP) v2" print profile, and the very first/every
+ * subsequent build of these tinted files converted them to sRGB with a
+ * plain `-colorspace sRGB` reassignment — which ignores that embedded
+ * profile entirely. Measured directly against a real ICC-aware
+ * conversion (`-profile` with Windows' own sRGB.icm, which DOES use the
+ * source profile): a bean pixel came out srgb(113,0,1) the naive way —
+ * fully saturated maroon, green/blue crushed to 0 — versus the correct
+ * srgb(128,25,28), a muted roast-brown. That's the real "too heavy":
+ * every one of my recolor attempts was correctly leaving the ink alone,
+ * but the ink itself was wrong from the very first conversion, before
+ * any of that recoloring ever touched it.
+ *
+ * Current tinted files: Pete's original plain JPEGs, converted ONLY
+ * through that ICC-aware profile conversion (no white-replacement, no
+ * masking, no blending of any kind — literally zero pixels recolored
+ * beyond the colorspace conversion itself, per Pete's own ask). The
+ * white background is therefore plain white again, same as the
+ * untouched source — it won't match the butter-yellow paper stock the
+ * way Original Almond's tinted files do; that's a separate, deliberately
+ * deferred cosmetic question, not a bug.
  *
  * 'template_dir' is relative to assets/templates/ and is where
  * rrt_label_sizes() below looks for that flavor's {size}-template.jpg —
