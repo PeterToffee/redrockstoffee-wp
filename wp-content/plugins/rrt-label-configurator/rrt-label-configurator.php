@@ -329,19 +329,28 @@ function rrt_label_min_qty_for_size( $size_key ) {
  *   different engines simply don't render the same font identically; this
  *   is the closest a single flat number per axis can get.
  *
- * Three fonts got DROPPED here (Bold Script/Satisfy, Bangers Bold,
- * Great Vibes) rather than calibrated — Pete, 2026-11-11: "if we reduce
- * the number of fonts, that's ok, get to something that has the smallest
- * of misalignment." Their ratios swung 5-7% just from CHANGING THE TEST
- * STRING (every other font held under ~3.5%), meaning no fixed multiplier
- * reliably predicts them for arbitrary customer text — recoloring the
- * dice differently for every order. The 13 remaining fonts all measured
- * consistent (<3.5%) across all 3 strings, so a flat per-font number
- * actually means something for them. Remove the matching font-drum card
- * (inc/quote-module-card.part.php) and TEXT_FONTS entry
- * (label-configurator.js) if a font is ever dropped from here too — all
- * three must stay in sync or a customer could still pick a font this
- * array doesn't know (falls back to the array's first font — see
+ * Three fonts (Bold Script/Satisfy, Bangers Bold, Great Vibes) measured
+ * much less reliable — their ratio swung 5-7% just from CHANGING THE
+ * TEST STRING (every other font held under ~3.5%), meaning no fixed
+ * multiplier reliably predicts them for arbitrary customer text. Pete,
+ * 2026-11-11: "if we reduce the number of fonts, that's ok" — these
+ * three are pulled from the font-drum (inc/quote-module-card.part.php)
+ * so no NEW design can pick them. They stay HERE and in TEXT_FONTS
+ * (label-configurator.js) anyway, with their (less consistent, but still
+ * far better than uncalibrated) measured numbers — Pete, same day: "Bold
+ * Script is the one used for the Happy Holidays/Mythical Designs one,
+ * it's still outstanding with the customer" — pulling a font's DATA, not
+ * just its drum card, would silently fall back to a different font (see
+ * $font_key below) the next time that already-placed order's design is
+ * opened, edited, or reprinted. Dropping a font from the picker and
+ * erasing its ability to render/print a design someone already approved
+ * are two different things; only the picker changes here.
+ *
+ * If a font's .ttf/TEXT_FONTS entry is ever ACTUALLY deleted (not just
+ * pulled from the drum) — e.g. once Pete confirms no outstanding order
+ * still uses it — remove it from here, TEXT_FONTS, and the font-drum
+ * together; all three must stay in sync or a customer could pick a font
+ * this array doesn't know (falls back to the array's first font — see
  * $font_key below — which would re-break WYSIWYG silently).
  *
  * Re-measure and update this whole list (all 16 original fonts, not just
@@ -397,6 +406,19 @@ function rrt_label_fonts() {
 			'size_calibration'        => 0.911,
 			'wrap_width_calibration'  => 0.828,
 		),
+		// Pete, 2026-11-11: dropped from the font-drum (less reliable
+		// calibration), NOT deleted — see this function's own note just
+		// above on why ("Mythical Designs" is still outstanding with Bold
+		// Script). Not selectable for a new design; still renders/prints
+		// correctly for any design that already used it.
+		'satisfy'       => array(
+			'label'                   => 'Bold Script',
+			'css_family'              => "'Satisfy', cursive",
+			'ttf_file'                => 'assets/fonts/satisfy.ttf',
+			'google_font'             => 'Satisfy',
+			'size_calibration'        => 0.872,
+			'wrap_width_calibration'  => 0.852,
+		),
 		'lobster'       => array(
 			'label'                   => 'Lobster',
 			'css_family'              => "'Lobster', cursive",
@@ -404,6 +426,16 @@ function rrt_label_fonts() {
 			'google_font'             => 'Lobster',
 			'size_calibration'        => 0.934,
 			'wrap_width_calibration'  => 0.786,
+		),
+		// Pete, 2026-11-11: dropped from the font-drum, not deleted — see
+		// 'satisfy' just above for why.
+		'bangers'       => array(
+			'label'                   => 'Bangers Bold',
+			'css_family'              => "'Bangers', cursive",
+			'ttf_file'                => 'assets/fonts/bangers.ttf',
+			'google_font'             => 'Bangers',
+			'size_calibration'        => 1.031,
+			'wrap_width_calibration'  => 0.710,
 		),
 		'fredoka'       => array(
 			'label'                   => 'Rounded & Fun',
@@ -428,6 +460,16 @@ function rrt_label_fonts() {
 			'google_font'             => 'Abril+Fatface',
 			'size_calibration'        => 1.008,
 			'wrap_width_calibration'  => 0.736,
+		),
+		// Pete, 2026-11-11: dropped from the font-drum, not deleted — see
+		// 'satisfy' above for why.
+		'greatvibes'    => array(
+			'label'                   => 'Great Vibes',
+			'css_family'              => "'Great Vibes', cursive",
+			'ttf_file'                => 'assets/fonts/greatvibes.ttf',
+			'google_font'             => 'Great+Vibes',
+			'size_calibration'        => 0.811,
+			'wrap_width_calibration'  => 0.915,
 		),
 		'sniglet'       => array(
 			'label'                   => 'Sniglet',

@@ -39,19 +39,26 @@
 	// Pete, 2026-11-11: "if we reduce the number of fonts, that's ok, get
 	// to something that has the smallest of misalignment... WYSIWYG is
 	// the order of the day" — Bold Script/Satisfy, Bangers Bold, and Great
-	// Vibes dropped from the font-drum (inc/quote-module-card.part.php)
-	// and here together; see rrt_label_fonts()'s own note in
-	// rrt-label-configurator.php for the measurement behind why these
-	// three specifically. All three lists (here, the font-drum markup,
-	// and rrt_label_fonts()) must stay in sync.
+	// Vibes pulled from the font-drum (inc/quote-module-card.part.php), so
+	// no NEW design can pick them. Kept here (and in rrt_label_fonts() —
+	// see its own note for the measurement behind why these three
+	// specifically) because Pete, same day: "Bold Script is the one used
+	// for the Happy Holidays/Mythical Designs one, it's still outstanding
+	// with the customer" — this map is what makes the LIVE PREVIEW render
+	// an already-placed design correctly if it's ever reopened/edited, so
+	// pulling the font here too would silently swap its look out from
+	// under an order Pete hasn't even finished proofing yet.
 	var TEXT_FONTS = {
 		oswald: "'Oswald', sans-serif",
 		luckiest: "'Luckiest Guy', cursive",
 		comic: "'Boogaloo', cursive",
+		satisfy: "'Satisfy', cursive",
 		lobster: "'Lobster', cursive",
+		bangers: "'Bangers', cursive",
 		fredoka: "'Fredoka One', cursive",
 		montserrat: "'Montserrat', sans-serif",
 		abril: "'Abril Fatface', cursive",
+		greatvibes: "'Great Vibes', cursive",
 		sniglet: "'Sniglet', cursive",
 		arial: "Arial, Helvetica, sans-serif",
 		playfair: "'Playfair Display', serif",
