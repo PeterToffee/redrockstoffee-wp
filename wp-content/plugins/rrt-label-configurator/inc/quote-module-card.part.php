@@ -228,7 +228,7 @@
 											<input type="range" id="bh-slider" style="display:none;" min="0" max="80" value="0" step="5">
 											<input type="range" id="bw-slider" style="display:none;" min="15" max="100" value="90" step="5">
 										</div>
-										<button id="center-text-btn" type="button" style="display:none; width:100%; margin-top:0.25rem; padding:0.6rem 0.75rem; background:linear-gradient(to right,#e03020,#e67e22 25%,#e67e22 75%,#e03020); color:#fff; border:none; border-radius:8px; font-size:0.78rem; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; line-height:1.3; text-align:center; text-transform:uppercase; box-shadow:-4px 0 14px rgba(220,40,20,0.75),4px 0 14px rgba(220,40,20,0.75),0 0 8px rgba(220,40,20,0.4);">TEXT OFF CENTER — TAP TO RECENTER</button>
+										<button id="center-text-btn" type="button" style="display:none; width:100%; margin-top:0.25rem; padding:0.6rem 0.75rem; background:linear-gradient(to right,#e03020,#e67e22 25%,#e67e22 75%,#e03020); color:#fff; border:none; border-radius:8px; font-size:0.78rem; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; line-height:1.3; text-align:center; text-transform:uppercase; box-shadow:-4px 0 14px rgba(220,40,20,0.75),4px 0 14px rgba(220,40,20,0.75),0 0 8px rgba(220,40,20,0.4);">OFF CENTER — TAP TO RECENTER</button>
 
 										<p class="hint" style="display:none;">Drag text on preview · ↑↓←→ keys</p>
 

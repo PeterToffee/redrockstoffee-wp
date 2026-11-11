@@ -961,9 +961,15 @@
 		if ( ! activeGroup() ) {
 			addTextGroup();
 		}
+		// Pete, 2026-11-11: the off-center alarm now follows whichever tab
+		// is open (see activeCenterTarget()) — re-check on every tab
+		// switch so it doesn't keep showing/hiding stale state from the
+		// tab just left.
+		updateCenterBtn();
 	} );
 	els.tabBtnLogo.addEventListener( 'click', function () {
 		selectTab( 'logo' );
+		updateCenterBtn();
 	} );
 
 	// --- text groups ---
@@ -1100,14 +1106,32 @@
 		} );
 	}
 
+	// Pete, 2026-11-11: "when we load text, and drag...and it runs off
+	// kilter, we have the centering device/alarm, perfect. Can we add a
+	// similar item for the file/logo" — this whole block used to be
+	// text-only (hardcoded to activeGroup()). Generalized to whichever
+	// kind is relevant right now: whichever tab is open (Logo vs Text)
+	// decides whether the shared alarm widget is watching the active logo
+	// or the active text group, since that's always the one thing visibly
+	// being dragged/edited at a time. Returns null (alarm stays hidden) if
+	// there's nothing to watch on the open tab.
+	function activeCenterTarget() {
+		var onLogoTab = !! ( els.panelLogo && els.panelLogo.classList.contains( 'active' ) );
+		if ( onLogoTab ) {
+			var logo = activeLogo();
+			return logo ? { item: logo, kind: 'logo' } : null;
+		}
+		var group = activeGroup();
+		return ( group && group.text.trim() ) ? { item: group, kind: 'text' } : null;
+	}
+
 	// Ported from the real site's updateCenterBtn()/"Center text button"
-	// handler — shows a "TEXT OFF CENTER — TAP TO RECENTER" alarm button
-	// whenever the active text group has drifted off horizontal center,
-	// clicking it snaps x back to 50%. Hidden whenever nothing is
-	// off-center, there's no active group, the group has no TEXT yet, or
-	// the customer dismissed it for this particular off-center position
-	// (see the dismiss handler and attachDrag()'s drag-start reset below —
-	// a fresh drag re-arms it).
+	// handler — shows an "OFF CENTER — TAP TO RECENTER" alarm button
+	// whenever the relevant item (see activeCenterTarget() above) has
+	// drifted off horizontal center, clicking it snaps x back to 50%.
+	// Hidden whenever there's nothing to watch, or the customer dismissed
+	// it for this particular off-center position (see the dismiss handler
+	// and attachDrag()'s drag-start reset below — a fresh drag re-arms it).
 	//
 	// Pete, 2026-11-08: "the alarm is on with nothing in the text box!" —
 	// defaultPos() (above) nudges every 2nd+ group a few % off dead-center
@@ -1116,35 +1140,41 @@
 	// even on a brand-new, still-empty group — just easy to miss before
 	// this alarm got loud and moved right under the preview box. Gating on
 	// actual text content is the real fix (an empty box has nothing to be
-	// "off center"), not changing the nudge amount.
+	// "off center"), not changing the nudge amount. A logo always has
+	// real content the moment it exists, so it has no equivalent gate.
 	function updateCenterBtn() {
 		if ( ! offCenterWrap ) {
 			return;
 		}
-		var group = activeGroup();
-		if ( ! group || ! group.text.trim() || Math.abs( group.pos.x - 50 ) <= 0.1 || group.offCenterDismissed ) {
+		var target = activeCenterTarget();
+		if ( ! target || Math.abs( target.item.pos.x - 50 ) <= 0.1 || target.item.offCenterDismissed ) {
 			offCenterWrap.hidden = true;
 			return;
 		}
+		els.centerTextBtn.textContent = ( 'logo' === target.kind ? 'LOGO' : 'TEXT' ) + ' OFF CENTER — TAP TO RECENTER';
 		offCenterWrap.hidden = false;
 	}
 	if ( centerTextDismissBtn ) {
 		centerTextDismissBtn.addEventListener( 'click', function () {
-			var group = activeGroup();
-			if ( group ) {
-				group.offCenterDismissed = true;
+			var target = activeCenterTarget();
+			if ( target ) {
+				target.item.offCenterDismissed = true;
 			}
 			offCenterWrap.hidden = true;
 		} );
 	}
 
 	els.centerTextBtn.addEventListener( 'click', function () {
-		var group = activeGroup();
-		if ( ! group ) {
+		var target = activeCenterTarget();
+		if ( ! target ) {
 			return;
 		}
-		group.pos.x = 50;
-		renderTextGroup( group );
+		target.item.pos.x = 50;
+		if ( 'logo' === target.kind ) {
+			renderLogo( target.item );
+		} else {
+			renderTextGroup( target.item );
+		}
 		updateCenterBtn();
 	} );
 
@@ -1633,6 +1663,14 @@
 			artLabel: art.label,
 			scale: parseFloat( els.logoSizeSlider.value ),
 			pos: defaultPos( state.logos.length ),
+			// Pete, 2026-11-08's own fix for text ("the alarm is on with
+			// nothing in the text box") applies here too: defaultPos()
+			// deliberately nudges a 2nd+ logo off dead-center so they don't
+			// stack exactly on top of each other — that alone shouldn't
+			// trip the off-center alarm before the customer has actually
+			// dragged anything. Pre-dismissed; attachDrag()'s drag-start
+			// resets this the instant a REAL drag happens.
+			offCenterDismissed: true,
 			el: img,
 		};
 		state.logos.push( logo );
@@ -1643,6 +1681,7 @@
 		syncDonateRow( logo );
 		checkLogoQuality( logo );
 		renderLogo( logo );
+		updateCenterBtn();
 	}
 
 	// A native <select>'s <option> can only ever show plain text — no
@@ -1820,6 +1859,9 @@
 					file: file,
 					scale: parseFloat( els.logoSizeSlider.value ),
 					pos: defaultPos( state.logos.length ),
+					// See addArtLogo()'s own note on why a freshly-created
+					// logo starts pre-dismissed.
+					offCenterDismissed: true,
 					el: img,
 					donate: false,
 				};
@@ -1839,6 +1881,7 @@
 			syncDonateRow( logo );
 			checkLogoQuality( logo );
 			renderLogo( logo );
+			updateCenterBtn();
 
 			// Pete, 2026-10-26: "I don't want to take someone's money and
 			// print a really sh*t label from a garbage file" — a throwaway
@@ -1905,6 +1948,7 @@
 				els.logoSizeSlider.value = logo.scale;
 				syncDonateRow( logo );
 				checkLogoQuality( logo );
+				updateCenterBtn();
 			} );
 			els.logoSelectorBtns.appendChild( pill );
 		} );
@@ -1933,9 +1977,9 @@
 			var glyphGap = 'text' === kind ? textGlyphGapPct( el, zoneRect ) : { top: 0, bottom: 0 };
 			// A fresh drag re-arms the off-center alarm even if it was
 			// dismissed for the PREVIOUS position — see updateCenterBtn().
-			if ( 'text' === kind ) {
-				item.offCenterDismissed = false;
-			}
+			// Applies to both kinds now (Pete, 2026-11-11: logo gets the
+			// same off-center alarm text already has).
+			item.offCenterDismissed = false;
 			state.dragging = {
 				item: item,
 				el: el,
@@ -2007,6 +2051,7 @@
 			var dragMaxYLogo = isArt ? 100 : Math.max( 100 - d.halfHPct, d.halfHPct );
 			d.item.pos.y = clamp( rawY, dragMinYLogo, dragMaxYLogo );
 			positionEl( d.el, d.item.pos );
+			updateCenterBtn();
 		}
 	}
 
@@ -2458,6 +2503,7 @@
 				donate: !! l.donate,
 				scale: clampLogoScale( l.scale ),
 				pos: { x: l.pos.x, y: l.pos.y },
+				offCenterDismissed: !! l.offCenterDismissed,
 				naturalWidth: l.naturalWidth,
 				naturalHeight: l.naturalHeight,
 			};
@@ -2608,6 +2654,7 @@
 				donate: saved.donate,
 				scale: clampLogoScale( saved.scale ),
 				pos: { x: saved.pos.x, y: saved.pos.y },
+				offCenterDismissed: !! saved.offCenterDismissed,
 				naturalWidth: saved.naturalWidth,
 				naturalHeight: saved.naturalHeight,
 				el: img,
@@ -2657,6 +2704,12 @@
 
 		renderHeldDesigns();
 		selectTab( design.textGroups.length ? 'quote' : 'logo' );
+		// Re-check now that the tab is actually settled — activeCenterTarget()
+		// reads whichever tab is open, so calling this before selectTab()
+		// above (the earlier calls near liveGroup/liveLogo) could still be
+		// looking at the tab this design is ABOUT to leave, not the one it
+		// lands on.
+		updateCenterBtn();
 		setStatus( 'Editing your ' + design.sizeLabel + ' design — make your changes, then hit "Harry, I love it!" again.', 'success' );
 		// Pete, 2026-11-09: "it doesn't move up, confusing" — Edit can be
 		// clicked from the Saved Designs tray, the flat preview popup, or
