@@ -166,14 +166,42 @@ echo; echo "H. Headless browser check of /co-branding/ (local)"
 # Checks for the absence of JS errors only; add a real init marker later if a
 # full-parity smoke test is wanted.
 if [ -x "$EDGE" ] || [ -f "$EDGE" ]; then
-  "$EDGE" --headless --disable-gpu --enable-logging=stderr --v=0 --virtual-time-budget=12000 --dump-dom "$LOCAL_SITE/co-branding/" > "$TMP/edge-dom.html" 2> "$TMP/edge.err"
-  # 2026-11-11: this launches the real system Edge, which loads Pete's actual
-  # browser profile and its installed extensions - Adobe Acrobat's extension
-  # (webpack://dc-chrome-extension/..., acrobat.adobe.com/sw.js) throws its own
-  # unrelated console errors on every page load, which this check was wrongly
-  # attributing to our JS. "chrome-extension://" alone doesn't catch it since
-  # Acrobat's errors report a webpack:// or acrobat.adobe.com source instead.
-  ERRS=$(grep "INFO:CONSOLE" "$TMP/edge.err" | grep -v -E "chrome-extension://|dc-chrome-extension|acrobat\.adobe\.com" | grep -E "Uncaught|SyntaxError|ReferenceError|TypeError" | cut -c1-200)
+  # 2026-11-11: this used to launch Edge against Pete's REAL profile, which
+  # loads his actual installed extensions - Adobe Acrobat
+  # (webpack://dc-chrome-extension/..., acrobat.adobe.com/sw.js) and some
+  # other extension's own "extensions::setIcon" icon-fetch failure both
+  # showed up as "JavaScript errors on /co-branding/" that had nothing to
+  # do with this plugin. A fresh --user-data-dir (tried first) does NOT
+  # fix this - Edge still force-loads some extensions (Acrobat's among
+  # them, this time reporting as a plain chrome-extension:// source)
+  # regardless of profile, almost certainly a managed/policy install, not
+  # something tied to Pete's personal profile data. Kept the fresh
+  # profile anyway (cheap, and still closes off whatever ISN'T
+  # policy-forced) but the real fix is content-based: exclude any console
+  # line whose reported source is a chrome-extension:// URL at all - that
+  # alone can never be this plugin's own JS, whichever specific extension
+  # happens to be forced into this profile today or next month.
+  EDGE_PROFILE="$TMP/edge-clean-profile"
+  rm -rf "$EDGE_PROFILE"
+  mkdir -p "$EDGE_PROFILE"
+  "$EDGE" --headless --disable-gpu --no-first-run --user-data-dir="$EDGE_PROFILE" --enable-logging=stderr --v=0 --virtual-time-budget=12000 --dump-dom "$LOCAL_SITE/co-branding/" > "$TMP/edge-dom.html" 2> "$TMP/edge.err"
+  # A console message's own stack trace can wrap onto further physical
+  # lines that don't repeat the "INFO:CONSOLE" prefix - an extension's
+  # chrome-extension:// source sometimes only shows up on one of those
+  # continuation lines, not the first line (the one with "TypeError" etc
+  # that the filter below is looking for). Joining each full message onto
+  # one line first (new message = a line starting with the "[pid:tid:...]"
+  # prefix; everything after it until the next one is the same message) so
+  # the chrome-extension:// exclusion can see the whole thing, not just
+  # whichever physical line happened to have the error keyword on it.
+  # dc-chrome-extension (Acrobat's webpack:// bundle path) isn't an actual
+  # chrome-extension:// URL, and "extensions::setIcon" etc (the browser's
+  # OWN extension-API layer reporting a failure on an extension's behalf -
+  # no URL at all, just "extensions::<method>") is a third distinct shape -
+  # each needs its own pattern alongside the generic chrome-extension://
+  # one above. Any of the three is unambiguously not this plugin's JS.
+  ERRS=$(awk '/^\[[0-9]+:[0-9]+:/{if(rec)print rec;rec=$0;next}{rec=rec" "$0}END{if(rec)print rec}' "$TMP/edge.err" \
+    | grep "INFO:CONSOLE" | grep -v -E "chrome-extension://|dc-chrome-extension|extensions::" | grep -E "Uncaught|SyntaxError|ReferenceError|TypeError" | cut -c1-200)
   if [ -n "$ERRS" ]; then fail "JavaScript errors on /co-branding/:"; echo "$ERRS" | sed 's/^/           /'; else pass "no JavaScript errors on /co-branding/"; fi
 else warn "Edge not found - skipped browser check"; fi
 
