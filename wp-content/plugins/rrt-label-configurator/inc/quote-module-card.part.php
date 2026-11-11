@@ -163,6 +163,11 @@
 												<span class="font-preview comic">Life is beautiful</span>
 											</label>
 											<label class="radio-card">
+												<input type="radio" name="quote-font" value="satisfy">
+												<div class="radio-card-body"><span class="radio-card-label">Bold Script</span></div>
+												<span class="font-preview satisfy">Life is beautiful</span>
+											</label>
+											<label class="radio-card">
 												<input type="radio" name="quote-font" value="lobster">
 												<div class="radio-card-body"><span class="radio-card-label">Lobster</span></div>
 												<span class="font-preview lobster">Life is beautiful</span>

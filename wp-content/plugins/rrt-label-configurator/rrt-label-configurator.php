@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.84.0' );
+define( 'RRT_LABEL_VERSION', '3.85.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -406,18 +406,28 @@ function rrt_label_fonts() {
 			'size_calibration'        => 0.911,
 			'wrap_width_calibration'  => 0.828,
 		),
-		// Pete, 2026-11-11: dropped from the font-drum (less reliable
-		// calibration), NOT deleted — see this function's own note just
-		// above on why ("Mythical Designs" is still outstanding with Bold
-		// Script). Not selectable for a new design; still renders/prints
-		// correctly for any design that already used it.
+		// Pete, 2026-11-11: "bold script not there on live... along with
+		// recalibration please" — back in the font-drum (Mythical
+		// Designs' Bold Script needed to actually be pickable to rebuild
+		// it), re-measured with 8 strings instead of 3 for a steadier
+		// number. One wrinkle specific to this font: GD's own bbox height
+		// genuinely shrinks for a string with NO descenders at all (e.g.
+		// "Thank You So Much"), while the browser's measurement is a fixed
+		// font-metric box that doesn't — not a GD/browser disagreement,
+		// two different definitions of "height" that only converge when
+		// the text has a natural mix of ascenders/descenders, which real
+		// customer text overwhelmingly does. Excluded that one
+		// no-descender outlier from the average below; still the least
+		// consistent font kept anywhere in this file (~4-9% spread vs
+		// under 3.5% for the fonts still fully trusted), so give it a bit
+		// more margin than the rest.
 		'satisfy'       => array(
 			'label'                   => 'Bold Script',
 			'css_family'              => "'Satisfy', cursive",
 			'ttf_file'                => 'assets/fonts/satisfy.ttf',
 			'google_font'             => 'Satisfy',
-			'size_calibration'        => 0.872,
-			'wrap_width_calibration'  => 0.852,
+			'size_calibration'        => 0.890,
+			'wrap_width_calibration'  => 0.835,
 		),
 		'lobster'       => array(
 			'label'                   => 'Lobster',
