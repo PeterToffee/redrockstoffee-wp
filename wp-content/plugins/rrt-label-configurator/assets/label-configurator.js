@@ -2483,7 +2483,14 @@
 		resetDraftAfterHold();
 		renderHeldDesigns();
 		closeBoxModal();
-		setStatus( activeSize().label + ' design saved — see it under Saved Designs below.', 'success' );
+		// Pete, 2026-11-09: "remove the lettering '...saved — see it under
+		// Saved Designs below.'" asked for this status line gone; it got
+		// missed in that pass (only the "file deleted" auto-clear below got
+		// built) and Pete, 2026-11-11, caught it still there, in the wrong
+		// spot too (status sits below the Submit button, unrelated to the
+		// Saved Designs tray it refers to) and redundant with the scroll
+		// below, which already takes the customer straight to the design
+		// that just got saved.
 		// Pete, 2026-11-09: "when I hit harry I love it, have it go down
 		// so I see the saved designs thing, then I can hit make another
 		// and it'll shoot me back" — closing the box popup used to just
