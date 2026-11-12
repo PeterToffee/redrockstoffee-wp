@@ -84,8 +84,9 @@ add_action(
 					return;
 				}
 				printf(
-					'<p style="margin: 1.25em 0; padding: 1em 1.25em; background: linear-gradient(135deg, #fdf3e7, #fbe4c8); border: 2px solid #991e21; border-radius: 12px; text-align: center; box-shadow: 0 2px 10px rgba(153,30,33,0.18);"><a href="%1$s" style="display: inline-block; background: linear-gradient(135deg, #991e21, #7a181b); color: #fff; font-weight: 700; font-size: 1.05em; text-decoration: none; padding: 0.65em 1.5em; border-radius: 999px; box-shadow: 0 3px 10px rgba(153,30,33,0.4);">🎨 Want your own label? Design one &rarr;</a></p>',
-					esc_url( home_url( '/co-branding/' ) )
+					'<p style="margin: 1.25em 0; padding: 1em 1.25em; background: linear-gradient(135deg, #fdf3e7, #fbe4c8); border: 2px solid #991e21; border-radius: 12px; text-align: center; box-shadow: 0 2px 10px rgba(153,30,33,0.18);"><a href="%1$s" style="display: inline-flex; align-items: center; gap: 0.5em; background: linear-gradient(135deg, #991e21, #7a181b); color: #fff; font-weight: 700; font-size: 1.05em; text-decoration: none; padding: 0.65em 1.5em; border-radius: 999px; box-shadow: 0 3px 10px rgba(153,30,33,0.4);"><img src="%2$s" alt="" width="32" height="19" style="display: block; width: 32px; height: auto; filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 3px #fff) drop-shadow(0 0 5px #fff);">Want your own label? Design one &rarr;</a></p>',
+					esc_url( home_url( '/co-branding/' ) ),
+					esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' )
 				);
 			},
 			25
