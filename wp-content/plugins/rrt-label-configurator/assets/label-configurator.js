@@ -2919,6 +2919,11 @@
 						setStatus( json.data.message, 'success' );
 						state.heldDesigns = [];
 						renderHeldDesigns();
+						resetDraftAfterHold();
+						els.name.value    = '';
+						els.email.value   = '';
+						els.phone.value   = '';
+						els.message.value = '';
 					} else {
 						setStatus( json.data && json.data.message ? json.data.message : 'Something went wrong. Please try again.', 'error' );
 					}
