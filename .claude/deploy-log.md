@@ -151,3 +151,9 @@
 - inc/quote-module-card.part.php  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (14 checks, 0 warnings). Server backups: *.bak.1794509043. Rollback: .claude/deploy/rollback.sh 1794509043 --go
+
+## 2026-11-12 14:58 - deploy 1794519007 (commit 83979ca0)
+- assets/home-starburst.css  (DIFF)
+- inc/home-starburst.php  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (12 checks, 0 warnings). Server backups: *.bak.1794519007. Rollback: .claude/deploy/rollback.sh 1794519007 --go
