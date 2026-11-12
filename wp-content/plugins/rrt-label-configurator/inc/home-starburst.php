@@ -80,10 +80,21 @@ add_shortcode( 'rrt_home_starburst', function () {
 
 	ob_start();
 	?>
-	<a class="rrt-starburst" href="<?php echo esc_url( home_url( '/co-branding/' ) ); ?>">
-		<img class="rrt-starburst-shape" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/home-starburst-shape.png' ); ?>" alt="">
-		<span class="rrt-starburst-text"><?php echo esc_html( $text ); ?></span>
-	</a>
+	<div class="rrt-starburst-cta-row">
+		<a class="rrt-starburst" href="<?php echo esc_url( home_url( '/co-branding/' ) ); ?>">
+			<img class="rrt-starburst-shape" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/home-starburst-shape.png' ); ?>" alt="">
+			<span class="rrt-starburst-content">
+				<img class="rrt-starburst-harry" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' ); ?>" alt="">
+				<span class="rrt-starburst-text"><?php echo esc_html( $text ); ?></span>
+			</span>
+		</a>
+		<a class="rrt-home-cta-btn" href="<?php echo esc_url( home_url( '/co-branding/' ) ); ?>">
+			<span class="rrt-home-cta-harry-wrap">
+				<img class="rrt-home-cta-harry" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' ); ?>" alt="">
+			</span>
+			Harry&rsquo;s asking, want your own label?<br>Design it here &rarr;
+		</a>
+	</div>
 	<?php
 	return ob_get_clean();
 } );
