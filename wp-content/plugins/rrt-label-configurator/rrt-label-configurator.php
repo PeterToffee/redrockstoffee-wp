@@ -42,14 +42,19 @@ require_once RRT_LABEL_PATH . 'inc/accessibility-statement.php';
 /**
  * Pete, 2026-10-25: "where are we putting this... how do we coordinate
  * with the products page?" — activating the min-qty enforcement built
- * 2026-10-18, and adding a CTA link on the two matching Original Almond
+ * 2026-10-18, and adding a CTA link on the matching Original Almond
  * product pages (not every product), pointing to the real /co-branding/
- * page where the configurator now lives. Product IDs are the ONLY two
- * confirmed by Pete this session — `Original Almond Toffee 8 oz. Box`
- * (ID 12) and `4 oz. Original Almond Toffee x 2` (ID 5161). Priority 25
- * on woocommerce_single_product_summary lands it between the excerpt
- * (20) and WooCommerce's own add-to-cart button (30) — visible, not
- * buried below the purchase action.
+ * page where the configurator now lives. Product IDs confirmed by Pete:
+ * `Original Almond Toffee 8 oz. Box` (ID 12) and `4 oz. Original Almond
+ * Toffee x 2` (ID 5161). Priority 25 on woocommerce_single_product_summary
+ * lands it between the excerpt (20) and WooCommerce's own add-to-cart
+ * button (30) — visible, not buried below the purchase action.
+ *
+ * Pete, 2026-11-12: added the Koffie-Almond equivalents — `Koffie-Almond™
+ * Toffee 8 oz Box` (ID 3988) and `4 oz. Koffie-Robust™ Almond Toffee x 2`
+ * (ID 6287) — same CTA, same placement, so both flavors get the same
+ * upsell. Also shortened the CTA copy and gave it a bolder, pill-button
+ * look to stand out more against the surrounding product copy.
  *
  * Both this block and inc/woocommerce-min-qty.php's own internal guard
  * check class_exists('WooCommerce') — that check is only reliable once
@@ -74,12 +79,12 @@ add_action(
 				if ( ! $product ) {
 					return;
 				}
-				$rrt_cta_product_ids = array( 12, 5161 );
+				$rrt_cta_product_ids = array( 12, 5161, 3988, 6287 );
 				if ( ! in_array( $product->get_id(), $rrt_cta_product_ids, true ) ) {
 					return;
 				}
 				printf(
-					'<p style="margin: 1em 0; padding: 0.75em 1em; background: #fdf3e7; border: 1px solid #991e21; border-radius: 8px; font-weight: 600;"><a href="%1$s" style="color: #991e21; text-decoration: none;">Want this with your own custom label? Design one &rarr;</a></p>',
+					'<p style="margin: 1.25em 0; padding: 1em 1.25em; background: linear-gradient(135deg, #fdf3e7, #fbe4c8); border: 2px solid #991e21; border-radius: 12px; text-align: center; box-shadow: 0 2px 10px rgba(153,30,33,0.18);"><a href="%1$s" style="display: inline-block; background: linear-gradient(135deg, #991e21, #7a181b); color: #fff; font-weight: 700; font-size: 1.05em; text-decoration: none; padding: 0.65em 1.5em; border-radius: 999px; box-shadow: 0 3px 10px rgba(153,30,33,0.4);">🎨 Want your own label? Design one &rarr;</a></p>',
 					esc_url( home_url( '/co-branding/' ) )
 				);
 			},
