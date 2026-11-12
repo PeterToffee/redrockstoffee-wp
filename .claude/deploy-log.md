@@ -144,3 +144,10 @@
 - inc/quote-module-card.part.php  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (12 checks, 0 warnings). Server backups: *.bak.1794428019. Rollback: .claude/deploy/rollback.sh 1794428019 --go
+
+## 2026-11-12 11:46 - deploy 1794509043 (commit c2579d31)
+- assets/label-configurator.css  (DIFF)
+- assets/label-configurator.js  (DIFF)
+- inc/quote-module-card.part.php  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (14 checks, 0 warnings). Server backups: *.bak.1794509043. Rollback: .claude/deploy/rollback.sh 1794509043 --go
