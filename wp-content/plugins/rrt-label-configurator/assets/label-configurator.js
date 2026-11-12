@@ -210,7 +210,11 @@
 		centerTextDismissBtn = document.createElement( 'button' );
 		centerTextDismissBtn.type = 'button';
 		centerTextDismissBtn.className = 'rrt-lc-offcenter-dismiss';
-		centerTextDismissBtn.textContent = '× DISMISS';
+		// Pete, 2026-11-11: "add lettering to dismiss button: 'dismiss, I
+		// WANT it off-center'" — was a bare "× DISMISS", easy to read as
+		// dismissing something else entirely (the whole tool? an error?)
+		// rather than "yes, I meant to put it there."
+		centerTextDismissBtn.textContent = 'DISMISS, I WANT IT OFF-CENTER';
 		centerTextDismissBtn.setAttribute( 'aria-label', 'Dismiss off-center warning' );
 		offCenterWrap.appendChild( centerTextDismissBtn );
 	}

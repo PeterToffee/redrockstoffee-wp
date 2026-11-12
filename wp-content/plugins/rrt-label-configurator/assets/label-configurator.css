@@ -69,44 +69,74 @@
 	margin-top: 0.75rem;
 }
 
+/* Pete, 2026-11-11: "make alarm button nicer looking somehow, it looks
+   sketchy...and the dismiss looks unrelated, make closer looking/more
+   similar" — the old #e03020->#e67e22 fire-red/orange gradient plus an
+   animated dual-side neon glow was a completely different color
+   language from the rest of this plugin's own buttons (--rrt-primary:
+   #991e21, the same burgundy "Harry, I love it!"/Submit use — see
+   .rrt-lc-btn-primary above), which is what read as "sketchy": a loud,
+   off-brand alert graphic sitting in an otherwise restrained UI. Now
+   built as the SAME pill family as .rrt-lc-btn-primary (radius,
+   padding proportions, burgundy fill) with a single soft pulse in that
+   same color instead of the old two-sided neon glow — reads as "this
+   site's own button, just insisting a little," not a scam-site warning.
+   The dismiss button below is the matching OUTLINED/ghost version of
+   that exact same pill (same radius, same burgundy, border instead of
+   fill) so the two read as one coordinated pair, not two unrelated
+   controls. #center-text-btn's own markup still sets everything inline
+   (byte-for-byte copy from TheUnframer — see this file's header note),
+   so these still need !important to win over it. */
 #center-text-btn {
 	margin-top: 0 !important;
 	padding: 0.9rem 1rem !important;
 	font-size: 0.92rem !important;
 	letter-spacing: 0.3px;
+	border-radius: 999px !important;
+	background: linear-gradient( 135deg, var( --rrt-primary ), var( --rrt-primary-dark ) ) !important;
+	box-shadow: none !important;
 	/* A base button rule elsewhere in the copied CSS sets white-space:
 	   nowrap (pill-button buttons sitting on one line sitewide), which
 	   would otherwise clip "TAP TO RECENTER" at this card's width instead
 	   of wrapping it to a 2nd line. */
 	white-space: normal !important;
-	animation: rrt-lc-offcenter-pulse 1s ease-in-out infinite;
-	transform-origin: center;
+	animation: rrt-lc-offcenter-pulse 1.6s ease-in-out infinite;
 }
 
+/* Pete, 2026-11-11: this came out solid orange, not the intended
+   outlined burgundy — Elementor's own theme-kit rule
+   (.elementor-kit-4045 button) styles every plain <button> on the page
+   and beats a bare .rrt-lc-offcenter-dismiss class selector on
+   specificity alone ((0,1,1) vs (0,1,0)), same bug class as
+   #center-text-btn's own !important above. Matching that same fix here. */
 .rrt-lc-offcenter-dismiss {
 	align-self: center;
-	border-radius: 999px;
-	background: #fff;
-	color: #e03020;
-	border: 1.5px solid #e03020;
+	border-radius: 999px !important;
+	background: transparent !important;
+	background-image: none !important;
+	color: var( --rrt-primary ) !important;
+	border: 1.5px solid var( --rrt-primary ) !important;
 	font-family: 'Poppins', sans-serif;
 	font-weight: 700;
-	font-size: 0.78rem;
-	letter-spacing: 0.3px;
-	padding: 8px 22px;
+	font-size: 0.74rem;
+	letter-spacing: 0.2px;
+	padding: 8px 20px !important;
 	cursor: pointer;
-	white-space: nowrap;
+	white-space: normal;
+	text-align: center;
+	line-height: 1.3;
+	max-width: 85%;
 }
 .rrt-lc-offcenter-dismiss:hover {
-	background: #e03020;
-	color: #fff;
+	background: var( --rrt-primary ) !important;
+	color: #fff !important;
 }
 @keyframes rrt-lc-offcenter-pulse {
 	0%, 100% {
-		box-shadow: -4px 0 14px rgba( 220, 40, 20, 0.75 ), 4px 0 14px rgba( 220, 40, 20, 0.75 ), 0 0 8px rgba( 220, 40, 20, 0.4 );
+		box-shadow: 0 2px 10px rgba( 153, 30, 33, 0.35 );
 	}
 	50% {
-		box-shadow: -6px 0 22px rgba( 220, 40, 20, 0.95 ), 6px 0 22px rgba( 220, 40, 20, 0.95 ), 0 0 16px rgba( 220, 40, 20, 0.7 );
+		box-shadow: 0 2px 18px rgba( 153, 30, 33, 0.6 );
 	}
 }
 
