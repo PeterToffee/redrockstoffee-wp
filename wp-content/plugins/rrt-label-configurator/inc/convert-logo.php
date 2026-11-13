@@ -176,7 +176,21 @@ function rrt_label_convert_respond( Imagick $im, $ext ) {
 	// live under wp-content, so there's no reason to involve WordPress's
 	// own upload-dir machinery for a file that exists for microseconds.
 	$tmp_out = tempnam( sys_get_temp_dir(), 'rrtcv' );
-	$im->writeImage( $ext . ':' . $tmp_out );
+	try {
+		$im->writeImage( $ext . ':' . $tmp_out );
+	} catch ( Exception $e ) {
+		// Pete, 2026-11-13: that same real customer EPS got past the
+		// getImageBlob() bug above only to fail PNG writing with
+		// "Incorrect data in iCCP" -- a malformed embedded ICC color
+		// profile baked in by (old, 2009-era) Photoshop that modern
+		// libpng's stricter validation rejects outright. Retrying once
+		// with the profile removed is strictly a fallback for a broken
+		// profile specifically; a well-formed one still survives on the
+		// first attempt (see the HEIC/RAW converters' own notes on why
+		// keeping it matters when it's valid).
+		$im->removeImageProfile( 'icc' );
+		$im->writeImage( $ext . ':' . $tmp_out );
+	}
 	$blob = file_get_contents( $tmp_out );
 	unlink( $tmp_out );
 	$im->clear();
