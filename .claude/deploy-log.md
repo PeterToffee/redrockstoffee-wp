@@ -157,3 +157,13 @@
 - inc/home-starburst.php  (DIFF)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (12 checks, 0 warnings). Server backups: *.bak.1794519007. Rollback: .claude/deploy/rollback.sh 1794519007 --go
+
+## 2026-11-13 12:49 - deploy 1794597639 (commit fccb904e)
+- assets/heic2any.min.js  (NEW)
+- assets/label-configurator.css  (DIFF)
+- assets/label-configurator.js  (DIFF)
+- inc/convert-logo.php  (NEW)
+- inc/handle-submission.php  (DIFF)
+- inc/quote-module-card.part.php  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (18 checks, 0 warnings). Server backups: *.bak.1794597639. Rollback: .claude/deploy/rollback.sh 1794597639 --go
