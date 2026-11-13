@@ -1094,8 +1094,9 @@ function rrt_label_configurator_shortcode( $atts ) {
 	wp_enqueue_style( 'rrt-label-configurator', RRT_LABEL_URL . 'assets/label-configurator.css', array( 'rrt-configurator-components' ), RRT_LABEL_VERSION );
 	// Pete, 2026-11-13: HEIC browser-side fallback for when the server-side
 	// Imagick conversion is unavailable/fails — vendored verbatim from
-	// TheUnframer.com's own upload configurator (assets/js/heic2any.min.js),
-	// same plain-global-script pattern (not an ES module) so window.heic2any
+	// TheUnframer.com's own upload configurator theme (its heic2any.min.js,
+	// copied byte-for-byte into this plugin's own assets/ folder), same
+	// plain-global-script pattern (not an ES module) so window.heic2any
 	// exists before label-configurator.js needs it.
 	wp_enqueue_script( 'rrt-heic2any', RRT_LABEL_URL . 'assets/heic2any.min.js', array(), RRT_LABEL_VERSION, true );
 	wp_enqueue_script( 'rrt-label-configurator', RRT_LABEL_URL . 'assets/label-configurator.js', array( 'rrt-heic2any' ), RRT_LABEL_VERSION, true );
