@@ -149,17 +149,41 @@ function rrt_label_ajax_convert_logo() {
 }
 
 /**
- * Shared by all three conversion branches: reads the finished Imagick
- * object's bytes straight into a data: URL (no temp file written
- * anywhere persistent — PHP cleans up the original upload tmp file
- * itself at request end) and returns the plain array the AJAX handler
- * sends back as JSON on success.
+ * Shared by all three conversion branches: writes the finished Imagick
+ * object out and reads the bytes back into a data: URL, then returns
+ * the plain array the AJAX handler sends back as JSON on success.
+ *
+ * Pete, 2026-11-13: a real customer EPS (Adobe Photoshop export) came
+ * back from readImage()/mergeImageLayers() with the right dimensions
+ * (confirmed: Ghostscript itself rasterizes this file fine, verified by
+ * installing it locally and running the SAME conversion via the `magick`
+ * CLI) but PHP-Imagick's getImageBlob() specifically threw "Failed to
+ * get the image contents (empty or invalid image?)" on the live server
+ * every time, regardless of colorspace/merge method/iterator position --
+ * a known flakiness in that one call on some PHP-Imagick builds.
+ * writeImage() to a real (short-lived, immediately deleted) temp file is
+ * a completely different, far more battle-tested code path -- it's
+ * exactly what the `magick` CLI itself does under the hood, which is why
+ * the CLI never had this problem in the first place.
  */
 function rrt_label_convert_respond( Imagick $im, $ext ) {
-	$blob  = $im->getImageBlob();
 	$width  = $im->getImageWidth();
 	$height = $im->getImageHeight();
+
+	// Plain tempnam() (not wp_tempnam(), which needs wp-admin/includes/
+	// file.php loaded -- not guaranteed in this plain admin-ajax.php
+	// context) in the OS temp dir; nothing here is meant to persist or
+	// live under wp-content, so there's no reason to involve WordPress's
+	// own upload-dir machinery for a file that exists for microseconds.
+	$tmp_out = tempnam( sys_get_temp_dir(), 'rrtcv' );
+	$im->writeImage( $ext . ':' . $tmp_out );
+	$blob = file_get_contents( $tmp_out );
+	unlink( $tmp_out );
 	$im->clear();
+
+	if ( false === $blob || '' === $blob ) {
+		throw new ImagickException( 'Conversion produced no image data.' );
+	}
 
 	$mime = ( 'png' === $ext ) ? 'image/png' : 'image/jpeg';
 
