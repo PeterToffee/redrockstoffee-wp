@@ -67,8 +67,15 @@ function rrt_label_order_folder( $name ) {
  * duplicated inline for each one.
  *
  * Returns array( 'layers' => [...], 'dropped_logo_count' => int ).
+ *
+ * $design_i identifies this design within the submission purely so a
+ * real-upload logo layer can look up its own OPTIONAL preserved original
+ * (see label-configurator.js's placeLogoFile()/buildLayersMetaForDraft())
+ * under $_FILES['logo_original_' . $design_i . '_' . $logo_i] — only
+ * present when that logo was converted on the way in (HEIC/PDF/EPS/AI/
+ * PSD/TIFF/RAW), never for a plain PNG/JPEG/WEBP upload.
  */
-function rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, $size_key ) {
+function rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, $size_key, $design_i = 0 ) {
 	$art_library = rrt_label_art_library();
 
 	$layers = array();
@@ -159,7 +166,7 @@ function rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, 
 					}
 				}
 			}
-			$layers[] = array(
+			$layer = array(
 				'type'        => 'logo',
 				'pos'         => $pos,
 				'scale'       => $logo_scale,
@@ -173,6 +180,18 @@ function rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, 
 				'donate'      => ! empty( $raw['donate'] ),
 				'low_quality' => $low_quality,
 			);
+			// Pete, 2026-11-13: "I have people throwing all sorts of files" —
+			// when this logo was converted on the way in, the customer's real
+			// original rides along under its own singular field (see
+			// inc/convert-logo.php + label-configurator.js's submit handler);
+			// rrt_label_save_originals() prefers this over $layer['tmp_path']
+			// (the converted PNG/JPEG) so Pete still gets the authentic file.
+			$original_field = 'logo_original_' . $design_i . '_' . $logo_i;
+			if ( ! empty( $_FILES[ $original_field ]['tmp_name'] ) && is_uploaded_file( $_FILES[ $original_field ]['tmp_name'] ) ) {
+				$layer['original_tmp_path'] = $_FILES[ $original_field ]['tmp_name'];
+				$layer['original_name']     = isset( $_FILES[ $original_field ]['name'] ) ? sanitize_file_name( wp_unslash( $_FILES[ $original_field ]['name'] ) ) : '';
+			}
+			$layers[] = $layer;
 			++$logo_i;
 		} elseif ( 'text' === $raw['type'] ) {
 			// Pete, 2026-11-11: "I had added a blank line with an extra
@@ -307,6 +326,12 @@ function rrt_label_handle_submit() {
 		$quantity = isset( $design_raw['quantity'] ) ? (int) $design_raw['quantity'] : 1;
 		$quantity = max( rrt_label_min_qty_for_size( $size_key ), $quantity );
 
+		// Pete, 2026-11-13: "what if I have notes for EACH label" — a
+		// per-design note (captured in the box-preview popup, see
+		// label-configurator.js), separate from $message's whole-order
+		// note above.
+		$design_note = isset( $design_raw['note'] ) ? sanitize_textarea_field( wp_unslash( $design_raw['note'] ) ) : '';
+
 		$layers_raw = is_array( $design_raw['layers'] ?? null ) ? $design_raw['layers'] : array();
 		if ( empty( $layers_raw ) ) {
 			continue;
@@ -327,7 +352,7 @@ function rrt_label_handle_submit() {
 			}
 		}
 
-		$resolved = rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, $size_key );
+		$resolved = rrt_label_resolve_design_layers( $layers_raw, $logo_tmp_paths, $sizes, $size_key, $design_i );
 		$layers   = $resolved['layers'];
 		if ( empty( $layers ) ) {
 			continue;
@@ -392,6 +417,7 @@ function rrt_label_handle_submit() {
 			'flavor_label'       => $flavors[ $flavor_key ]['label'],
 			'size_label'         => $sizes[ $size_key ]['label'],
 			'quantity'           => $quantity,
+			'note'               => $design_note,
 			'labels_needed'      => $labels_needed,
 			'layers'             => $layers,
 			'dropped_logo_count' => $resolved['dropped_logo_count'],
@@ -495,7 +521,30 @@ function rrt_label_save_originals( $order_dir, $layers, $file_prefix = '' ) {
 	$paths = array();
 	$n     = 0;
 	foreach ( $layers as $layer ) {
-		if ( 'logo' !== $layer['type'] || ! empty( $layer['art_key'] ) || empty( $layer['tmp_path'] ) || ! file_exists( $layer['tmp_path'] ) ) {
+		if ( 'logo' !== $layer['type'] || ! empty( $layer['art_key'] ) ) {
+			continue;
+		}
+		// Pete, 2026-11-13: "I have people throwing all sorts of files" —
+		// a HEIC/PDF/EPS/AI/PSD/TIFF/RAW upload arrives here as its
+		// already-converted PNG/JPEG ($layer['tmp_path']), with the
+		// customer's authentic original (if any) riding along separately
+		// as $layer['original_tmp_path'] (see
+		// rrt_label_resolve_design_layers()'s own note on where that comes
+		// from). Prefer the real original when present — Pete gets the
+		// customer's actual file, not just what Imagick made of it.
+		if ( ! empty( $layer['original_tmp_path'] ) && file_exists( $layer['original_tmp_path'] ) ) {
+			$ext = strtolower( pathinfo( $layer['original_name'] ?? '', PATHINFO_EXTENSION ) );
+			if ( ! $ext ) {
+				$ext = 'dat'; // name didn't survive the upload intact — still save the bytes.
+			}
+			++$n;
+			$dest = sprintf( '%s/%soriginal-logo-%d.%s', $order_dir, $file_prefix, $n, $ext );
+			if ( copy( $layer['original_tmp_path'], $dest ) ) {
+				$paths[] = $dest;
+			}
+			continue;
+		}
+		if ( empty( $layer['tmp_path'] ) || ! file_exists( $layer['tmp_path'] ) ) {
 			continue;
 		}
 		// Same getimagesize()-based mime detection as
@@ -546,6 +595,9 @@ function rrt_label_write_order_info( $order_dir, $order_fields, $design_results 
 	foreach ( $design_results as $i => $design_result ) {
 		$body .= "\n--- Design " . ( $i + 1 ) . ': ' . $design_result['flavor_label'] . ' / ' . $design_result['size_label'] . " ---\n";
 		$body .= 'Quantity requested: ' . $design_result['quantity'] . "\n";
+		if ( ! empty( $design_result['note'] ) ) {
+			$body .= 'Note for this label: ' . $design_result['note'] . "\n";
+		}
 
 		$logo_n = 0;
 		$text_n = 0;
@@ -1438,6 +1490,9 @@ function rrt_label_email_submission( $order_fields, $design_results, $order_dir 
 		$body .= '<table style="border-collapse: collapse; width: 100%; max-width: 600px;">';
 		$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #eee;"><strong>Quantity requested</strong></td><td style="padding:6px 8px; border-bottom:1px solid #eee;">' . esc_html( $design_result['quantity'] ) . '</td></tr>';
 		$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #eee;"><strong>Logos</strong></td><td style="padding:6px 8px; border-bottom:1px solid #eee;">' . esc_html( $logo_count ) . '</td></tr>';
+		if ( ! empty( $design_result['note'] ) ) {
+			$body .= '<tr><td style="padding:6px 8px; border-bottom:1px solid #eee;"><strong>Note for this label</strong></td><td style="padding:6px 8px; border-bottom:1px solid #eee;">' . nl2br( esc_html( $design_result['note'] ) ) . '</td></tr>';
+		}
 		$body .= '</table>';
 
 		// Pete, 2026-10-26: "I don't want to take someone's money and print

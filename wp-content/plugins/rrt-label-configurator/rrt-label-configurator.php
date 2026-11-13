@@ -29,11 +29,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.89.0' );
+define( 'RRT_LABEL_VERSION', '3.91.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
 require_once RRT_LABEL_PATH . 'inc/handle-submission.php';
+require_once RRT_LABEL_PATH . 'inc/convert-logo.php';
 require_once RRT_LABEL_PATH . 'inc/home-starburst.php';
 require_once RRT_LABEL_PATH . 'inc/harry-path.php';
 require_once RRT_LABEL_PATH . 'inc/hero-ken-burns.php';
@@ -1091,7 +1092,13 @@ function rrt_label_configurator_shortcode( $atts ) {
 	wp_enqueue_style( 'rrt-configurator-base', RRT_LABEL_URL . 'assets/configurator-base.css', array(), RRT_LABEL_VERSION );
 	wp_enqueue_style( 'rrt-configurator-components', RRT_LABEL_URL . 'assets/configurator-components.css', array( 'rrt-configurator-base' ), RRT_LABEL_VERSION );
 	wp_enqueue_style( 'rrt-label-configurator', RRT_LABEL_URL . 'assets/label-configurator.css', array( 'rrt-configurator-components' ), RRT_LABEL_VERSION );
-	wp_enqueue_script( 'rrt-label-configurator', RRT_LABEL_URL . 'assets/label-configurator.js', array(), RRT_LABEL_VERSION, true );
+	// Pete, 2026-11-13: HEIC browser-side fallback for when the server-side
+	// Imagick conversion is unavailable/fails — vendored verbatim from
+	// TheUnframer.com's own upload configurator (assets/js/heic2any.min.js),
+	// same plain-global-script pattern (not an ES module) so window.heic2any
+	// exists before label-configurator.js needs it.
+	wp_enqueue_script( 'rrt-heic2any', RRT_LABEL_URL . 'assets/heic2any.min.js', array(), RRT_LABEL_VERSION, true );
+	wp_enqueue_script( 'rrt-label-configurator', RRT_LABEL_URL . 'assets/label-configurator.js', array( 'rrt-heic2any' ), RRT_LABEL_VERSION, true );
 
 	// Same Google Fonts list TheUnframer's own configurator loads (its
 	// font-drum's .font-preview.* classes reference these families by
@@ -1479,6 +1486,29 @@ function rrt_label_configurator_shortcode( $atts ) {
 							<div class="rrt-lc-box-face rrt-lc-box-endcap-left" id="rrt-lc-box-endcap-left"></div>
 							<div class="rrt-lc-box-face rrt-lc-box-endcap-right" id="rrt-lc-box-endcap-right"></div>
 							</div>
+						</div>
+						<?php
+						/**
+						 * Pete, 2026-11-13: "what if I have notes for EACH
+						 * label" — the "Anything else we should know?" box
+						 * (rrt-lc-message, in the Your Info card) is shared
+						 * across the WHOLE order and never resets between
+						 * held designs, so there was no way to leave a
+						 * different note per label. This field lives inside
+						 * the box-preview popup instead (the natural "about
+						 * to hold this specific design" moment), gets
+						 * snapshotted into the held design alongside its
+						 * flavor/size/layers (see holdCurrentDraft() in
+						 * label-configurator.js), restored when that design
+						 * is edited back onto the stage, and shown read-only
+						 * (disabled) when just viewing a held design here.
+						 * The original rrt-lc-message box is untouched and
+						 * still works as a general, whole-order note.
+						 */
+						?>
+						<div class="rrt-lc-field rrt-lc-box-note-field">
+							<label for="rrt-lc-box-note">Note for this label? (optional)</label>
+							<textarea id="rrt-lc-box-note" rows="2" placeholder="e.g. &quot;please center the logo higher&quot;"></textarea>
 						</div>
 						<div class="rrt-lc-box-modal-actions">
 							<button type="button" id="rrt-lc-box-love-btn" class="rrt-lc-btn-primary"><span class="rrt-lc-love-icon-wrap"><img class="rrt-lc-love-icon" src="<?php echo esc_url( RRT_LABEL_URL . 'assets/images/harry-logo.png' ); ?>" width="36" height="21" decoding="sync" alt=""></span>Harry, I love it!</button>

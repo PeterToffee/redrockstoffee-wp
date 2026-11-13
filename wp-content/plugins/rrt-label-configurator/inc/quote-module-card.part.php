@@ -237,7 +237,11 @@
 
 								<!-- LOGO PANEL -->
 								<div class="text-tab-panel" id="tab-panel-logo">
-									<input type="file" id="logo-file-input" accept="image/*,application/pdf,.pdf,.tif,.tiff,.psd,.eps,.ai" style="display:none;">
+									<!-- Pete, 2026-11-13: "I have people throwing all sorts of files" —
+									     widened to match what label-configurator.js now actually
+									     converts server-side (HEIC/RAW/PDF/EPS/AI/PSD/TIFF), not just
+									     what the OS picker happens to show. -->
+									<input type="file" id="logo-file-input" accept="image/*,.heic,.heif,application/pdf,.pdf,.tif,.tiff,.psd,.eps,.ai,.cr2,.cr3,.nef,.arw,.dng,.orf,.raf,.rw2" style="display:none;">
 
 									<!-- Pete, 2026-10-17: "a library of holiday/birthday/celebration
 									     art icons we can use to click like adding logos... on a drop down

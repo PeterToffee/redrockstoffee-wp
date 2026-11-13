@@ -490,6 +490,19 @@
 	white-space: nowrap;
 }
 
+/* Pete, 2026-11-13: "what if I have notes for EACH label" — same
+   truncate-don't-wrap treatment as the summary line above it, just
+   italic so it visually reads as a quoted note rather than plain
+   description text. */
+.rrt-lc-held-item-note {
+	color: #666;
+	font-size: 0.82rem;
+	font-style: italic;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .rrt-lc-held-item-actions {
 	display: flex;
 	align-items: center;
@@ -1262,6 +1275,16 @@
 	flex-wrap: wrap;
 	gap: 0.75rem;
 	margin-top: 0.5rem;
+}
+
+/* Pete, 2026-11-13: "what if I have notes for EACH label" — same field,
+   two states: editable while this popup is showing the LIVE draft (about
+   to be held), read-only/dimmed while it's just viewing an already-held
+   design (see openBoxModalForHeldDesign() in label-configurator.js). */
+#rrt-lc-box-note:disabled {
+	background: #f3f3f3;
+	color: #666;
+	cursor: default;
 }
 /* Pete, 2026-11-10: "there's an 'edit this design' button, and a 'back to
    the drawing board' button, didn't we decide to remove the back to the

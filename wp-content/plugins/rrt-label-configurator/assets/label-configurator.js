@@ -119,6 +119,7 @@
 		boxEditBtn: document.getElementById( 'rrt-lc-box-edit-btn' ),
 		boxBackBtn: document.getElementById( 'rrt-lc-box-back-btn' ),
 		boxDeleteBtn: document.getElementById( 'rrt-lc-box-delete-btn' ),
+		boxNote: document.getElementById( 'rrt-lc-box-note' ),
 
 		addAnotherBtn: document.getElementById( 'rrt-lc-add-another-btn' ),
 		emptyConfirmModal: document.getElementById( 'rrt-lc-empty-confirm-modal' ),
@@ -558,6 +559,13 @@
 	// the exact same 3D mockup can be driven by either source.
 	var boxModalHeldDesign = null;
 
+	// Pete, 2026-11-13: "what if I have notes for EACH label" — saved here
+	// while openBoxModalForHeldDesign() temporarily swaps #rrt-lc-box-note
+	// over to show a held design's OWN note (read-only), so closeBoxModal()
+	// can hand the live draft's in-progress note back afterward instead of
+	// losing it.
+	var boxNoteDraftValue = '';
+
 	// Which size config the box popup should measure against right now —
 	// the held design's own size (so e.g. a held 4oz still renders at 4oz
 	// box dimensions even while the live draft sits on 8oz) or, in normal
@@ -763,6 +771,10 @@
 			if ( els.boxModalHeading ) {
 				els.boxModalHeading.textContent = 'How it’ll look on the box';
 			}
+			if ( els.boxNote ) {
+				els.boxNote.disabled = false;
+				els.boxNote.value = boxNoteDraftValue;
+			}
 		}
 	}
 	// Pete, 2026-11-08: "possible to look at the file (view) on the box
@@ -797,6 +809,15 @@
 		}
 		if ( els.boxModalHeading ) {
 			els.boxModalHeading.textContent = design.flavorLabel + ' · ' + design.sizeLabel + ' · Qty ' + design.quantity;
+		}
+		if ( els.boxNote ) {
+			// Stash whatever the live draft currently has typed so
+			// closeBoxModal() can hand it back once this held-design view
+			// closes — this field is about to show THIS design's own note
+			// instead, read-only.
+			boxNoteDraftValue = els.boxNote.value;
+			els.boxNote.value = design.note || '';
+			els.boxNote.disabled = true;
 		}
 		openBoxModal();
 	}
@@ -1814,31 +1835,100 @@
 		els.logoFileInput.click();
 	} );
 
-	els.logoFileInput.addEventListener( 'change', function () {
-		var file = els.logoFileInput.files[ 0 ];
-		if ( ! file ) {
-			return;
+	// Pete, 2026-11-13: "I have people throwing all sorts of files" — HEIC
+	// iPhone photos, PDF/EPS/AI logo exports, TIFF/PSD, camera RAW.
+	// Browsers can't decode ANY of these into an <img>, so the plain
+	// FileReader preview below (the only thing this input ever did) just
+	// silently produced nothing to drag/see. These extension lists mirror
+	// inc/convert-logo.php's own allow-lists exactly — keep them in sync.
+	var HEIC_EXTENSIONS   = [ 'heic', 'heif' ];
+	var VECTOR_EXTENSIONS = [ 'pdf', 'eps', 'ai', 'psd', 'tif', 'tiff' ];
+	var RAW_EXTENSIONS    = [ 'cr2', 'cr3', 'nef', 'arw', 'dng', 'orf', 'raf', 'rw2' ];
+
+	function fileExtension( file ) {
+		var m = /\.([a-z0-9]+)$/i.exec( file.name || '' );
+		return m ? m[ 1 ].toLowerCase() : '';
+	}
+	function isHeicFile( file ) {
+		return /^image\/hei[cf]/.test( file.type ) || HEIC_EXTENSIONS.indexOf( fileExtension( file ) ) !== -1;
+	}
+	function isConvertibleFile( file ) {
+		var ext = fileExtension( file );
+		return VECTOR_EXTENSIONS.indexOf( ext ) !== -1 || RAW_EXTENSIONS.indexOf( ext ) !== -1;
+	}
+
+	// Turns a data: URL (from either the server conversion endpoint or the
+	// heic2any browser fallback below) into a real File, so a converted
+	// logo flows through every existing code path below exactly like a
+	// plain PNG/JPEG upload always has.
+	function dataUrlToFile( dataUrl, filename, mime ) {
+		return fetch( dataUrl ).then( function ( r ) {
+			return r.blob();
+		} ).then( function ( blob ) {
+			return new File( [ blob ], filename, { type: mime } );
+		} );
+	}
+
+	// Server-side conversion round-trip (inc/convert-logo.php, Imagick) —
+	// the only path for PDF/EPS/AI/PSD/TIFF/RAW, and the first attempt for
+	// HEIC before the browser-side heic2any fallback below.
+	function convertLogoViaServer( file ) {
+		return fetchFreshNonce().then( function ( nonce ) {
+			if ( ! nonce ) {
+				throw new Error( 'Something went wrong refreshing the form. Please reload the page and try again.' );
+			}
+			var body = new FormData();
+			body.append( 'action', 'rrt_label_convert_logo' );
+			body.append( 'nonce', nonce );
+			body.append( 'image', file );
+			return fetch( config.ajaxUrl, { method: 'POST', body: body } );
+		} ).then( function ( r ) {
+			return r.json();
+		} ).then( function ( json ) {
+			if ( ! json.success ) {
+				throw new Error( ( json.data && json.data.message ) || 'Could not convert that file.' );
+			}
+			var baseName = ( file.name || 'logo' ).replace( /\.[^.]+$/, '' );
+			var mime     = 'png' === json.data.ext ? 'image/png' : 'image/jpeg';
+			return dataUrlToFile( json.data.data_url, baseName + '.' + json.data.ext, mime );
+		} );
+	}
+
+	// Browser-side HEIC fallback for when server-side Imagick conversion
+	// is unavailable/fails — ported from TheUnframer's own upload
+	// configurator. Only ever tried AFTER a server attempt fails; never
+	// the first attempt (the server path keeps full ICC/orientation
+	// handling heic2any doesn't bother with).
+	function convertHeicClientSide( file ) {
+		if ( typeof window.heic2any !== 'function' ) {
+			return Promise.reject( new Error( 'HEIC conversion isn’t available right now. Please convert to JPG or PNG first.' ) );
 		}
-		// 2026-10-30 RED ALERT fix: this used to silently `return` on any file
-		// that wasn't exactly image/png or image/jpeg -- nothing happened, no
-		// message, the picker just closed. A customer (Pete, testing) picked a
-		// photo straight off an iPhone (HEIC by default) and it was dropped
-		// with zero indication anything was wrong; since the submit button
-		// only checks "is there text OR a logo" (not "did every attempted
-		// upload actually succeed"), the order went through with the text but
-		// NO image at all, and nobody knew until the order landed. Every
-		// rejection now tells the customer exactly what happened instead of
-		// silently losing their file.
-		if ( ! /^image\/(png|jpe?g|webp)$/.test( file.type ) ) {
-			var isHeic = /^image\/hei[cf]/.test( file.type ) || /\.(heic|heif)$/i.test( file.name || '' );
-			setStatus(
-				isHeic
-					? 'That looks like an iPhone photo (HEIC) — this form needs a JPG, PNG, or WEBP. On your phone: Settings > Camera > Formats > "Most Compatible" takes JPGs instead, or just use a screenshot/edited copy of the photo.'
-					: 'That file type isn’t supported — please choose a JPG, PNG, or WEBP image.',
-				'error'
-			);
-			return;
-		}
+		var baseName = ( file.name || 'photo' ).replace( /\.[^.]+$/, '' );
+		return window.heic2any( { blob: file, toType: 'image/jpeg', quality: 0.95 } ).then( function ( result ) {
+			var blob = Array.isArray( result ) ? result[ 0 ] : result;
+			return new File( [ blob ], baseName + '.jpg', { type: 'image/jpeg' } );
+		} ).catch( function ( err ) {
+			// heic2any throws instead of converting when the HEIC container
+			// already embeds a browser-readable JPEG — same quirk
+			// TheUnframer's own fallback works around.
+			var msg = String( ( err && err.message ) || '' );
+			if ( msg.indexOf( 'already browser readable' ) !== -1 || 1 === ( err && err.code ) ) {
+				return new File( [ file ], baseName + '.jpg', { type: 'image/jpeg' } );
+			}
+			throw err;
+		} );
+	}
+
+	// Everything that used to live inline in reader.onload below — now
+	// shared by the plain (standard image, synchronous) path and every
+	// converted-file path above, so a HEIC/PDF/EPS/etc. upload ends up on
+	// the stage exactly like any ordinary PNG/JPEG always has.
+	// originalFile defaults to file itself (the common, unconverted case);
+	// it's only a DIFFERENT object when file is a conversion's output and
+	// originalFile is the customer's real upload — see buildLayersMetaForDraft()'s
+	// own note on why that distinction travels all the way to final submit.
+	function placeLogoFile( file, originalFile ) {
+		originalFile = originalFile || file;
 		var reader = new FileReader();
 		reader.onload = function ( evt ) {
 			// Pete, 2026-10-19: "I can bring in multiple art, from library,
@@ -1861,6 +1951,7 @@
 				logo = {
 					id: state.nextLogoId++,
 					file: file,
+					originalFile: originalFile,
 					scale: parseFloat( els.logoSizeSlider.value ),
 					pos: defaultPos( state.logos.length ),
 					// See addArtLogo()'s own note on why a freshly-created
@@ -1875,6 +1966,7 @@
 				renderLogoSelectorPills();
 			} else {
 				logo.file = file;
+				logo.originalFile = originalFile;
 				logo.artKey = null; // CHOOSE FILE on an ART logo replaces it with a real upload.
 				logo.artLabel = null;
 				logo.donate = false;
@@ -1904,6 +1996,55 @@
 			qualityProbe.src = evt.target.result;
 		};
 		reader.readAsDataURL( file );
+	}
+
+	els.logoFileInput.addEventListener( 'change', function () {
+		var file = els.logoFileInput.files[ 0 ];
+		if ( ! file ) {
+			return;
+		}
+
+		// 2026-10-30 RED ALERT fix: this used to silently `return` on any file
+		// that wasn't exactly image/png or image/jpeg -- nothing happened, no
+		// message, the picker just closed. Every rejection (and now every
+		// conversion attempt/failure) tells the customer exactly what
+		// happened instead of silently losing their file.
+		if ( /^image\/(png|jpe?g|webp)$/.test( file.type ) ) {
+			placeLogoFile( file );
+			return;
+		}
+
+		if ( isHeicFile( file ) ) {
+			setStatus( 'Converting your photo…' );
+			convertLogoViaServer( file ).catch( function () {
+				// No server-side Imagick, or it choked on this specific
+				// file — fall back to converting right here in the browser
+				// before giving up.
+				return convertHeicClientSide( file );
+			} ).then( function ( converted ) {
+				setStatus( '' );
+				placeLogoFile( converted, file );
+			} ).catch( function ( err ) {
+				setStatus(
+					'That looks like an iPhone photo (HEIC) and we couldn’t convert it — ' + ( ( err && err.message ) || 'please try again' ) + '. On your phone: Settings > Camera > Formats > "Most Compatible" takes JPGs instead, or just use a screenshot/edited copy of the photo.',
+					'error'
+				);
+			} );
+			return;
+		}
+
+		if ( isConvertibleFile( file ) ) {
+			setStatus( 'Converting your ' + fileExtension( file ).toUpperCase() + ' file…' );
+			convertLogoViaServer( file ).then( function ( converted ) {
+				setStatus( '' );
+				placeLogoFile( converted, file );
+			} ).catch( function ( err ) {
+				setStatus( ( err && err.message ) || 'Could not convert that file.', 'error' );
+			} );
+			return;
+		}
+
+		setStatus( 'That file type isn’t supported — please choose a JPG, PNG, WEBP, HEIC, PDF, EPS, AI, PSD, TIFF, or camera RAW file.', 'error' );
 	} );
 
 	els.logoRemoveBtn.addEventListener( 'click', function () {
@@ -2282,7 +2423,16 @@
 			// actual File objects, matched back up to their 'logo' entry
 			// in order on the server side.
 			if ( ! logo.artKey ) {
-				logoFiles.push( logo.file );
+				// Pete, 2026-11-13: originalFile differs from file only when
+				// this logo was converted on the way in (see
+				// convertLogoViaServer()/convertHeicClientSide()) — carried
+				// here so the final submit can send the customer's real
+				// original alongside the converted PNG/JPEG everything else
+				// already expects.
+				logoFiles.push( {
+					file: logo.file,
+					original: ( logo.originalFile && logo.originalFile !== logo.file ) ? logo.originalFile : null,
+				} );
 			}
 			layersMeta.push( { type: 'logo', pos: logo.pos, scale: clampLogoScale( logo.scale ), art_key: logo.artKey || '', donate: ! logo.artKey && !! logo.donate } );
 		} );
@@ -2339,6 +2489,14 @@
 		els.logoFilename.textContent = '';
 		syncDonateRow( null );
 		checkLogoQuality( null );
+		// Pete, 2026-11-13: "what if I have notes for EACH label" — this
+		// note is per-design (captured into the held design by
+		// holdCurrentDraft() just before this runs), so it must reset here
+		// too, same as every other per-design field above, instead of
+		// silently carrying over into the next design.
+		if ( els.boxNote ) {
+			els.boxNote.value = '';
+		}
 		// Pete, 2026-11-11: "when we save a file (not submit) we need a
 		// reset on the form... get ourselves back to the default positions
 		// on radio buttons" — this cleared the text/logo layers and the
@@ -2391,6 +2549,16 @@
 			summary.textContent = design.summary || '';
 			text.appendChild( title );
 			text.appendChild( summary );
+			// Pete, 2026-11-13: "what if I have notes for EACH label" — a
+			// quick visible reminder this design carries its own note,
+			// same "never look identical" reasoning as the thumbnail/
+			// summary above it.
+			if ( design.note ) {
+				var noteLine = document.createElement( 'div' );
+				noteLine.className = 'rrt-lc-held-item-note';
+				noteLine.textContent = 'Note: ' + design.note;
+				text.appendChild( noteLine );
+			}
 
 			var actions = document.createElement( 'div' );
 			actions.className = 'rrt-lc-held-item-actions';
@@ -2502,6 +2670,7 @@
 				// for an ART piece's logo.el.src (that library image's URL).
 				src: l.el.src,
 				file: l.file || null,
+				originalFile: l.originalFile || l.file || null,
 				artKey: l.artKey || null,
 				artLabel: l.artLabel || null,
 				donate: !! l.donate,
@@ -2547,6 +2716,10 @@
 			sizeKey: state.sizeKey,
 			sizeLabel: activeSize().label,
 			quantity: qty,
+			// Pete, 2026-11-13: "what if I have notes for EACH label" —
+			// captured here, BEFORE resetDraftAfterHold() (right below)
+			// clears the field for the next design.
+			note: els.boxNote ? els.boxNote.value.trim() : '',
 			summary: summarizeDraftContent(),
 			zoneHtml: els.zone.innerHTML,
 			zoneWidth: zoneRect.width,
@@ -2619,6 +2792,13 @@
 			radio.checked = radio.value === design.sizeKey;
 		} );
 		els.quantity.value = design.quantity;
+		// Pete, 2026-11-13: "what if I have notes for EACH label" — restore
+		// this design's own note so re-editing it doesn't lose what was
+		// written, and so holding it again (without reopening the box
+		// popup) still carries the same note forward unless changed.
+		if ( els.boxNote ) {
+			els.boxNote.value = design.note || '';
+		}
 
 		design.textGroups.forEach( function ( saved ) {
 			var div = document.createElement( 'div' );
@@ -2653,6 +2833,7 @@
 			var logo = {
 				id: state.nextLogoId++,
 				file: saved.file,
+				originalFile: saved.originalFile || saved.file,
 				artKey: saved.artKey,
 				artLabel: saved.artLabel,
 				donate: saved.donate,
@@ -2870,6 +3051,11 @@
 				flavorKey: state.flavorKey,
 				sizeKey: state.sizeKey,
 				quantity: parseInt( els.quantity.value, 10 ) || MIN_QTY[ state.sizeKey ] || 1,
+				// Pete, 2026-11-13: "what if I have notes for EACH label" —
+				// whatever's still typed in the box popup's note field when
+				// Submit is clicked belongs to THIS still-on-stage design,
+				// same as every held design's own note.
+				note: els.boxNote ? els.boxNote.value.trim() : '',
 				layersMeta: built.layersMeta,
 				logoFiles: built.logoFiles,
 			} );
@@ -2896,13 +3082,27 @@
 			body.append( 'message', els.message.value.trim() );
 
 			var designsMeta = designs.map( function ( design, i ) {
-				design.logoFiles.forEach( function ( file ) {
-					body.append( 'logo_files_' + i + '[]', file );
+				// Pete, 2026-11-13: for a logo that got converted on the way in
+				// (HEIC/PDF/EPS/AI/PSD/TIFF/RAW — see convertLogoViaServer()/
+				// convertHeicClientSide() above), logo_files still carries the
+				// already-converted PNG/JPEG everything else expects, but the
+				// customer's real original also rides along under its own
+				// singular field so rrt_label_save_originals() can keep the
+				// authentic file in the order folder, not just the conversion.
+				// Named by logo index (not a parallel array) so a logo with no
+				// distinct original just sends nothing extra — no placeholder,
+				// no alignment to get wrong.
+				design.logoFiles.forEach( function ( entry, logoIdx ) {
+					body.append( 'logo_files_' + i + '[]', entry.file );
+					if ( entry.original ) {
+						body.append( 'logo_original_' + i + '_' + logoIdx, entry.original );
+					}
 				} );
 				return {
 					flavor: design.flavorKey,
 					size: design.sizeKey,
 					quantity: design.quantity,
+					note: design.note || '',
 					layers: design.layersMeta,
 				};
 			} );
