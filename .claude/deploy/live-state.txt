@@ -6,7 +6,7 @@ e9f06907472fe0a512eb16b9058677ee  assets/heic2any.min.js
 77ef1b0e4560a73703a569aef81029f6  assets/label-configurator.css
 c2725869cde367c84839ea9d09cda890  assets/label-configurator.js
 0a9ca8450494d00b7b047eacf23b1a2f  inc/accessibility-statement.php
-4bbc472c5e432425ec0a1d730fc6e383  inc/convert-logo.php
+b989d944fb5b4ab8c0d34c5a0990237d  inc/convert-logo.php
 4360ab01d0e95d975d47e04d875797d2  inc/handle-submission.php
 121b770a5fb724b8b9397aa6013c1666  inc/harry-path.php
 2775d8d3f6493f82707d83e87bbc1005  inc/hero-ken-burns.php

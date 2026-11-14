@@ -1,0 +1,5 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/live/inc/convert-logo.php" "deploy-backups/1794614723/backup/inc/convert-logo.php"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/live/inc/convert-logo.php to /home/client_21778bd1e8_366786/deploy-backups/1794614723/backup/inc/convert-logo.php
+sftp> put "C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php" "html/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php.new"
+Uploading C:/Claude RedRocksToffee/redrockstoffee-wp/.deploy-tmp/head/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php to /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php.new

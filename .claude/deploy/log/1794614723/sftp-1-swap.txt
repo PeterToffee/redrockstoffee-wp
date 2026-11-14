@@ -1,0 +1,5 @@
+Connected to 366786.us19.ssh.myftpupload.com.
+sftp> rename "html/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php" "html/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php.old"
+sftp> rename "html/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php.new" "html/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php"
+sftp> rm "html/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php.old"
+Removing /home/client_21778bd1e8_366786/html/wp-content/plugins/rrt-label-configurator/inc/convert-logo.php.old
