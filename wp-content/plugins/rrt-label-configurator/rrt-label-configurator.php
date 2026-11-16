@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RRT_LABEL_VERSION', '3.91.0' );
+define( 'RRT_LABEL_VERSION', '3.98.0' );
 define( 'RRT_LABEL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RRT_LABEL_URL', plugin_dir_url( __FILE__ ) );
 
@@ -200,7 +200,11 @@ function rrt_label_sizes( $flavor_key = 'original-almond' ) {
 			'template_file'       => 'assets/templates/' . $template_dir . '8oz-template.jpg',
 			'template_print_file' => 'assets/templates/' . $template_dir . '8oz-template-print.jpg',
 			'dpi'             => 300,
-			'image_width_in'  => 4.127,
+			// Pete, 2026-11-16: "the 8 oz 4.125 single" — corrected from
+			// 4.127. Both round to the same 1238px at 300dpi (4.127*300=
+			// 1238.1, 4.125*300=1237.5), so this is a spec/precision fix,
+			// not a pixel change — no template file resize needed.
+			'image_width_in'  => 4.125,
 			'image_height_in' => 11,
 			// Real glossy-white box dimensions, confirmed with Pete
 			// 2026-10-25 — used only by the 3D box-mockup preview below
@@ -231,7 +235,14 @@ function rrt_label_sizes( $flavor_key = 'original-almond' ) {
 			'template_file'       => 'assets/templates/' . $template_dir . '4oz-template.jpg',
 			'template_print_file' => 'assets/templates/' . $template_dir . '4oz-template-print.jpg',
 			'dpi'             => 300,
-			'image_width_in'  => 2.627,
+			// Pete, 2026-11-16: "make the 4 oz single 2.633 x 11 ea" —
+			// corrected from 2.627. UNLIKE the 8oz fix just above, this
+			// DOES change the real pixel width (2.627*300=788.1->788px
+			// actual template files on disk; 2.633*300=789.9->790px, what
+			// this config now claims) — flagged to Pete, not yet resolved
+			// whether the 4oz template JPGs (both flavors x template/
+			// print/tinted = 6 files) need resizing 788->790px to match.
+			'image_width_in'  => 2.633,
 			'image_height_in' => 11,
 			// See the 8oz entry above for why these three exist — same
 			// depth/height (the wrap math is identical), narrower box.
@@ -254,13 +265,13 @@ function rrt_label_sizes( $flavor_key = 'original-almond' ) {
  * inc/handle-submission.php). One place to tune labels-per-sheet/sheet
  * width per box size, same spirit as rrt_label_sizes() above.
  *
- * 2026-10-19: Pete confirmed 4oz as "three across on an 8.25in x 11in
- * file" — same sheet width as 8oz (not the narrower 7.881in = 3 x
- * 2.627in this used as a placeholder before being confirmed), so one
- * sheet size serves both box sizes. The 3 labels don't exactly fill
- * 8.25in (3 x 2.627in = 7.881in, leaving ~0.37in left over), so
- * rrt_label_composite_sheet() centers the row instead of pinning it to
- * the left edge.
+ * Pete, 2026-11-16: "the 3 up 4 oz outputted at 7.9 x 11" — reverted
+ * the 2026-10-19 decision above (8.25in shared sheet width for both
+ * sizes) back to a snug per-size fit: 3 x 2.633in (the corrected 4oz
+ * single width, rrt_label_sizes() above) = 7.899in, rounds to exactly
+ * 7.9in — labels now fill the 4oz sheet edge to edge with no centering
+ * margin needed. 8oz is unaffected: 2 x 4.125in = 8.25in exactly,
+ * same number this file already had.
  */
 function rrt_label_sheet_config( $size_key ) {
 	$sheets = array(
@@ -270,7 +281,7 @@ function rrt_label_sheet_config( $size_key ) {
 		),
 		'4oz' => array(
 			'labels_per_sheet' => 3,
-			'width_in'         => 8.25,
+			'width_in'         => 7.9,
 		),
 	);
 	return $sheets[ $size_key ] ?? null;
