@@ -12,4 +12,4 @@ b989d944fb5b4ab8c0d34c5a0990237d  inc/convert-logo.php
 2775d8d3f6493f82707d83e87bbc1005  inc/hero-ken-burns.php
 3711690ee898c337b091fcc021581494  inc/home-starburst.php
 313d7f180343ad71bcdbc3ecc94c88ab  inc/quote-module-card.part.php
-00b2b649f18b4b82e1ed042cbdf2cb1d  rrt-label-configurator.php
+f3bd3fee17bfaf241f27f60eac5e6b08  rrt-label-configurator.php

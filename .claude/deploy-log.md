@@ -171,3 +171,13 @@
 ## 2026-11-13 17:06 - deploy 1794614723 (commit 3c2a8e98)
 - inc/convert-logo.php  (DIFF)
 - verified: round trip + live pages passed (9 checks, 0 warnings). Server backups: *.bak.1794614723. Rollback: .claude/deploy/rollback.sh 1794614723 --go
+
+## 2026-11-16 09:42 - deploy 1794846894 (commit c84eada6)
+- assets/templates/4oz-template-print.jpg  (FORCE)
+- assets/templates/4oz-template-tinted.jpg  (FORCE)
+- assets/templates/4oz-template.jpg  (FORCE)
+- assets/templates/koffie-almond/4oz-template-print.jpg  (FORCE)
+- assets/templates/koffie-almond/4oz-template-tinted.jpg  (FORCE)
+- assets/templates/koffie-almond/4oz-template.jpg  (FORCE)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (21 checks, 0 warnings). Server backups: *.bak.1794846894. Rollback: .claude/deploy/rollback.sh 1794846894 --go
