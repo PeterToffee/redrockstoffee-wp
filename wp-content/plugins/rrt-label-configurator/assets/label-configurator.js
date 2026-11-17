@@ -2178,13 +2178,16 @@
 			positionEl( logo.el, logo.pos );
 			return;
 		}
-		var isArt = !! logo.artKey; // ART is allowed to overlap the dashed line on purpose — see onDragMove()'s own note.
+		// Pete, 2026-11-17: "I can move an image outside of the dotted
+		// area" — ART used to get a deliberate half-overlap allowance (see
+		// onDragMove()'s own note on why that existed), but Pete now wants
+		// ART fully contained too, same as a real uploaded logo.
 		var halfWPct = ( elRect.width / zoneRect.width ) * 50;
 		var halfHPct = ( elRect.height / zoneRect.height ) * 50;
-		var minX = isArt ? 0 : Math.min( halfWPct, 50 );
-		var maxX = isArt ? 100 : Math.max( 100 - halfWPct, 50 );
-		var minY = isArt ? 0 : Math.min( halfHPct, 100 - halfHPct );
-		var maxY = isArt ? 100 : Math.max( 100 - halfHPct, halfHPct );
+		var minX = Math.min( halfWPct, 50 );
+		var maxX = Math.max( 100 - halfWPct, 50 );
+		var minY = Math.min( halfHPct, 100 - halfHPct );
+		var maxY = Math.max( 100 - halfHPct, halfHPct );
 		logo.pos.x = clamp( logo.pos.x, minX, maxX );
 		logo.pos.y = clamp( logo.pos.y, minY, maxY );
 		positionEl( logo.el, logo.pos );
@@ -2250,26 +2253,19 @@
 		var rawY = d.startPos.y + dyPct;
 
 		// Hard wall: clamp so the element's own rendered edges never cross
-		// the zone boundary, not just its anchor point — EXCEPT for ART,
-		// where Pete confirmed the dashed zone is the right boundary but
-		// "we still need more room to move art closer to the dashed
-		// lines": even dragged to the absolute limit, a fully-contained
-		// box can only ever get flush with the line (verified — 0px gap
-		// at every size tested), never past it, so "closer" has to mean
-		// letting the box actually CROSS the line. ART's anchor (center)
-		// is allowed the full [0,100] zone range instead of being pulled
-		// in by half its own size, so up to half the art can overlap past
-		// the dashed line — logos/text are unaffected, still fully
-		// contained. Logo is center-anchored on both axes; text is
-		// center-anchored on X but BOTTOM-anchored on Y (see
+		// the zone boundary, not just its anchor point. ART used to get a
+		// deliberate half-overlap allowance here (Pete, 2026-11-16: "we
+		// still need more room to move art closer to the dashed lines"),
+		// but Pete, 2026-11-17: "I can move an image outside of the dotted
+		// area" — ART is fully contained now too, same as logos/text. Text
+		// is center-anchored on X but BOTTOM-anchored on Y (see
 		// renderTextGroup()'s comment), so its vertical room to move is
 		// measured from the bottom edge upward. Same min>max guard as
 		// clampGroupToZone() — if the box is wider/taller than the zone
 		// itself, cap the bounds to a sane [0,100] window first so
 		// clamp() can't return an out-of-range value.
-		var isArt = !! d.item.artKey;
-		var dragMinX = isArt ? 0 : Math.min( d.halfWPct, 50 );
-		var dragMaxX = isArt ? 100 : Math.max( 100 - d.halfWPct, 50 );
+		var dragMinX = Math.min( d.halfWPct, 50 );
+		var dragMaxX = Math.max( 100 - d.halfWPct, 50 );
 		d.item.pos.x = clamp( rawX, dragMinX, dragMaxX );
 		if ( 'text' === d.kind ) {
 			// glyphGapTop/glyphGapBottom (captured at drag-start) widen both
@@ -2283,8 +2279,8 @@
 			d.el.style.bottom = ( 100 - d.item.pos.y ) + '%';
 			updateCenterBtn();
 		} else {
-			var dragMinYLogo = isArt ? 0 : Math.min( d.halfHPct, 100 - d.halfHPct );
-			var dragMaxYLogo = isArt ? 100 : Math.max( 100 - d.halfHPct, d.halfHPct );
+			var dragMinYLogo = Math.min( d.halfHPct, 100 - d.halfHPct );
+			var dragMaxYLogo = Math.max( 100 - d.halfHPct, d.halfHPct );
 			d.item.pos.y = clamp( rawY, dragMinYLogo, dragMaxYLogo );
 			positionEl( d.el, d.item.pos );
 			updateCenterBtn();
