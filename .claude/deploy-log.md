@@ -181,3 +181,12 @@
 - assets/templates/koffie-almond/4oz-template.jpg  (FORCE)
 - rrt-label-configurator.php  (DIFF)
 - verified: round trip + live pages passed (21 checks, 0 warnings). Server backups: *.bak.1794846894. Rollback: .claude/deploy/rollback.sh 1794846894 --go
+
+## 2026-11-17 10:54 - deploy 1794936977 (commit c02d594c)
+- assets/configurator-components.css  (DIFF)
+- assets/label-configurator.css  (DIFF)
+- assets/label-configurator.js  (DIFF)
+- inc/handle-submission.php  (DIFF)
+- inc/quote-module-card.part.php  (DIFF)
+- rrt-label-configurator.php  (DIFF)
+- verified: round trip + live pages passed (17 checks, 0 warnings). Server backups: *.bak.1794936977. Rollback: .claude/deploy/rollback.sh 1794936977 --go
