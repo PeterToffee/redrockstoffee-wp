@@ -267,7 +267,7 @@ add_action( 'wp_ajax_nopriv_rrt_label_submit', 'rrt_label_handle_submit' );
  * from the single-design version — it just runs once per design, into
  * its own subfolder of one shared $order_dir, so nothing from one design
  * can collide with or overwrite another's (e.g. two held 8oz designs
- * would otherwise both want "label-flat.png" in the same folder).
+ * would otherwise both want "label-flat.tif" in the same folder).
  */
 function rrt_label_handle_submit() {
 	check_ajax_referer( 'rrt_label_submit', 'nonce' );
@@ -694,6 +694,13 @@ function rrt_label_composite( $size_key, $layers, $order_dir, $order_id_text = '
 
 	rrt_label_draw_order_id( $canvas, $size_key, $order_id_text );
 
+	// Pete, 2026-11-17: back to PNG for now — Pete will correct the DPI
+	// manually in Photoshop as needed. The TIFF path (rrt_label_save_tiff_300dpi(),
+	// tried 2026-11-16 for the Photoshop 72 DPI pHYs-reading bug) is held
+	// below, ready, not deleted, per Pete's "hide and hold".
+	// $out_path = $order_dir . '/' . $file_prefix . 'label-flat.tif';
+	// rrt_label_save_tiff_300dpi( $canvas, $out_path );
+	// imagedestroy( $canvas );
 	$out_path = $order_dir . '/' . $file_prefix . 'label-flat.png';
 	imagepng( $canvas, $out_path, 6 ); // 6 = a reasonable PNG compression level; always lossless regardless of level.
 	imagedestroy( $canvas );
@@ -785,6 +792,11 @@ function rrt_label_composite_layers( $size_key, $layers, $order_dir, $flavor_key
 	// Layer 0: the bare template itself, so the full stack is self-
 	// contained (Pete doesn't have to separately dig up the master
 	// template file to reconstruct the design).
+	// Pete, 2026-11-17: back to PNG for now — see rrt_label_composite()'s
+	// own note. TIFF path held below, ready, not deleted.
+	// $base_path = $order_dir . '/' . $file_prefix . 'layer-00-template.tif';
+	// rrt_label_save_tiff_300dpi( $template_img, $base_path );
+	// imagedestroy( $template_img );
 	$base_path = $order_dir . '/' . $file_prefix . 'layer-00-template.png';
 	imagepng( $template_img, $base_path, 6 );
 	imagedestroy( $template_img );
@@ -816,6 +828,10 @@ function rrt_label_composite_layers( $size_key, $layers, $order_dir, $flavor_key
 			$suffix = 'text';
 		}
 
+		// Pete, 2026-11-17: back to PNG for now — TIFF path held below, ready, not deleted.
+		// $layer_path = sprintf( '%s/%slayer-%02d-%s.tif', $order_dir, $file_prefix, $i, sanitize_key( $suffix ) );
+		// rrt_label_save_tiff_300dpi( $layer_canvas, $layer_path );
+		// imagedestroy( $layer_canvas );
 		$layer_path = sprintf( '%s/%slayer-%02d-%s.png', $order_dir, $file_prefix, $i, sanitize_key( $suffix ) );
 		imagepng( $layer_canvas, $layer_path, 6 );
 		imagedestroy( $layer_canvas );
@@ -883,8 +899,14 @@ function rrt_label_composite_sheet( $size_key, $composite_path, $order_dir, $lab
 	}
 	imagedestroy( $single );
 
+	// Pete, 2026-11-17: back to PNG for now — this is the ganged/print-sheet
+	// file that showed the 72 DPI Photoshop symptom on 2026-11-16; Pete will
+	// correct the DPI manually in Photoshop as needed. TIFF path
+	// (rrt_label_save_tiff_300dpi()) held below, ready, not deleted.
+	// $out_path = sprintf( '%s/%sprint-sheet-qty%d.tif', $order_dir, $file_prefix, $labels_needed );
+	// rrt_label_save_tiff_300dpi( $sheet, $out_path );
+	// imagedestroy( $sheet );
 	$out_path = sprintf( '%s/%sprint-sheet-qty%d.png', $order_dir, $file_prefix, $labels_needed );
-
 	imagepng( $sheet, $out_path, 6 );
 	imagedestroy( $sheet );
 	rrt_label_set_png_dpi( $out_path, 300 );
@@ -1046,6 +1068,26 @@ function rrt_label_draw_dotted_rect( $canvas, $x0, $y0, $x1, $y1, $color, $thick
 }
 
 /**
+ * Pete, 2026-11-16: "we had a weirdness recently when I opened the
+ * ganged files on PS, it came through at 72 DPI and huge dimensions" —
+ * verified directly (built a test PNG, ran this exact function, read
+ * the resulting pHYs chunk back with ImageMagick): the chunk IS being
+ * written correctly at 300 DPI. This isn't a bug in this function —
+ * it's a long-documented Photoshop quirk where PS unreliably reads a
+ * PNG's pHYs chunk and silently falls back to its own 72 DPI default,
+ * which is exactly what "72 DPI and huge dimensions" looks like (the
+ * same pixel count divided by 72 instead of 300 reads ~4x bigger).
+ * JPEG/TIFF don't have this problem — PS reads their resolution tags
+ * reliably. Switched the real output to TIFF via Imagick (see
+ * rrt_label_save_tiff_300dpi() below) instead of patching PNG metadata
+ * PS won't reliably read anyway.
+ *
+ * This function is HELD, not deleted (Pete: "by keep, I meant hide and
+ * hold") — no remaining callers as of this change, kept for reference/
+ * rollback since it IS correct, just solving a problem at the wrong
+ * layer (file metadata) for a reader (Photoshop + PNG) that doesn't
+ * reliably honor it.
+ *
  * Manually tags a PNG with a pHYs chunk so it's labeled $dpi dots per
  * inch — without this, a file can be built at exactly-300-DPI pixel
  * dimensions and still open in Photoshop/a printer reporting some other
@@ -1088,6 +1130,67 @@ function rrt_label_set_png_dpi( $png_path, $dpi ) {
 	$new_data = substr( $clean, 0, $ihdr_end ) . $phys_chunk . substr( $clean, $ihdr_end );
 
 	return (bool) file_put_contents( $png_path, $new_data );
+}
+
+/**
+ * Pete, 2026-11-16: "we had a weirdness... came through at 72 DPI and
+ * huge dimensions" / "I think we came across this with theunframer" —
+ * replaces rrt_label_set_png_dpi() (held above, not deleted) as the
+ * real fix: writes TIFF instead of PNG, since Photoshop reads a TIFF's
+ * resolution tag reliably where it doesn't for PNG's pHYs chunk.
+ *
+ * Takes the already-finished GD image (every composite/layer/sheet in
+ * this file is built with GD; nothing here changes) and re-encodes it
+ * through Imagick purely to tag + write the TIFF — GD itself can't
+ * write TIFF at all. Round-trips through an in-memory PNG blob rather
+ * than touching disk twice.
+ *
+ * The resolution tag is set ONLY AFTER readImageBlob(), never before —
+ * confirmed against this exact gotcha already solved once in
+ * TheUnframer's own configurator-ajax.php (rrt_label_convert_logo()'s
+ * sibling there): calling setResolution() BEFORE reading a RASTER
+ * source (which this always is — a GD-rendered PNG blob, never a
+ * vector format) makes Imagick RESAMPLE the pixels to match the new
+ * density instead of just labeling them, silently changing the actual
+ * pixel dimensions. setImageResolution() after the read only rewrites
+ * the metadata tag, which is what we actually want here: same pixels,
+ * correctly labeled.
+ *
+ * NOTE: written against the live server's confirmed Imagick install
+ * (Pete, 2026-11-16) — this local dev environment's PHP has no Imagick
+ * extension (GD only, confirmed via `php -m`), so this specific
+ * function could not be exercised end-to-end here. Test a real order
+ * on the live site and confirm the resulting .tif opens in Photoshop
+ * at exactly 300 DPI with the expected pixel dimensions before
+ * trusting this for a real customer order.
+ */
+function rrt_label_save_tiff_300dpi( $gd_image, $out_path ) {
+	if ( ! extension_loaded( 'imagick' ) ) {
+		return false;
+	}
+
+	ob_start();
+	imagepng( $gd_image, null, 6 );
+	$png_blob = ob_get_clean();
+	if ( '' === $png_blob ) {
+		return false;
+	}
+
+	try {
+		$im = new Imagick();
+		$im->readImageBlob( $png_blob );
+		$im->setImageUnits( Imagick::RESOLUTION_PIXELSPERINCH );
+		$im->setImageResolution( 300, 300 );
+		$im->setImageFormat( 'tiff' );
+		// Preserves alpha for the layer files (transparent except for
+		// that one layer) — TIFF supports it same as PNG did.
+		$ok = $im->writeImage( $out_path );
+		$im->clear();
+		$im->destroy();
+		return (bool) $ok;
+	} catch ( Exception $e ) {
+		return false;
+	}
 }
 
 /**
@@ -1149,6 +1252,20 @@ function rrt_label_draw_logo( $canvas, $px, $logo_tmp_path, $logo_pos, $logo_sca
 
 	$dest_w = max( 1, round( ( $logo_scale / 100 ) * $px['zone_width'] ) );
 	$dest_h = max( 1, round( $dest_w * ( imagesy( $logo_img ) / imagesx( $logo_img ) ) ) );
+	// Pete, 2026-11-16: "it keeps getting way bigger than the dotted
+	// line" — $logo_scale is always "% of the zone's own WIDTH" (see the
+	// submission-time clamp above and clampLogoScale() in
+	// label-configurator.js), with nothing checking it against the
+	// zone's HEIGHT. A real portrait phone photo at scale=100 drew at 3x
+	// the zone's own height here, overflowing the print canvas top and
+	// bottom — a real print defect, not just an on-screen one. Capping
+	// dest_w/dest_h directly (not just the earlier scale clamp) means
+	// even a stale or bypassed client value can't produce an oversized
+	// print — this is the actual pixel size that gets drawn.
+	if ( $dest_h > $px['zone_height'] ) {
+		$dest_h = $px['zone_height'];
+		$dest_w = max( 1, round( $dest_h * ( imagesx( $logo_img ) / imagesy( $logo_img ) ) ) );
+	}
 
 	$center_x = $px['zone_x'] + ( $logo_pos['x'] / 100 ) * $px['zone_width'];
 	$center_y = $px['zone_y'] + ( $logo_pos['y'] / 100 ) * $px['zone_height'];

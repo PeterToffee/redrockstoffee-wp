@@ -269,8 +269,8 @@
 	   over an external stylesheet otherwise; same justified use already
 	   established for .font-drum-rotator elsewhere in this file. */
 	.slider-step-btn {
-		width: 38px !important;
-		height: 38px !important;
+		width: 40px !important;
+		height: 40px !important;
 		font-size: 1.1rem !important;
 	}
 
@@ -289,6 +289,456 @@
 		padding: 0.5rem 0.75rem !important;
 	}
 
+	/* Pete, 2026-11-15: "lots of... partial buttons, lettering" + "buttons
+	   too small to hit" — these never got a mobile bump at all. Same
+	   mobile-only, desktop-untouched treatment as the rest of this block;
+	   !important needed wherever the base/inline value would otherwise win
+	   (same justification as above). */
+	.toggle-btn {
+		padding: 0.6rem 0.75rem !important;
+		font-size: 0.85rem !important;
+	}
+
+	/* The WHITE/BLACK SHADOW and WHITE/BLACK TYPE pills are inline-styled
+	   smaller still than the base .toggle-btn (0.6rem font, tight padding)
+	   to fit their 2-line label — bump those specifically, keeping the
+	   2-line layout. */
+	#shadow-outline-row .toggle-btn,
+	#shadow-color-row .toggle-btn {
+		padding: 0.4rem 0.5rem !important;
+		font-size: 0.75rem !important;
+	}
+
+	#btn-bold,
+	#btn-italic {
+		width: 40px !important;
+		height: 40px !important;
+	}
+
+	.color-swatch,
+	#text-color-custom {
+		width: 36px !important;
+		height: 36px !important;
+	}
+
+	.rrt-lc-held-item-view {
+		padding: 10px 16px !important;
+		font-size: 0.9rem !important;
+	}
+
+	.rrt-lc-held-item-remove {
+		padding: 10px 12px !important;
+		font-size: 1.3rem !important;
+	}
+
+	/* Pete, 2026-11-15: "working on your file/library line, make buttons
+	   all same size, but only stretch them up into the white area above,
+	   same height as the 1 and the +/-" — YOUR FILE/ART LIBRARY/+Add/×
+	   Remove and the numbered logo-selector pill ("1", "2"...) all sat at
+	   different natural heights on this one row. #logo-selector-row is
+	   align-items:flex-end, so pinning height to the same 40px as
+	   .slider-step-btn (the Art Size −/+ buttons, already the tallest
+	   thing in the row) grows each one upward from its existing bottom
+	   edge into the blank space above it, rather than widening anything —
+	   scoped to this row only, not the shadow row's own +Add/×Remove. */
+	#logo-selector-row #logo-upload-btn,
+	#logo-selector-row #art-picker-btn,
+	#logo-selector-row #logo-add-btn,
+	#logo-selector-row #logo-remove-btn,
+	#logo-selector-row .toggle-btn {
+		height: 40px !important;
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+	}
+
+	/* Pete, 2026-11-15: "make the x on the red remove button larger, keep
+	   the button the same size" — the × glyph only; the button's own
+	   box stays pinned at 40px by the rule above. */
+	#logo-selector-row #logo-remove-btn {
+		font-size: 1.6rem !important;
+	}
+
+}
+
+/* Pete, 2026-11-15: "not intuitive that there's other things that can
+   indeed be scrolled" — the Shadow/group row, the Bold/Italic/Font/Width/
+   Color row, and the logo-selector row (inc/quote-module-card.part.php)
+   all scroll sideways with flex-wrap:nowrap + overflow-x:auto and no
+   affordance at all, so a control sitting at the clipped edge reads as a
+   broken/cut-off button rather than "swipe for more." A static fade on
+   both edges is a plain CSS signal that more is reachable, with no JS
+   and no markup restructuring beyond the one class added to each row.
+   (The font-drum solves this differently, via a peek-a-card carousel —
+   left as-is, it already works.) Pete, 2026-11-15 (follow-up): "add the
+   fade on the left like it's on the right" — matched, both edges now.
+   Pete, 2026-11-15 (follow-up, from the reel-mockup exploration): "make
+   the fade at either end more abrupt so I see more of what's in the
+   wings, but there's the tease" — narrowed from 8%/15% to 2%/4%.
+   Pete, 2026-11-16 (mobile, all 3 rows): "needing the fade out on the
+   edges to be wider in, so we understand there's more lurking" — that
+   2%/4% fade had gotten so abrupt it read as nothing fading at all;
+   widened to 10%/90% so the drop-off is clearly visible as a fade,
+   not just a hard edge. */
+.rrt-lc-scroll-row {
+	-webkit-mask-image: linear-gradient( to right, transparent 0%, #000 10%, #000 90%, transparent 100% );
+	mask-image: linear-gradient( to right, transparent 0%, #000 10%, #000 90%, transparent 100% );
+}
+
+/* Pete, 2026-11-16: "archaic... taller, easier to grab/mouse" — first
+   pass styled the native ::-webkit-scrollbar taller/branded, but it
+   lives INSIDE the row's own box at the row's bottom edge, which is
+   exactly where the bottom reel curve overlaps on top of it (by
+   design, so the curve sits against the buttons) — the curve always
+   won the stacking fight and hid it. "put the maroon scroll bar UNDER
+   the curved/spoke thing... lower down" — rather than fight that
+   overlap, this is a separate, custom-built scrollbar element placed
+   AFTER .rrt-lc-reel-wrap-bottom in the markup (see
+   quote-module-card.part.php), with its own margin-top for clear
+   space below the curve — no stacking/z-index contest possible since
+   it isn't sharing the same pixels at all. Native scrollbar hidden
+   instead of styled. See initCustomScrollbar() in label-configurator.js
+   for the thumb-sizing/drag logic. Desktop only (min-width:992px) —
+   mobile keeps swipe + the reel-drag affordance and doesn't need this. */
+.rrt-lc-custom-scrollbar {
+	display: none; /* custom scrollbar is desktop-only; the media query below turns it on. Declared BEFORE that query, not after — a same-specificity rule placed after a media query overrides it even when the query doesn't match the viewport that wrote the rule, since source order (not just the condition) decides ties. Confirmed the hard way: this originally sat after the query and silently kept the scrollbar hidden at every width. */
+}
+@media ( min-width: 992px ) {
+	.rrt-lc-scroll-row::-webkit-scrollbar {
+		display: none;
+	}
+	.rrt-lc-scroll-row {
+		scrollbar-width: none; /* Firefox */
+	}
+	.rrt-lc-custom-scrollbar {
+		display: block;
+		position: relative;
+		height: 14px;
+		margin-top: 10px;
+		background: rgba( 153, 30, 33, 0.15 );
+		border-radius: 7px;
+		cursor: pointer;
+	}
+	.rrt-lc-custom-scrollbar-thumb {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		background: #991e21;
+		border-radius: 7px;
+		cursor: grab;
+	}
+	.rrt-lc-custom-scrollbar-thumb:hover {
+		background: #7a181b;
+	}
+}
+
+/* Pete: "copy mockup" — the mockup's .scroll-row also carries a soft
+   goldenrod glow (brighter center, fading to the edges) behind the
+   buttons, same "center is closer" lighting cue as the curve above it.
+   Generalized from #logo-selector-row to every reel row, 2026-11-16. */
+.rrt-lc-reel-group .rrt-lc-scroll-row {
+	padding-bottom: 2px;
+	margin-top: 2px;
+	background: radial-gradient( ellipse 65% 140% at 50% 50%, rgba(245,158,11,0.22) 0%, rgba(245,158,11,0) 70% );
+}
+
+/* Pete, 2026-11-15/16: "copy mockup. measure, check and do it right" —
+   the first port of the reel-mockup.html effect guessed the real
+   buttons were much shorter than the mockup's 74px demo buttons and
+   scaled everything down ~0.5x, dropping the button motion entirely.
+   Wrong guess, never re-checked: measured directly on the live page,
+   this ONE row (#logo-selector-row, mobile) is already ~70-74px tall —
+   mockup scale. Re-scoped to just this row (not all three) and
+   re-ported with the mockup's own CSS values verbatim below, nothing
+   scaled or guessed. See initReelEffect()/updateButtonCurve() in
+   label-configurator.js for the matching JS (spokes + button motion). */
+.rrt-lc-reel-wrap {
+	position: relative;
+	z-index: 5;
+	height: 26px;
+	margin-bottom: -22px;
+	filter: drop-shadow( 0 4px 4px rgba( 0, 0, 0, 0.4 ) );
+}
+.rrt-lc-reel-wrap-bottom {
+	position: relative;
+	z-index: 5;
+	height: 10px;
+	margin: -10px 0 0;
+	filter: drop-shadow( 0 -3px 3px rgba( 0, 0, 0, 0.35 ) );
+}
+.rrt-lc-reel-thickness {
+	position: absolute;
+	inset: 0;
+	clip-path: ellipse( 78% 48% at 50% 0% );
+	background: #8a540c;
+	transform: translateY( 4px );
+}
+.rrt-lc-reel-strip {
+	position: absolute;
+	inset: 0;
+	clip-path: ellipse( 78% 48% at 50% 0% );
+	background-color: #d97e06;
+}
+.rrt-lc-reel-strip::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient( to bottom, rgba(0,0,0,0.4), transparent 45%, transparent 65%, rgba(0,0,0,0.35) );
+	pointer-events: none;
+}
+.rrt-lc-reel-thickness-bottom,
+.rrt-lc-reel-strip-bottom {
+	clip-path: ellipse( 78% 68% at 50% 0% );
+}
+
+/* Pete: "all the button work is fucked up... copied the desktop shit
+   into the local mobile" — measured why: it's NOT that these rules were
+   wrong, it's that they were never winning in the first place. The
+   phase-B mobile touch-target pass (@media max-width:991px, above in
+   this file) left #logo-selector-row #logo-upload-btn/#art-picker-btn/
+   #logo-add-btn/#logo-remove-btn/.toggle-btn pinned to height:40px
+   !important (2-ID specificity) and .slider-step-btn pinned to 40x40
+   !important — both beat the plain `#logo-selector-row .btn`/`.step`
+   classes below outright, !important or not, since neither of those
+   had !important OR matching specificity. getBoundingClientRect
+   confirmed every one of these buttons was still rendering at 40px,
+   not 74px, no matter what this block said. Re-specified below to
+   actually win: matching !important, and specificity bumped to
+   ID+ID+class (for the four named buttons) or ID+class+class (for
+   .step) so it beats the 2-ID mobile rule rather than losing to it. */
+/* Pete, 2026-11-16: "make it look exactly like what we just did" —
+   the YOUR FILE/ART LIBRARY row's own rules below were #logo-selector-
+   row-scoped because that was the only row with this treatment at the
+   time. Now that the Shadow row and the Font/Width row (either side of
+   the text box) get the same reel + custom-scrollbar treatment, every
+   rule that isn't about THIS row's own specific buttons (.btn-file/
+   .btn-lib's colors, and the Art Size .size-wrap/.size-label/.size-row
+   layout, which only this row has) is generalized to
+   .rrt-lc-reel-group so it applies uniformly to all three — same
+   classes (.btn/.btn-pill/.btn-add/.btn-remove/.step/.btn-label),
+   added to the Shadow/Font rows' own buttons in
+   quote-module-card.part.php, now resolve to the same CSS instead of
+   duplicating it per row. */
+.rrt-lc-reel-group .btn {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	border-radius: 0;
+	height: 74px;
+	position: relative;
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 0.75rem;
+	cursor: pointer;
+	white-space: nowrap;
+	padding: 0 14px;
+}
+.rrt-lc-reel-group #logo-upload-btn.btn,
+.rrt-lc-reel-group #art-picker-btn.btn,
+.rrt-lc-reel-group #logo-add-btn.btn,
+.rrt-lc-reel-group #logo-remove-btn.btn,
+.rrt-lc-reel-group #quote-add-btn.btn,
+.rrt-lc-reel-group #quote-remove-btn.btn,
+.rrt-lc-reel-group #btn-bold.btn,
+.rrt-lc-reel-group #btn-italic.btn {
+	height: 74px !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	border-radius: 0 !important;
+}
+/* Pete: "do your work" — the shared override above was also forcing
+   font-size:0.75rem onto #logo-remove-btn, clobbering its own
+   mockup-matching 1.6rem (the × needs to read large, per .btn-remove
+   below) with a MORE specific, later rule. Caught via the same
+   measured-styles dump: real showed font=12px where the mockup's own
+   .btn-remove measured 25.6px (1.6rem). Most of these buttons do want
+   the base 0.75rem; the two ×Remove buttons (logo and text-group) keep
+   their own larger size instead, set below alongside .btn-remove. */
+.rrt-lc-reel-group #logo-upload-btn.btn,
+.rrt-lc-reel-group #art-picker-btn.btn,
+.rrt-lc-reel-group #logo-add-btn.btn,
+.rrt-lc-reel-group #quote-add-btn.btn,
+.rrt-lc-reel-group #btn-bold.btn,
+.rrt-lc-reel-group #btn-italic.btn {
+	font-size: 0.75rem !important;
+}
+#logo-selector-row .btn-file { background: #991e21; color: #fff; }
+#logo-selector-row .btn-lib { background: #fff; border: 1.5px solid #991e21; color: #991e21; }
+#logo-selector-row #logo-upload-btn.btn-file { padding: 0 14px !important; }
+#logo-selector-row #art-picker-btn.btn-lib { padding: 0 10px !important; }
+.rrt-lc-reel-group .btn-pill { width: 40px; padding: 0; background: #f5e3d8; color: #991e21; border: 1.5px solid #c084b8; }
+.rrt-lc-reel-group .btn-pill.selected { background: #991e21; color: #fff; border-color: #991e21; }
+.rrt-lc-reel-group .btn-add { background: #991e21; color: #fff; }
+.rrt-lc-reel-group #logo-add-btn.btn-add,
+.rrt-lc-reel-group #quote-add-btn.btn-add {
+	padding: 0 12px !important;
+}
+.rrt-lc-reel-group .btn-add-plus { font-size: 1.3rem; font-weight: 900; }
+/* .btn-remove is only for a LONE glyph (the logo row's "×") — a 40px
+   fixed box at 1.6rem. #quote-remove-btn's label is the whole word
+   "× Remove", so it stays a plain .btn (inline background color only,
+   see quote-module-card.part.php) instead of using this class. */
+.rrt-lc-reel-group .btn-remove { background: #e53e3e; color: #fff; width: 40px; font-size: 1.6rem; }
+.rrt-lc-reel-group #logo-remove-btn.btn-remove {
+	padding: 0 !important;
+	font-size: 1.6rem !important;
+}
+.rrt-lc-reel-group .btn-label { display: inline-block; }
+
+/* The 2-line WHITE/BLACK SHADOW and WHITE/BLACK TYPE toggle pairs beat
+   an existing ID+class mobile rule (#shadow-outline-row .toggle-btn,
+   #shadow-color-row .toggle-btn — padding/font-size, same tap-target
+   pass as everything else in this file) the same way the four named
+   buttons above beat their own ID-based rule: one more level of
+   specificity (.rrt-lc-reel-group ancestor + the existing ID + class). */
+.rrt-lc-reel-group #shadow-outline-row .toggle-btn,
+.rrt-lc-reel-group #shadow-color-row .toggle-btn {
+	padding: 0 10px !important;
+	font-size: 0.65rem !important;
+}
+
+/* Pete, 2026-11-16: "copy the art size slider style completely for
+   other sliders in the add text" / "lettering... needs to be inside
+   the slider area like the art size slider" — generalized from
+   #logo-selector-row so the Shadow/Font/Text Width sliders can use the
+   exact same structure (fixed 74px box, label absolutely positioned
+   near the bottom INSIDE it instead of stacked above in normal flow,
+   step buttons filling the box at full height) — see
+   quote-module-card.part.php for the matching markup change on those
+   three sliders. */
+/* Pete, 2026-11-16: "tighten up the slider widths, make less wide" —
+   150px gave the slider track (flex:1, filling whatever's left after
+   the two 40px step buttons) more room than Pete wanted. 115px keeps
+   both step buttons at their full size and the track still visibly
+   draggable, just narrower overall. */
+.rrt-lc-reel-group .size-wrap { flex: 1 1 auto; min-width: 115px; position: relative; height: 74px; }
+/* Pete, 2026-11-16: "put the lettering one word above the slider and
+   one word below the slider" — replaces the single .size-label (one
+   line, bottom:15px) with a top/bottom pair sandwiching the slider
+   track, which sits roughly vertically centered in this same 74px box
+   via .size-row's align-items:center. .size-label-single is kept for
+   one-word labels (Shadow) that don't split into two. */
+.rrt-lc-reel-group .size-label-top,
+.rrt-lc-reel-group .size-label-bottom,
+.rrt-lc-reel-group .size-label-single {
+	position: absolute;
+	left: 0;
+	right: 0;
+	z-index: 2;
+	text-align: center;
+	font-size: 0.55rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: #991e21;
+	pointer-events: none;
+}
+/* Pete, 2026-11-16: "not so top and bottom, closer to the slider
+   itself" — was top:2px/bottom:2px (the box's own edges); pulled in
+   toward the slider's own vertical center (the track sits roughly
+   mid-box via .size-row's align-items:center). */
+.rrt-lc-reel-group .size-label-top { top: 22px; }
+.rrt-lc-reel-group .size-label-bottom { bottom: 15px; }
+.rrt-lc-reel-group .size-label-single { bottom: 15px; }
+.rrt-lc-reel-group .size-row { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 0.4rem; }
+/* Pete, 2026-11-16: "the +- for the sliders can be less wide... make
+   the sliders a little wider now" — narrower step buttons (was 40px)
+   hand that freed-up width straight to .style-slider for free, since
+   it's flex:1 (fills whatever's left in the fixed-width .size-wrap). */
+.rrt-lc-reel-group .step {
+	flex-shrink: 0;
+	width: 26px;
+	height: 74px;
+	border-radius: 0;
+	border: 1.5px solid #991e21;
+	background: #fff;
+	color: #991e21;
+	font-size: 1.1rem;
+	font-weight: 900;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+/* Pete: "do your work" — this row's own .step buttons were rendering
+   solid black, not the mockup's white/maroon-bordered square. Root
+   cause: a SITE-WIDE rule further down this file ("change the plus and
+   minuses on the sliders to black, with white -+", 2026-11-09) repaints
+   every .slider-step-btn black with !important, for every slider in
+   the plugin — found via a getComputedStyle + matched-rules dump, not
+   a guess. That rule is a real, intentional site convention for every
+   OTHER slider in this plugin; only these reel rows are meant to look
+   like the mockup, so it's overridden back to white/maroon here, scoped
+   and !important to actually beat it. Generic .rrt-lc-reel-group scope
+   (not ID) is enough here since the legacy black-override rule is also
+   a plain, single class — two classes already outrank it. */
+/* Pete: "go back to mockup and see what you messed up" — found it.
+   #tab-panel-quote was the wrong anchor: it only wraps the Shadow/
+   Font/Width rows (#tab-panel-quote), NOT the YOUR FILE/ART LIBRARY
+   row, which lives in a separate SIBLING panel, #tab-panel-logo
+   (confirmed via el.closest()). So this override worked for two rows
+   and silently never matched the third, leaving the real culprit — a
+   plain mobile-only .slider-step-btn{width:40px!important;...} rule,
+   @media max-width:991px, near the top of this file — free to win
+   there with nothing of equal-or-higher specificity contesting it.
+   #text-layers-wrap is the actual common ancestor of BOTH tab panels,
+   so anchoring here (not either tab panel's own ID) reaches all three
+   rows uniformly regardless of which panel they're in. */
+#text-layers-wrap .rrt-lc-reel-group .slider-step-btn.step {
+	width: 26px !important;
+	height: 74px !important;
+	font-size: 1.1rem !important;
+	border-radius: 0 !important;
+	padding: 0 !important;
+	background: #fff !important;
+	color: #991e21 !important;
+	border-color: #991e21 !important;
+}
+#text-layers-wrap .rrt-lc-reel-group .slider-step-btn.step:hover {
+	background: #fff !important;
+	border-color: #991e21 !important;
+}
+.rrt-lc-reel-group .style-slider {
+	flex: 1;
+	min-width: 20px;
+	height: 6px;
+	border-radius: 0;
+	accent-color: #d97e06;
+	position: relative;
+	top: 6px;
+}
+/* Pete: "do your work" / measured — this row's own slider thumb was
+   being hidden entirely by an existing mobile rule
+   (configurator-components.css: @media max-width:768px
+   .style-slider::-webkit-slider-thumb { width:0 !important; opacity:0 })
+   from the earlier tap-target pass, which assumed every slider on
+   mobile is dragged via its external step buttons only. The mockup's
+   slider has a normal visible goldenrod thumb; restored it here,
+   generically for every reel row's slider, beating that mobile rule on
+   both specificity (two classes vs. one) and !important. */
+.rrt-lc-reel-group .style-slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 16px !important;
+	height: 16px !important;
+	opacity: 1 !important;
+	border-radius: 50%;
+	background: #d97e06;
+	box-shadow: 0 1px 4px rgba( 0, 0, 0, 0.25 );
+	cursor: pointer;
+}
+.rrt-lc-reel-group .style-slider::-moz-range-thumb {
+	width: 16px !important;
+	height: 16px !important;
+	opacity: 1 !important;
+	border-radius: 50%;
+	background: #d97e06;
+	border: none;
+	box-shadow: 0 1px 4px rgba( 0, 0, 0, 0.25 );
+	cursor: pointer;
 }
 
 /* Pete, 2026-10-26 (asked more than once): "thumbs larger, window needs
@@ -950,6 +1400,14 @@
 
 /* --- buttons --- */
 
+/* Pete, 2026-11-16: "see your label on the box button on mobile is
+   cut off" / "as is submit my label design" — both are full-width
+   pill buttons whose text was inheriting white-space:nowrap from a
+   generic button rule elsewhere in the copied TheUnframer CSS; at
+   mobile widths "SEE YOUR LABEL ON THE BOX" is wider than the pill
+   itself, so it ran past the pill's own edge instead of wrapping.
+   white-space:normal lets it wrap to 2 lines when it has to, harmless
+   on desktop where it already fits on one. */
 .rrt-lc-btn-primary {
 	border: none;
 	border-radius: 999px;
@@ -961,6 +1419,8 @@
 	background: var( --rrt-primary );
 	color: #fff;
 	width: 100%;
+	white-space: normal;
+	line-height: 1.25;
 }
 
 .rrt-lc-btn-primary:hover {

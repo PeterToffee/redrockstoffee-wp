@@ -164,7 +164,6 @@
 		artPickerBtn: document.getElementById( 'art-picker-btn' ),
 		artPickerPanel: document.getElementById( 'art-picker-panel' ),
 		logoUploadBtn: document.getElementById( 'logo-upload-btn' ),
-		logoAddBtn: document.getElementById( 'logo-add-btn' ),
 		logoRemoveBtn: document.getElementById( 'logo-remove-btn' ),
 		logoSizeSlider: document.getElementById( 'logo-size-slider' ),
 		logoSelectorBtns: document.getElementById( 'logo-selector-btns' ),
@@ -229,7 +228,6 @@
 		logos: [], // { id, file, scale, pos, el }
 		activeLogoId: null,
 		nextLogoId: 1,
-		addingNewLogo: false, // true while waiting on the file picker for a brand-new logo (vs. replacing the active one)
 		dragging: null,
 		// Pete, 2026-11-07: "if user wishes to put together an order for
 		// each size, file is saved(held)... with a descriptor/tally
@@ -1069,12 +1067,22 @@
 	// 3rd, etc. get nudged apart so they don't land exactly on top of
 	// each other (and, for text, so it doesn't land pre-flagged as
 	// "off center" by updateCenterBtn() the moment it's created).
-	function defaultPos( existingCount ) {
+	// Pete, 2026-11-16: "when I added a second image it seemed to have a
+	// different side to side centering than the first image" — the
+	// diagonal nudge below (on purpose, so a 2nd+ item doesn't land
+	// exactly on top of the first) was shifting logos off-center
+	// horizontally too, which read as inconsistent/wrong for images
+	// specifically. `centerX` lets a caller keep every item centered on
+	// the X axis (still nudged on Y, so two logos still don't stack
+	// exactly) without touching text groups' own behavior, which this
+	// function also drives (see the off-center-alarm gating note below,
+	// tied to this same diagonal nudge) and which nobody asked to change.
+	function defaultPos( existingCount, centerX ) {
 		if ( 0 === existingCount ) {
 			return { x: 50, y: 50 };
 		}
 		var nudge = ( existingCount % 4 ) * 6 - 9;
-		return { x: 50 + nudge, y: 50 + nudge };
+		return { x: centerX ? 50 : 50 + nudge, y: 50 + nudge };
 	}
 
 	function renderSelectorPills() {
@@ -1082,12 +1090,45 @@
 		state.textGroups.forEach( function ( group, i ) {
 			var pill = document.createElement( 'button' );
 			pill.type = 'button';
-			pill.className = 'toggle-btn' + ( group.id === state.activeGroupId ? ' selected' : '' );
-			pill.style.width = '1.6rem';
-			pill.style.fontSize = '0.65rem';
-			pill.textContent = String( i + 1 );
+			// Pete, 2026-11-16: "make it look exactly like what we just
+			// did" — matches renderLogoSelectorPills()'s own mockup-port
+			// (.btn/.btn-pill + a .btn-label span so the reel's text-sink
+			// motion applies the same way every other button in this row
+			// gets it).
+			pill.className = 'toggle-btn btn btn-pill' + ( group.id === state.activeGroupId ? ' selected' : '' );
+			// Pete, 2026-11-16: "the orange 1 should say text line 1, 3
+			// lines" — same 3-lines-of-one-word pattern as the +Add Text
+			// Line button next to it. .btn's base white-space:nowrap/
+			// 0.75rem font would overflow this pill's fixed 40px width
+			// with 3 lines of real words, so both are overridden inline
+			// here (dynamically created element, no shared class to hang
+			// this off of) smaller/line-wrapped, same as the WHITE/BLACK
+			// SHADOW 2-line pills already do with inline styles.
+			pill.style.whiteSpace = 'normal';
+			pill.style.lineHeight = '1.1';
+			// Pete, 2026-11-16: "letters same size as the add text line
+			// button" — matches .btn's own base 0.75rem (the +Add Text
+			// Line button next to it never overrides font-size, so that's
+			// what it actually renders at) instead of a smaller guess.
+			pill.style.fontSize = '0.75rem';
+			pill.style.textAlign = 'center';
+			var label = document.createElement( 'span' );
+			label.className = 'btn-label';
+			label.innerHTML = 'Text<br>Line<br>' + ( i + 1 );
+			pill.appendChild( label );
 			pill.addEventListener( 'click', function () {
 				state.activeGroupId = group.id;
+				// Pete, 2026-11-17: "images sit on top of the text layer... I
+				// want to have the text on top of an image...can't" —
+				// renderLogoSelectorPills()'s own pill click already does this
+				// bring-to-front re-append for logos (so an older, buried logo
+				// can be reselected), but text pills never had the equivalent.
+				// Reselecting ANY logo pill (e.g. just to use its size slider)
+				// always re-appends that logo last, so without this a text
+				// group that started on top could get buried under a logo
+				// with zero way back — this gives text the same "click its
+				// own pill to bring it back to front" escape hatch.
+				els.zone.appendChild( group.el );
 				renderSelectorPills();
 				loadGroupIntoControls( group );
 			} );
@@ -1595,11 +1636,12 @@
 	} );
 
 	// --- logo (same "multiple instances, pick which one you're editing"
-	// pattern as text groups — CHOOSE FILE replaces the ACTIVE logo's
-	// image, +Add starts a brand-new one, matching #logo-add-btn/
-	// #logo-selector-btns already in the copied markup, which weren't
-	// wired on the first pass — that's why "choose file" clobbered the
-	// one logo you already had instead of adding another.) ---
+	// pattern as text groups — YOUR FILE/ART LIBRARY each add a brand
+	// new one in the normal case; see placeLogoFile()'s own note below
+	// for the one narrow exception. A dedicated +Add button used to
+	// also exist here but was removed 2026-11-16 as redundant — Pete:
+	// "we don't need that add button, we can just add another file by
+	// hitting the art library button or the your file button".) ---
 
 	function activeLogo() {
 		return state.logos.filter( function ( l ) {
@@ -1687,7 +1729,7 @@
 			artKey: key,
 			artLabel: art.label,
 			scale: parseFloat( els.logoSizeSlider.value ),
-			pos: defaultPos( state.logos.length ),
+			pos: defaultPos( state.logos.length, true ),
 			// Pete, 2026-11-08's own fix for text ("the alarm is on with
 			// nothing in the text box") applies here too: defaultPos()
 			// deliberately nudges a 2nd+ logo off dead-center so they don't
@@ -1824,13 +1866,6 @@
 	} );
 
 	els.logoUploadBtn.addEventListener( 'click', function () {
-		state.addingNewLogo = false;
-		els.logoFileInput.value = '';
-		els.logoFileInput.click();
-	} );
-
-	els.logoAddBtn.addEventListener( 'click', function () {
-		state.addingNewLogo = true;
 		els.logoFileInput.value = '';
 		els.logoFileInput.click();
 	} );
@@ -1940,8 +1975,13 @@
 			// instead of adding it. Now it only reuses the active slot when
 			// that slot is currently an ART piece; an active real upload (or
 			// no active logo at all) always adds a new layer, matching how
-			// the ART picker already behaves.
-			var active = state.addingNewLogo ? null : activeLogo();
+			// the ART picker already behaves. (The dedicated +Add button
+			// this originally also served was removed 2026-11-16 — ART
+			// LIBRARY already always adds, and YOUR FILE does too whenever
+			// the active logo isn't itself an art placeholder — so the
+			// addingNewLogo flag that distinguished "came from +Add" is
+			// gone too; this one check now covers every path.)
+			var active = activeLogo();
 			var logo   = ( active && active.artKey ) ? active : null;
 			if ( ! logo ) {
 				var img = document.createElement( 'img' );
@@ -1953,7 +1993,7 @@
 					file: file,
 					originalFile: originalFile,
 					scale: parseFloat( els.logoSizeSlider.value ),
-					pos: defaultPos( state.logos.length ),
+					pos: defaultPos( state.logos.length, true ),
 					// See addArtLogo()'s own note on why a freshly-created
 					// logo starts pre-dismissed.
 					offCenterDismissed: true,
@@ -1971,7 +2011,6 @@
 				logo.artLabel = null;
 				logo.donate = false;
 			}
-			state.addingNewLogo = false;
 			logo.el.src = evt.target.result;
 			els.logoFilename.textContent = file.name;
 			syncDonateRow( logo );
@@ -2072,7 +2111,11 @@
 		if ( ! logo ) {
 			return;
 		}
-		logo.scale = clampLogoScale( parseFloat( els.logoSizeSlider.value ) );
+		logo.scale = clampLogoScale( parseFloat( els.logoSizeSlider.value ), logo );
+		// Snap the thumb back to the real (possibly lower) ceiling so a
+		// portrait photo's slider visibly stops before 100 instead of
+		// sitting at 100 while the image itself is actually capped lower.
+		els.logoSizeSlider.value = logo.scale;
 		checkLogoQuality( logo );
 		renderLogo( logo );
 	} );
@@ -2082,12 +2125,27 @@
 		state.logos.forEach( function ( logo, i ) {
 			var pill = document.createElement( 'button' );
 			pill.type = 'button';
-			pill.className = 'toggle-btn' + ( logo.id === state.activeLogoId ? ' selected' : '' );
-			pill.style.width = '1.6rem';
-			pill.style.fontSize = '0.65rem';
-			pill.textContent = String( i + 1 );
+			// Pete, 2026-11-16: "copy mockup" — matches the mockup's own
+			// .btn-pill (40px square, goldenrod-adjacent cream fill) with
+			// a .btn-label span so the reel's text-sink motion applies to
+			// it the same as every other button in this row.
+			pill.className = 'btn btn-pill' + ( logo.id === state.activeLogoId ? ' selected' : '' );
+			var label = document.createElement( 'span' );
+			label.className = 'btn-label';
+			label.textContent = String( i + 1 );
+			pill.appendChild( label );
 			pill.addEventListener( 'click', function () {
 				state.activeLogoId = logo.id;
+				// Pete, 2026-11-16: "added another file... clobbered/deleted
+				// the first file" — nothing was actually deleted (state.logos
+				// kept both), but a newer logo always paints on top (plain
+				// DOM order, no z-index), and selecting an OLDER logo's pill
+				// never brought it back to front — so once two logos landed
+				// in roughly the same spot, the older one was effectively
+				// unreachable through the UI. Re-appending the active logo's
+				// own element moves it to the end of the zone's DOM, i.e. the
+				// top of the paint order, same as a real "bring to front".
+				els.zone.appendChild( logo.el );
 				renderLogoSelectorPills();
 				els.logoFilename.textContent = logoDisplayName( logo );
 				els.logoSizeSlider.value = logo.scale;
@@ -2099,9 +2157,42 @@
 		} );
 	}
 
+	// Pete, 2026-11-16: "if it's not centered, if I move it up, it'll
+	// continue to grow outside the dotted line" — clampLogoScale() only
+	// checks the image's size against the ZONE'S FULL width/height,
+	// which is only the real ceiling when the logo is dead-center. Once
+	// it's been dragged off-center (say, near the top), there's LESS
+	// room left on that side before the edge, so growing the slider
+	// keeps pushing the same (already near the top) edge further out
+	// even though the scale itself is under the centered-case cap.
+	// onDragMove() already solves exactly this for dragging (halfWPct/
+	// halfHPct measured from the element's own live size, pos clamped
+	// so the box's actual edges never cross the zone) — this re-uses
+	// that same math after a SIZE change instead of a position change,
+	// so growing the slider re-clamps position too, not just position
+	// re-clamping after a drag.
+	function clampLogoPosToZone( logo ) {
+		var zoneRect = els.zone.getBoundingClientRect();
+		var elRect = logo.el.getBoundingClientRect();
+		if ( ! zoneRect.width || ! zoneRect.height ) {
+			positionEl( logo.el, logo.pos );
+			return;
+		}
+		var isArt = !! logo.artKey; // ART is allowed to overlap the dashed line on purpose — see onDragMove()'s own note.
+		var halfWPct = ( elRect.width / zoneRect.width ) * 50;
+		var halfHPct = ( elRect.height / zoneRect.height ) * 50;
+		var minX = isArt ? 0 : Math.min( halfWPct, 50 );
+		var maxX = isArt ? 100 : Math.max( 100 - halfWPct, 50 );
+		var minY = isArt ? 0 : Math.min( halfHPct, 100 - halfHPct );
+		var maxY = isArt ? 100 : Math.max( 100 - halfHPct, halfHPct );
+		logo.pos.x = clamp( logo.pos.x, minX, maxX );
+		logo.pos.y = clamp( logo.pos.y, minY, maxY );
+		positionEl( logo.el, logo.pos );
+	}
+
 	function renderLogo( logo ) {
 		logo.el.style.width = logo.scale + '%';
-		positionEl( logo.el, logo.pos );
+		clampLogoPosToZone( logo );
 	}
 
 	// --- drag to reposition (same x/y % storage for text groups and logo,
@@ -2225,8 +2316,32 @@
 	// was. 100 is the real ceiling now (logo.scale is literally "% of the
 	// zone's own width" — see renderLogo()/checkLogoQuality()), enforced
 	// here so it can never again diverge from what the dotted line shows.
-	function clampLogoScale( scale ) {
-		return clamp( scale, parseFloat( els.logoSizeSlider.min ) || 5, 100 );
+	// Pete, 2026-11-16: "I can enlarge the image and it keeps getting way
+	// bigger than the dotted line" — scale has always been "% of the
+	// zone's own WIDTH" (see the 2026-11-11 fix below), with nothing
+	// checking it against the zone's HEIGHT. Fine for a square/landscape
+	// test image; a real portrait phone photo at scale=100 measured at
+	// 3x the zone's own height, overflowing top and bottom. `logo` (when
+	// its naturalWidth/naturalHeight are known — set once the quality-
+	// probe Image resolves in placeLogoFile()) lets this cap scale by
+	// whichever dimension the image's own aspect ratio would hit first,
+	// so it can never exceed the zone in EITHER direction, not just
+	// width. Falls back to the old width-only 100 cap when dimensions
+	// aren't known yet (brand-new upload, probe still in flight) or no
+	// logo is passed at all (some callers only ever had a bare number).
+	function clampLogoScale( scale, logo ) {
+		var maxScale = 100;
+		if ( logo && logo.naturalWidth && logo.naturalHeight ) {
+			var zoneRect = els.zone.getBoundingClientRect();
+			if ( zoneRect.width && zoneRect.height ) {
+				var imgAspect = logo.naturalWidth / logo.naturalHeight;
+				var zoneAspect = zoneRect.width / zoneRect.height;
+				if ( imgAspect < zoneAspect ) {
+					maxScale = 100 * ( imgAspect / zoneAspect );
+				}
+			}
+		}
+		return clamp( scale, parseFloat( els.logoSizeSlider.min ) || 5, maxScale );
 	}
 
 	// Pete, 2026-10-20: "need to be able to slide the label in the window
@@ -2434,7 +2549,7 @@
 					original: ( logo.originalFile && logo.originalFile !== logo.file ) ? logo.originalFile : null,
 				} );
 			}
-			layersMeta.push( { type: 'logo', pos: logo.pos, scale: clampLogoScale( logo.scale ), art_key: logo.artKey || '', donate: ! logo.artKey && !! logo.donate } );
+			layersMeta.push( { type: 'logo', pos: logo.pos, scale: clampLogoScale( logo.scale, logo ), art_key: logo.artKey || '', donate: ! logo.artKey && !! logo.donate } );
 		} );
 		state.textGroups.forEach( function ( group ) {
 			if ( group.text.trim() ) {
@@ -2674,7 +2789,7 @@
 				artKey: l.artKey || null,
 				artLabel: l.artLabel || null,
 				donate: !! l.donate,
-				scale: clampLogoScale( l.scale ),
+				scale: clampLogoScale( l.scale, l ),
 				pos: { x: l.pos.x, y: l.pos.y },
 				offCenterDismissed: !! l.offCenterDismissed,
 				naturalWidth: l.naturalWidth,
@@ -2837,7 +2952,7 @@
 				artKey: saved.artKey,
 				artLabel: saved.artLabel,
 				donate: saved.donate,
-				scale: clampLogoScale( saved.scale ),
+				scale: clampLogoScale( saved.scale, saved ),
 				pos: { x: saved.pos.x, y: saved.pos.y },
 				offCenterDismissed: !! saved.offCenterDismissed,
 				naturalWidth: saved.naturalWidth,
@@ -3135,6 +3250,289 @@
 				} );
 		} );
 	} );
+
+	// --- reel-scroll illusion (visual only, no button motion) ---
+	// Pete, 2026-11-15/16: ported from a long standalone mockup session
+	// (reel-mockup.html, never wired in) — a curved goldenrod strip
+	// above and below each scrollable row, radiating spokes that spin
+	// in sync with the scroll, 3D-looking thickness/shadow, the
+	// button dip/rise/text-sink motion, and a one-time auto-nudge
+	// wiggle on load. Pete, 2026-11-15 (later): the first port scaled
+	// values down and dropped the button motion, guessing the real
+	// buttons were much shorter than the mockup's 74px demo buttons —
+	// wrong guess, never re-checked. Measured directly: this row
+	// (#logo-selector-row, mobile) is already ~70-74px tall, i.e.
+	// mockup scale. Re-scoped to just this one row and re-ported with
+	// the mockup's own numbers verbatim, nothing scaled or guessed.
+	function buildSpokeBackground( rotationOffset, stripEl, hubY ) {
+		var stops = [];
+		var angle = 0;
+		var period = 7;
+		var thinWidth = 1.5;
+		var thickWidth = 1.7;
+		while ( angle < 360 ) {
+			var renderAngle = angle + rotationOffset;
+			var screenAngle = ( ( renderAngle % 360 ) + 360 ) % 360;
+			var rel = screenAngle > 180 ? screenAngle - 360 : screenAngle;
+			var t = Math.max( 0, Math.min( 1, Math.abs( rel ) / 70 ) );
+			var edgeness = t * t * ( 3 - 2 * t );
+			var markWidth = thinWidth + ( thickWidth - thinWidth ) * edgeness;
+			var renderEnd = renderAngle + markWidth;
+			stops.push( 'transparent ' + renderAngle.toFixed( 2 ) + 'deg' );
+			stops.push( 'rgba(255,255,255,0.85) ' + renderAngle.toFixed( 2 ) + 'deg' );
+			stops.push( 'rgba(255,255,255,0.85) ' + renderEnd.toFixed( 2 ) + 'deg' );
+			stops.push( 'transparent ' + renderEnd.toFixed( 2 ) + 'deg' );
+			angle += period;
+		}
+		stripEl.style.backgroundImage =
+			'conic-gradient(from 0deg at 50% ' + hubY + 'px, ' + stops.join( ', ' ) + '), ' +
+			'linear-gradient(135deg, #f59e0b, #d97e06)';
+	}
+
+	// Pete: "when I swipe the spokes area, the line won't slide until I
+	// hit the line itself first" (from the mockup session) — the reel
+	// strips are their own elements, not part of the scrollable row,
+	// so dragging directly on them wouldn't scroll anything on its own.
+	// Forwarding the drag into scrollLeft makes the whole assembly
+	// (spokes + row) feel like one scrollable object.
+	function enableReelDrag( wrapEl, rowEl ) {
+		var dragging = false, startX = 0, startScroll = 0;
+		wrapEl.style.touchAction = 'pan-x';
+		wrapEl.style.cursor = 'grab';
+		wrapEl.addEventListener( 'pointerdown', function ( e ) {
+			dragging = true;
+			startX = e.clientX;
+			startScroll = rowEl.scrollLeft;
+			wrapEl.setPointerCapture( e.pointerId );
+		} );
+		wrapEl.addEventListener( 'pointermove', function ( e ) {
+			if ( ! dragging ) return;
+			rowEl.scrollLeft = startScroll - ( e.clientX - startX );
+		} );
+		[ 'pointerup', 'pointercancel' ].forEach( function ( evt ) {
+			wrapEl.addEventListener( evt, function () { dragging = false; } );
+		} );
+	}
+
+	// Pete: "the tops and bottoms of the buttons should mimic the bottom
+	// curve... edge of the film reel" — ported verbatim from the mockup's
+	// updateButtonCurve(): each .btn/.step's position relative to the
+	// row's own center drives a small translateY (dip at center fades to
+	// a rise at the edges), plus a separate, bigger sink on each button's
+	// own .btn-label/.size-label text. Recomputed from live
+	// getBoundingClientRect() on every scroll frame and on resize, same
+	// as the mockup — this is NOT a one-time layout, it has to track the
+	// buttons' real on-screen position as the row scrolls.
+	function updateButtonCurve( row, items ) {
+		var rowRect = row.getBoundingClientRect();
+		var dipAmount = 0;
+		var riseAmount = 4;
+		items.forEach( function ( el ) {
+			var r = el.getBoundingClientRect();
+			var centerX = r.left + r.width / 2;
+			var frac = ( centerX - rowRect.left ) / rowRect.width;
+			var distFromCenter = Math.min( Math.abs( frac - 0.5 ) * 2, 1 );
+			var deadZone = 0.3;
+			var t = distFromCenter < deadZone ? 0 : ( distFromCenter - deadZone ) / ( 1 - deadZone );
+			var offset = dipAmount * ( 1 - t ) - riseAmount * t;
+			el.style.transform = 'translateY(' + offset.toFixed( 1 ) + 'px)';
+
+			var label = el.querySelector( '.btn-label' );
+			if ( label ) {
+				var sink = r.height * 0.10 * ( 0.4 + 0.6 * ( 1 - t ) );
+				if ( el.classList.contains( 'step' ) ) {
+					sink += 3;
+				}
+				label.style.transform = 'translateY(' + sink.toFixed( 1 ) + 'px)';
+			}
+		} );
+
+		row.querySelectorAll( '.size-label' ).forEach( function ( el ) {
+			var r = el.getBoundingClientRect();
+			var centerX = r.left + r.width / 2;
+			var frac = ( centerX - rowRect.left ) / rowRect.width;
+			var distFromCenter = Math.min( Math.abs( frac - 0.5 ) * 2, 1 );
+			var tLabel = distFromCenter < 0.3 ? 0 : ( distFromCenter - 0.3 ) / 0.7;
+			var sink = 74 * 0.10 * ( 0.4 + 0.6 * ( 1 - tLabel ) );
+			el.style.transform = 'translateY(' + sink.toFixed( 1 ) + 'px)';
+		} );
+	}
+
+	// Pete: "make it more plain that there's scrolling to be done" ->
+	// "add the auto nudge" — a brief, automatic wiggle right-then-back
+	// shortly after load, so the gesture teaches itself instead of
+	// adding a permanent arrow icon. Drives the real scrollLeft (not a
+	// fake visual-only animation), so it plays through the same scroll
+	// listener a real swipe would. maxNudge/duration are the mockup's
+	// own numbers — the earlier half-scale 20px version read as a
+	// "cheap" wiggle; this row is mockup-scale, so no scaling needed.
+	function autoNudge( rowEl ) {
+		var duration = 900;
+		var maxNudge = 40;
+		var start = null;
+		function step( timestamp ) {
+			if ( ! start ) start = timestamp;
+			var elapsed = timestamp - start;
+			var progress = Math.min( elapsed / duration, 1 );
+			var wave = Math.sin( progress * Math.PI );
+			rowEl.scrollLeft = maxNudge * wave;
+			rowEl.dispatchEvent( new Event( 'scroll' ) );
+			if ( progress < 1 ) {
+				requestAnimationFrame( step );
+			} else {
+				rowEl.scrollLeft = 0;
+				rowEl.dispatchEvent( new Event( 'scroll' ) );
+			}
+		}
+		requestAnimationFrame( step );
+	}
+
+	var REEL_HUB_PX = -182;
+
+	function initReelEffect( groupEl ) {
+		var row = groupEl.querySelector( '.rrt-lc-scroll-row' );
+		var wrapTop = groupEl.querySelector( '.rrt-lc-reel-wrap' );
+		var wrapBottom = groupEl.querySelector( '.rrt-lc-reel-wrap-bottom' );
+		var stripTop = wrapTop ? wrapTop.querySelector( '.rrt-lc-reel-strip' ) : null;
+		var stripBottom = wrapBottom ? wrapBottom.querySelector( '.rrt-lc-reel-strip' ) : null;
+		if ( ! row || ! stripTop || ! stripBottom ) {
+			return;
+		}
+		// Pete's pill buttons (#logo-selector-btns) get re-rendered by
+		// renderLogoSelectorPills() whenever logos change, so the item
+		// list has to be re-queried on every refresh, not cached once
+		// like the mockup's static markup could get away with.
+		function refresh() {
+			var rotation = row.scrollLeft * 0.29;
+			buildSpokeBackground( rotation, stripTop, REEL_HUB_PX );
+			buildSpokeBackground( rotation, stripBottom, REEL_HUB_PX );
+			updateButtonCurve( row, row.querySelectorAll( '.btn, .step' ) );
+		}
+
+		row.addEventListener( 'scroll', refresh );
+		window.addEventListener( 'resize', refresh );
+		enableReelDrag( wrapTop, row );
+		enableReelDrag( wrapBottom, row );
+		refresh();
+		setTimeout( function () { autoNudge( row ); }, 700 );
+	}
+
+	// Pete, 2026-11-16: "put the maroon scroll bar UNDER the
+	// curved/spoke thing... lower down" — a custom scrollbar, separate
+	// from the native one (hidden on desktop — see label-configurator.css),
+	// placed in the markup AFTER the bottom reel curve so it can never
+	// be covered by it. Desktop-only in CSS (.rrt-lc-custom-scrollbar is
+	// display:none below 992px); this still runs everywhere, it just
+	// has nothing visible to size on mobile.
+	function initCustomScrollbar( groupEl ) {
+		var row = groupEl.querySelector( '.rrt-lc-scroll-row' );
+		var track = groupEl.querySelector( '.rrt-lc-custom-scrollbar' );
+		var thumb = groupEl.querySelector( '.rrt-lc-custom-scrollbar-thumb' );
+		if ( ! row || ! track || ! thumb ) {
+			return;
+		}
+
+		// Pete: "just have it show when it loads" — dropped the
+		// show/hide-when-nothing-to-scroll logic entirely (it was
+		// flip-flopping depending on exactly when it ran relative to
+		// webfonts/layout settling, which read as "worse", not better,
+		// once more re-check points were added trying to fix that timing
+		// instead of just removing the thing being mistimed). This row
+		// always has enough buttons to overflow in practice, so the bar
+		// is simply always visible; only its thumb's size/position still
+		// updates live.
+		function syncThumb() {
+			var maxScroll = row.scrollWidth - row.clientWidth;
+			var thumbPct = Math.min( 100, ( row.clientWidth / row.scrollWidth ) * 100 );
+			var trackWidth = track.clientWidth;
+			var thumbWidthPx = trackWidth * ( thumbPct / 100 );
+			var travel = trackWidth - thumbWidthPx;
+			var frac = maxScroll > 0 ? row.scrollLeft / maxScroll : 0;
+			thumb.style.width = thumbWidthPx + 'px';
+			thumb.style.left = ( travel * frac ) + 'px';
+		}
+
+		row.addEventListener( 'scroll', syncThumb );
+		window.addEventListener( 'resize', syncThumb );
+		syncThumb();
+		// Pete: "not sure what it is until I hit it" — #quote-module-card
+		// (this row's real ancestor) starts display:none and only becomes
+		// visible once the customer adds their first background element;
+		// every sync above this point ran against a hidden, zero-width
+		// row, so the thumb's first real size was never computed until
+		// the user's own scroll (the only thing that happened to run
+		// syncThumb again) — reading as a pale, shapeless track with no
+		// visible thumb until then. ResizeObserver fires whenever the
+		// row's actual rendered size changes for any reason, including
+		// exactly that hidden-to-visible transition, so this corrects
+		// itself the moment the card appears — no need to know or guess
+		// what specifically revealed it.
+		if ( window.ResizeObserver ) {
+			new ResizeObserver( syncThumb ).observe( row );
+		}
+
+		// Dragging the thumb (or clicking anywhere on the track) moves
+		// row.scrollLeft proportionally — same relationship a native
+		// scrollbar thumb has to its track, computed from the track's
+		// own live width so it still works correctly if the row's
+		// content (and so its scrollable range) changes later.
+		var dragging = false;
+		var startX = 0;
+		var startScrollLeft = 0;
+		var trackWidthAtStart = 0;
+		var thumbWidthAtStart = 0;
+
+		function beginDrag( evt ) {
+			dragging = true;
+			startX = evt.clientX;
+			startScrollLeft = row.scrollLeft;
+			trackWidthAtStart = track.clientWidth;
+			thumbWidthAtStart = thumb.getBoundingClientRect().width;
+			track.setPointerCapture( evt.pointerId );
+		}
+		thumb.addEventListener( 'pointerdown', function ( evt ) {
+			evt.stopPropagation();
+			beginDrag( evt );
+		} );
+		track.addEventListener( 'pointerdown', function ( evt ) {
+			if ( evt.target === thumb ) {
+				return; // already handled by the thumb's own listener above
+			}
+			// Clicking empty track jumps the thumb under the pointer first,
+			// same as a native scrollbar track click, then drag continues
+			// from there.
+			var rect = track.getBoundingClientRect();
+			var thumbWidthPx = thumb.getBoundingClientRect().width;
+			var targetLeft = Math.min( Math.max( evt.clientX - rect.left - thumbWidthPx / 2, 0 ), rect.width - thumbWidthPx );
+			var maxScroll = row.scrollWidth - row.clientWidth;
+			var travel = rect.width - thumbWidthPx;
+			row.scrollLeft = travel > 0 ? ( targetLeft / travel ) * maxScroll : 0;
+			beginDrag( evt );
+		} );
+		track.addEventListener( 'pointermove', function ( evt ) {
+			if ( ! dragging ) {
+				return;
+			}
+			var maxScroll = row.scrollWidth - row.clientWidth;
+			var travel = trackWidthAtStart - thumbWidthAtStart;
+			var dx = evt.clientX - startX;
+			row.scrollLeft = startScrollLeft + ( travel > 0 ? ( dx / travel ) * maxScroll : 0 );
+		} );
+		[ 'pointerup', 'pointercancel' ].forEach( function ( evt ) {
+			track.addEventListener( evt, function () {
+				dragging = false;
+			} );
+		} );
+	}
+
+	Array.prototype.forEach.call(
+		document.querySelectorAll( '.rrt-lc-reel-group' ),
+		initReelEffect
+	);
+	Array.prototype.forEach.call(
+		document.querySelectorAll( '.rrt-lc-reel-group' ),
+		initCustomScrollbar
+	);
 
 	// --- init ---
 	// No default tab/text group — Pete: "let's start with no default,

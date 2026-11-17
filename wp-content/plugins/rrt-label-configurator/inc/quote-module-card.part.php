@@ -38,37 +38,100 @@
 									     version of this row — see renderTextGroup() in
 									     label-configurator.js), Color moved up from the row below to
 									     sit here too, all matching Unframer's current layout exactly. -->
-									<div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;">
-										<div id="quote-selector-btns" style="display:flex; gap:0.3rem; flex-wrap:nowrap;"></div>
-										<button id="quote-add-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.45rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">+ Add</button>
-										<button id="quote-remove-btn" type="button" style="font-size:0.65rem; padding:0.2rem 0.45rem; background:#e53e3e; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">× Remove</button>
-										<div style="flex-shrink:0;">
+									<!-- Pete, 2026-11-16: "swap the two lines the font B I and
+									     font size etc, upper and the shadow lower" — this is now
+									     the Font/Width/Type/Color row (was the 2nd row, below the
+									     textarea); the Shadow/Add/Remove row moved down to where
+									     this used to be, inside #quote-options below the textarea.
+									     Only the two rows traded places — #quote-options and
+									     .font-drum-row stayed put. -->
+									<div class="rrt-lc-reel-group">
+									<div class="rrt-lc-reel-wrap">
+										<div class="rrt-lc-reel-thickness"></div>
+										<div class="rrt-lc-reel-strip"></div>
+									</div>
+									<div class="rrt-lc-scroll-row" style="display:flex; align-items:flex-end; gap:0.35rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;">
+										<!-- Pete, 2026-11-16: "hide the bold/italic buttons for now" —
+										     display:none, not removed; #btn-bold/#btn-italic and their
+										     JS listeners are untouched, just not shown. -->
+										<div id="fs-style-wrap" style="flex:0 0 auto; display:none;">
+											<div class="toggle-row" style="gap:0.25rem; margin-top:0;">
+												<button class="toggle-btn btn" id="btn-bold" style="font-weight:700; font-family:Georgia,serif;"><span class="btn-label">B</span></button>
+												<button class="toggle-btn btn" id="btn-italic" style="font-style:italic; font-family:Georgia,serif;"><span class="btn-label">I</span></button>
+											</div>
+										</div>
+										<!-- Pete, 2026-11-16: "copy the art size slider style
+										     completely" — same size-wrap/size-label/size-row
+										     structure as #logo-size-wrap. The old #fs-display span
+										     was already display:none with no JS ever toggling it
+										     (checked — dead markup from an earlier design), dropped
+										     rather than carried into the new structure. -->
+										<!-- Pete, 2026-11-16: "put the lettering one word above the
+										     slider and one word below the slider" -->
+										<div id="fs-size-wrap" class="size-wrap" style="flex:0 0 auto; min-width:115px;">
+											<div class="size-label-top">Font</div>
+											<div class="size-label-bottom">Size</div>
+											<div class="size-row">
+												<button class="slider-step-btn step" data-for="fs-slider" data-dir="-1"><span class="btn-label">−</span></button>
+												<!-- Pete, 2026-10-26: "wanting to make letters larger, and it
+												     stalls before I get large enough" — same hardcoded-ceiling
+												     issue as the logo-size-slider (raised 80->150 earlier).
+												     fontSize is % of the ZONE'S WIDTH (see label-configurator.js),
+												     not an arbitrary unit, so 50 isn't a guess: on the 8oz zone
+												     (width 3.75in, height 2.5in) a single line at 50% works out
+												     to ~1.875in tall text (line-height ~2.34in) — right at the
+												     zone's own height, the real ceiling for one line to still
+												     fit. No server-side cap exists (rrt_label_draw_text() uses
+												     the same %-of-zone-width formula with no clamp), so this
+												     flows straight through to the real print file too. -->
+												<input type="range" class="style-slider" id="fs-slider" min="2" max="50" value="5" step="0.5">
+												<button class="slider-step-btn step" data-for="fs-slider" data-dir="1"><span class="btn-label">+</span></button>
+											</div>
+										</div>
+										<div id="fs-width-wrap" class="size-wrap" style="flex:0 0 auto; min-width:115px;">
+											<div class="size-label-top">Text</div>
+											<div class="size-label-bottom">Width</div>
+											<div class="size-row">
+												<button class="slider-step-btn step" data-for="box-side-margin" data-dir="-1"><span class="btn-label">+</span></button>
+												<input type="range" class="style-slider" id="box-side-margin" min="2" max="30" value="2" step="2">
+												<button class="slider-step-btn step" data-for="box-side-margin" data-dir="1"><span class="btn-label">−</span></button>
+											</div>
+										</div>
+										<!-- Pete, 2026-11-16: "move default black type to the left
+										     of white type" -->
+										<div id="shadow-color-row" class="toggle-row" style="gap:0.25rem; flex-shrink:0;">
+											<button class="toggle-btn btn" data-shadow-color="black" style="white-space:normal; line-height:1.15; text-align:center;"><span class="btn-label">BLACK<br>TYPE</span></button>
+											<button class="toggle-btn btn" data-shadow-color="white" style="white-space:normal; line-height:1.15; text-align:center;"><span class="btn-label">WHITE<br>TYPE</span></button>
+										</div>
+										<!-- Pete, 2026-11-09: "move the color selector to the right of
+										     the 'black type' button, on the same line" — relocated here
+										     from the Text Group/Add/Remove/Shadow row above. -->
+										<!-- Pete, 2026-11-16: "move color wording and color ball
+										     higher" — this row aligns everything to the bottom
+										     (align-items:flex-end), which pinned this column flush to
+										     the bottom edge; align-self:center lifts it toward the
+										     middle of the 74px row instead. -->
+										<div id="text-color-row" style="display:flex; flex-direction:column; align-items:flex-start; align-self:center; flex-shrink:0;">
 											<div class="slider-header">
-												<span class="slider-name">Shadow</span>
+												<span class="slider-name">Color</span>
 											</div>
-											<div class="slider-with-btns">
-												<button class="slider-step-btn" data-for="shadow-intensity-slider" data-dir="-1" style="width:18px;height:18px;flex-shrink:0;">−</button>
-												<input type="range" class="style-slider" id="shadow-intensity-slider" min="0" max="100" value="60" step="5" style="width:32px; flex-shrink:0;" title="Shadow intensity">
-												<button class="slider-step-btn" data-for="shadow-intensity-slider" data-dir="1" style="width:18px;height:18px;flex-shrink:0;">+</button>
+											<div class="color-row" id="text-color-swatches" style="display:none;">
+												<div class="color-swatch" data-color="red" title="Red"></div>
+												<div class="color-swatch" data-color="gold" title="Gold"></div>
+												<div class="color-swatch" data-color="brown" title="Brown"></div>
+												<div class="color-swatch" data-color="cream" title="Cream"></div>
+												<div class="color-swatch" data-color="slate" title="Slate"></div>
 											</div>
+											<input type="color" id="text-color-custom" value="#991e21" title="Custom color">
 										</div>
-										<?php
-										/**
-										 * Pete, 2026-11-09: "to the right of the shadow size, we need
-										 * a white or black shadow choice" — the shadow/outline drawn
-										 * behind the text (outlineShadow() in label-configurator.js,
-										 * rrt_label_draw_text()'s $outline_hex server-side) was always
-										 * hardcoded black regardless of anything else on the card; this
-										 * is a genuinely new, separate choice from the existing WHITE
-										 * TYPE/BLACK TYPE pair below (which picks the TEXT FILL, not
-										 * the outline behind it — see group.shadowColor vs the new
-										 * group.outlineColor in label-configurator.js).
-										 */
-										?>
-										<div id="shadow-outline-row" class="toggle-row" style="gap:0.25rem; flex-shrink:0;">
-											<button class="toggle-btn" data-outline-color="white" style="padding:0.2rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">WHITE<br>SHADOW</button>
-											<button class="toggle-btn selected" data-outline-color="black" style="padding:0.2rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">BLACK<br>SHADOW</button>
-										</div>
+									</div>
+									<div class="rrt-lc-reel-wrap-bottom">
+										<div class="rrt-lc-reel-thickness rrt-lc-reel-thickness-bottom"></div>
+										<div class="rrt-lc-reel-strip rrt-lc-reel-strip-bottom"></div>
+									</div>
+									<div class="rrt-lc-custom-scrollbar">
+										<div class="rrt-lc-custom-scrollbar-thumb"></div>
+									</div>
 									</div>
 
 									<div class="quote-textarea-wrapper" id="textarea-wrapper" style="display:none;">
@@ -77,72 +140,69 @@
 
 									<div class="quote-options" id="quote-options">
 
-										<!-- Pete, 2026-10-17: "remove spacemaker slider under type/color
-										     line" — overflow-y:hidden added alongside overflow-x:auto. Per the
-										     CSS overflow spec, setting only overflow-x to a non-visible value
-										     silently computes overflow-y to auto too, which was producing a
-										     real (if subtle) native vertical scrollbar with up/down arrows
-										     whenever the COLOR column's content was a hair taller than its
-										     siblings — not something this single-line row should ever do. -->
-										<div style="margin-top:0.25rem; display:flex; align-items:flex-end; gap:0.35rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;">
-											<div id="fs-style-wrap" style="flex:0 0 auto;">
-												<div class="toggle-row" style="gap:0.25rem; margin-top:0;">
-													<button class="toggle-btn" id="btn-bold" style="font-weight:700; font-family:Georgia,serif; flex:none; width:1.5rem; padding:0.35rem 0;">B</button>
-													<button class="toggle-btn" id="btn-italic" style="font-style:italic; font-family:Georgia,serif; flex:none; width:1.5rem; padding:0.35rem 0;">I</button>
+										<div class="rrt-lc-reel-group">
+										<div class="rrt-lc-reel-wrap">
+											<div class="rrt-lc-reel-thickness"></div>
+											<div class="rrt-lc-reel-strip"></div>
+										</div>
+										<div class="rrt-lc-scroll-row" style="margin-top:0.25rem; display:flex; align-items:center; gap:0.4rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;">
+											<!-- Pete, 2026-11-16: "move the 3 right buttons, remove etc
+											     and place in the left end of the line" — the text-group
+											     pill/+Add Text Line/×Remove trio moved from after the
+											     Shadow slider to the very front of this row, ahead of
+											     WHITE/BLACK SHADOW and the Shadow slider. -->
+											<div id="quote-selector-btns" style="display:flex; gap:0.3rem; flex-wrap:nowrap;"></div>
+											<!-- Pete, 2026-11-16: "change add button to + add text line" →
+											     "make add text line 3 lines of one word" — white-space:
+											     normal override needed since .btn's base rule is nowrap. -->
+											<button id="quote-add-btn" type="button" class="btn btn-add" style="font-family:'Poppins',sans-serif; white-space:normal; line-height:1.15; text-align:center;"><span class="btn-label"><span class="btn-add-plus">+</span> Add<br>Text<br>Line</span></button>
+											<!-- Pete, 2026-11-16: NOT .btn-remove here on purpose — that
+											     class is sized for the logo row's LONE "×" glyph (40px wide
+											     box, 1.6rem font); this button's label is the whole word
+											     "× Remove", which at that size badly overlapped itself in a
+											     40px box. Plain .btn (auto width, 0.75rem) with just the
+											     red color inline instead. -->
+											<!-- Pete, 2026-11-16: "put the x on top of the remove so
+										     it's not so wide" — ×/Remove stacked on 2 lines instead
+										     of one, so the button narrows to fit "Remove" (the longer
+										     word) instead of the full "× Remove" string. -->
+										<button id="quote-remove-btn" type="button" class="btn" style="font-family:'Poppins',sans-serif; background:#e53e3e; color:#fff; white-space:normal; line-height:1.15; text-align:center;"><span class="btn-label">×<br>Remove</span></button>
+											<?php
+											/**
+											 * Pete, 2026-11-09: "to the right of the shadow size, we need
+											 * a white or black shadow choice" — the shadow/outline drawn
+											 * behind the text (outlineShadow() in label-configurator.js,
+											 * rrt_label_draw_text()'s $outline_hex server-side) was always
+											 * hardcoded black regardless of anything else on the card; this
+											 * is a genuinely new, separate choice from the existing WHITE
+											 * TYPE/BLACK TYPE pair below (which picks the TEXT FILL, not
+											 * the outline behind it — see group.shadowColor vs the new
+											 * group.outlineColor in label-configurator.js).
+											 */
+											?>
+											<div id="shadow-outline-row" class="toggle-row" style="gap:0.25rem; flex-shrink:0;">
+												<button class="toggle-btn btn" data-outline-color="white" style="white-space:normal; line-height:1.15; text-align:center;"><span class="btn-label">WHITE<br>SHADOW</span></button>
+												<button class="toggle-btn btn selected" data-outline-color="black" style="white-space:normal; line-height:1.15; text-align:center;"><span class="btn-label">BLACK<br>SHADOW</span></button>
+											</div>
+											<div class="size-wrap" style="flex:0 0 auto; min-width:115px;">
+												<!-- Pete, 2026-11-16: "one word above... one word below" —
+											     Shadow is a single word, kept as the original one-line
+											     .size-label-single instead of splitting it oddly. -->
+											<div class="size-label-single">Shadow</div>
+												<div class="size-row">
+													<button class="slider-step-btn step" data-for="shadow-intensity-slider" data-dir="-1"><span class="btn-label">−</span></button>
+													<input type="range" class="style-slider" id="shadow-intensity-slider" min="0" max="100" value="60" step="5" title="Shadow intensity">
+													<button class="slider-step-btn step" data-for="shadow-intensity-slider" data-dir="1"><span class="btn-label">+</span></button>
 												</div>
 											</div>
-											<div id="fs-size-wrap" style="flex:0 0 auto;">
-												<div class="slider-header">
-													<span class="slider-name">Font</span>
-													<span class="slider-current" id="fs-display" style="display:none;">Medium</span>
-												</div>
-												<div class="slider-with-btns">
-													<button class="slider-step-btn" data-for="fs-slider" data-dir="-1" style="width:18px;height:18px;flex-shrink:0;">−</button>
-													<!-- Pete, 2026-10-26: "wanting to make letters larger, and it
-													     stalls before I get large enough" — same hardcoded-ceiling
-													     issue as the logo-size-slider (raised 80->150 earlier).
-													     fontSize is % of the ZONE'S WIDTH (see label-configurator.js),
-													     not an arbitrary unit, so 50 isn't a guess: on the 8oz zone
-													     (width 3.75in, height 2.5in) a single line at 50% works out
-													     to ~1.875in tall text (line-height ~2.34in) — right at the
-													     zone's own height, the real ceiling for one line to still
-													     fit. No server-side cap exists (rrt_label_draw_text() uses
-													     the same %-of-zone-width formula with no clamp), so this
-													     flows straight through to the real print file too. -->
-													<input type="range" class="style-slider" id="fs-slider" min="2" max="50" value="5" step="0.5" style="width:32px;flex-shrink:0;">
-													<button class="slider-step-btn" data-for="fs-slider" data-dir="1" style="width:18px;height:18px;flex-shrink:0;">+</button>
-												</div>
-											</div>
-											<div id="fs-width-wrap" style="flex:0 0 auto;">
-												<div class="slider-header">
-													<span class="slider-name">Text Width</span>
-												</div>
-												<div class="slider-with-btns">
-													<button class="slider-step-btn" data-for="box-side-margin" data-dir="-1" style="width:18px;height:18px;flex-shrink:0;">+</button>
-													<input type="range" class="style-slider" id="box-side-margin" min="2" max="30" value="2" step="2" style="width:32px;flex-shrink:0;">
-													<button class="slider-step-btn" data-for="box-side-margin" data-dir="1" style="width:18px;height:18px;flex-shrink:0;">−</button>
-												</div>
-											</div>
-											<div id="shadow-color-row" class="toggle-row" style="gap:0.25rem; flex-shrink:0;">
-												<button class="toggle-btn" data-shadow-color="white" style="padding:0.25rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">WHITE<br>TYPE</button>
-												<button class="toggle-btn" data-shadow-color="black" style="padding:0.25rem 0.35rem; font-size:0.6rem; white-space:normal; line-height:1.15; text-align:center;">BLACK<br>TYPE</button>
-											</div>
-											<!-- Pete, 2026-11-09: "move the color selector to the right of
-											     the 'black type' button, on the same line" — relocated here
-											     from the Text Group/Add/Remove/Shadow row above. -->
-											<div id="text-color-row" style="display:flex; flex-direction:column; align-items:flex-start; flex-shrink:0;">
-												<div class="slider-header">
-													<span class="slider-name">Color</span>
-												</div>
-												<div class="color-row" id="text-color-swatches" style="display:none;">
-													<div class="color-swatch" data-color="red" title="Red"></div>
-													<div class="color-swatch" data-color="gold" title="Gold"></div>
-													<div class="color-swatch" data-color="brown" title="Brown"></div>
-													<div class="color-swatch" data-color="cream" title="Cream"></div>
-													<div class="color-swatch" data-color="slate" title="Slate"></div>
-												</div>
-												<input type="color" id="text-color-custom" value="#991e21" title="Custom color">
-											</div>
+										</div>
+										<div class="rrt-lc-reel-wrap-bottom">
+											<div class="rrt-lc-reel-thickness rrt-lc-reel-thickness-bottom"></div>
+											<div class="rrt-lc-reel-strip rrt-lc-reel-strip-bottom"></div>
+										</div>
+										<div class="rrt-lc-custom-scrollbar">
+											<div class="rrt-lc-custom-scrollbar-thumb"></div>
+										</div>
 										</div>
 
 										<div class="font-drum-row">
@@ -258,8 +318,13 @@
 									     to just "×" to make room, and added the same nowrap+scroll safety
 									     net as the other rows in this card so a tight fit scrolls instead
 									     of wrapping to a 2nd line. -->
-									<div id="logo-selector-row" style="display:flex; align-items:flex-end; gap:0.2rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; margin-bottom:0.25rem;">
-										<button id="logo-upload-btn" type="button" style="font-size:0.6rem; padding:0.45rem 0.35rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">YOUR FILE</button>
+									<div class="rrt-lc-reel-group">
+									<div class="rrt-lc-reel-wrap">
+										<div class="rrt-lc-reel-thickness"></div>
+										<div class="rrt-lc-reel-strip"></div>
+									</div>
+									<div id="logo-selector-row" class="rrt-lc-scroll-row" style="display:flex; align-items:flex-end; gap:0.2rem; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; margin-bottom:0.25rem;">
+										<button id="logo-upload-btn" type="button" class="btn btn-file" style="font-family:'Poppins',sans-serif;"><span class="btn-label">YOUR FILE</span></button>
 										<!-- Pete, 2026-10-17 (follow-up): "can't look at art" / "circle with
 										     arrows, page goes up and down" — two real bugs, now fixed. (1) The
 										     panel had BOTH display:none and display:grid in the same style
@@ -277,7 +342,7 @@
 										     position:fixed, positioned under the button at open-time — the
 										     standard way a popover escapes a clipped/scrolling ancestor. -->
 										<div id="art-picker" style="position:relative; flex-shrink:0; display:inline-flex;">
-											<button id="art-picker-btn" type="button" style="font-size:0.6rem; padding:0.45rem 0.3rem; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; white-space:nowrap; flex-shrink:0;">ART LIBRARY</button>
+											<button id="art-picker-btn" type="button" class="btn btn-lib" style="font-family:'Poppins',sans-serif;"><span class="btn-label">ART LIBRARY</span></button>
 											<!-- Pete, 2026-10-17: "are there more we can add?" -> "more" — the
 										     library grew from 6 to 27 pieces, so the panel now needs to
 										     scroll (max-height + overflow-y:auto) instead of just growing
@@ -359,9 +424,6 @@
 												?>
 											</div>
 										</div>
-										<div id="logo-selector-btns" style="display:flex; gap:0.3rem; flex-wrap:nowrap;"></div>
-										<button id="logo-add-btn" type="button" style="font-size:0.6rem; padding:0.45rem 0.3rem; background:#991e21; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">+ Add</button>
-										<button id="logo-remove-btn" type="button" title="Remove" style="font-size:1.1rem; line-height:1; padding:0.4rem 0.4rem; background:#e53e3e; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-family:'Poppins',sans-serif; flex-shrink:0;">×</button>
 										<?php
 									/**
 									 * Pete, 2026-10-27: "we need some sort of title for it (SIZE),
@@ -381,24 +443,24 @@
 									 * squat single-line buttons next to it.
 									 */
 									?>
-									<div id="logo-size-wrap" style="flex:1 1 auto; min-width:70px;">
-										<!-- Pete, 2026-10-27: "center 'ART SIZE' over slider" — .slider-header
-										     is shared with Shadow/Font/Text Width (space-between, for when a
-										     second item like .slider-current sits opposite the label), so the
-										     centering override lives here, scoped to this one instance, rather
-										     than changed on the shared class. min-width:0 on both the row and
-										     the input itself is the real overflow fix underneath: a flex
-										     item's default min-width is its content's intrinsic size, and
-										     <input type="range"> has a real browser-default intrinsic width
-										     (~129px) that silently wins over flex-shrink/width:100% unless
-										     min-width is explicitly zeroed — without this the slider refused
-										     to actually shrink to fit and the row kept overflowing even though
-										     the math on paper said it should fit. -->
-										<div class="slider-header" style="justify-content:center;">
-											<span class="slider-name">Art Size</span>
-										</div>
-										<div class="slider-with-btns" style="min-width:0;">
-											<button class="slider-step-btn" data-for="logo-size-slider" data-dir="-1" style="width:22px;height:22px;flex-shrink:0;">−</button>
+									<div id="logo-size-wrap" class="size-wrap">
+										<!-- Pete, 2026-11-16: "copy mockup" — this now matches the
+										     mockup's own .size-wrap/.size-label/.size-row structure
+										     exactly (fixed 74px box, label absolutely positioned near
+										     the bottom, step buttons filling the box at full height)
+										     instead of the shared .slider-header/.slider-with-btns
+										     stack used by Shadow/Font/Text Width above, which is what
+										     made this column a different height than everything else
+										     in the row. min-width:0 on the slider itself is still the
+										     real overflow fix: <input type="range"> has a real
+										     browser-default intrinsic width (~129px) that wins over
+										     flex-shrink unless min-width is explicitly zeroed. -->
+										<!-- Pete, 2026-11-16: "put the lettering one word above the
+									     slider and one word below the slider" -->
+									<div class="size-label-top">Art</div>
+									<div class="size-label-bottom">Size</div>
+										<div class="size-row">
+											<button class="slider-step-btn step" data-for="logo-size-slider" data-dir="-1"><span class="btn-label">−</span></button>
 											<?php
 										/**
 										 * Pete, 2026-11-11: the 2026-10-25 raise to 150 was a real
@@ -419,9 +481,32 @@
 										 * stale cached JS bundle can't resurrect this).
 										 */
 										?>
-										<input type="range" id="logo-size-slider" class="style-slider" min="5" max="100" value="20" step="5" style="min-width:0;">
-											<button class="slider-step-btn" data-for="logo-size-slider" data-dir="1" style="width:22px;height:22px;flex-shrink:0;">+</button>
+										<input type="range" id="logo-size-slider" class="style-slider slider" min="5" max="100" value="20" step="5" style="min-width:0;">
+											<button class="slider-step-btn step" data-for="logo-size-slider" data-dir="1"><span class="btn-label">+</span></button>
 										</div>
+									</div>
+										<!-- Pete, 2026-11-16: "we don't need that add button, we can
+										     just add another file by hitting the art library button or
+										     the your file button" — confirmed in the JS: addArtLogo()
+										     always creates a new layer (no replace-check at all), and
+										     placeLogoFile() only replaces when the ACTIVE logo is itself
+										     an art-library placeholder, which isn't the normal flow.
+										     Removed #logo-add-btn entirely, not just hidden. -->
+										<div id="logo-selector-btns" style="display:flex; gap:0.3rem; flex-wrap:nowrap;"></div>
+										<button id="logo-remove-btn" type="button" title="Remove" class="btn btn-remove" style="font-family:'Poppins',sans-serif;"><span class="btn-label">×</span></button>
+									</div>
+									<div class="rrt-lc-reel-wrap-bottom">
+										<div class="rrt-lc-reel-thickness rrt-lc-reel-thickness-bottom"></div>
+										<div class="rrt-lc-reel-strip rrt-lc-reel-strip-bottom"></div>
+									</div>
+									<!-- Pete, 2026-11-16: "put the maroon scroll bar UNDER the
+									     curved/spoke thing... lower down" — a separate, custom-built
+									     scrollbar (desktop only; see label-configurator.css +
+									     initCustomScrollbar() in label-configurator.js), placed here
+									     AFTER the bottom curve so it never competes with it for the
+									     same pixels the way styling the native scrollbar did. -->
+									<div class="rrt-lc-custom-scrollbar">
+										<div class="rrt-lc-custom-scrollbar-thumb"></div>
 									</div>
 									</div>
 									<span id="logo-filename" style="font-size:0.6rem; color:#888; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; display:block; margin-bottom:0.25rem;"></span>
