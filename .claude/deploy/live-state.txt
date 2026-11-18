@@ -4,7 +4,7 @@ d3c21f7eaab3cbfa9f20ff3abde338bd  assets/harry-path.css
 e9f06907472fe0a512eb16b9058677ee  assets/heic2any.min.js
 29895fe061e8a81b85cc3a33831457d1  assets/home-starburst.css
 e52b7e8dff8528d66f790af6721940e3  assets/label-configurator.css
-085f273cb6f5405ace291f419913c71a  assets/label-configurator.js
+63248f2d1ba23cd616f268473d0b77ed  assets/label-configurator.js
 0a9ca8450494d00b7b047eacf23b1a2f  inc/accessibility-statement.php
 b989d944fb5b4ab8c0d34c5a0990237d  inc/convert-logo.php
 ec406cbd9d33946377ec7c65c861ebf8  inc/handle-submission.php
@@ -12,4 +12,4 @@ ec406cbd9d33946377ec7c65c861ebf8  inc/handle-submission.php
 2775d8d3f6493f82707d83e87bbc1005  inc/hero-ken-burns.php
 3711690ee898c337b091fcc021581494  inc/home-starburst.php
 1ac9fcbfe1b677e60a23b470bc071500  inc/quote-module-card.part.php
-d580eca4eaa65bbf714ed7c6175e31f4  rrt-label-configurator.php
+7bdc36651ce31578ff5b60487aa3ebf2  rrt-label-configurator.php
